@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DFW Regional Metroplex Simulation Engine - Pro Edition</title>
+    <style>
+      :root {
+          --bg-main: #0c0d12;
+          --bg-panel: #12141c;
+          --bg-accent: #1a1d29;
+          --border-color: #242936;
+          --text-main: #cbd5e1;
+          --text-muted: #64748b;
+          --transit-blue: #38bdf8;
+          --drive-red: #ef4444;
+          --walk-green: #10b981;
+      }
+      body { margin:0; background-color:var(--bg-main); color:var(--text-main); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; display:flex; height:100vh; width:100vw; overflow:hidden; user-select:none; }
+      #sidebar { width:340px; background:var(--bg-panel); border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:18px; box-sizing:border-box; gap:16px; overflow-y:auto; z-index:10; }
+      .panel-header { font-size:11px; font-weight:700; letter-spacing:.05em; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; }
+      .tab-group { display:flex; background:var(--bg-main); padding:3px; border-radius:6px; border:1px solid var(--border-color); }
+      .tab { flex:1; text-align:center; padding:6px; font-size:11px; font-weight:600; border-radius:4px; cursor:pointer; color:var(--text-muted); }
+      .tab.active { background:var(--bg-accent); color:#fff; }
+      .selector-row { display:flex; gap:4px; margin-top:4px; }
+      .selector-btn { flex:1; background:var(--bg-main); border:1px solid var(--border-color); color:var(--text-muted); padding:6px 4px; font-size:11px; border-radius:4px; cursor:pointer; font-weight:500; text-align:center; transition:all .2s; }
+      .selector-btn.active { background:var(--bg-accent); border-color:var(--transit-blue); color:#fff; }
+      .mode-row { margin-bottom:8px; font-size:12px; }
+      .mode-info { display:flex; justify-content:space-between; margin-bottom:4px; }
+      .mode-bar-container { height:6px; background:var(--bg-main); border-radius:3px; overflow:hidden; }
+      .mode-bar { height:100%; border-radius:3px; transition:width .3s ease; }
+      .chart-container { background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; padding:10px; height:50px; display:flex; align-items:flex-end; gap:2px; }
+      .chart-bar { flex:1; background:var(--transit-blue); opacity:.7; border-radius:1px 1px 0 0; }
+      .station-card { background:var(--bg-main); border:1px solid var(--border-color); padding:8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+      #main-workspace { flex:1; display:flex; flex-direction:column; position:relative; }
+      #canvas-container { flex:1; position:relative; background:#06080e; }
+      canvas { display:block; width:100%; height:100%; }
+      #playback-strip { height:56px; background:var(--bg-panel); border-top:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; padding:0 16px; box-sizing:border-box; z-index:10; }
+      .strip-section { display:flex; align-items:center; gap:8px; }
+      .time-readout {
+          font-family:monospace;
+          font-size:12px;
+          color:#fff;
+          background:rgba(18,20,28,0.80);
+          padding:5px 10px;
+          border-radius:4px;
+          border:1px solid var(--border-color);
+          min-width:120px;
+          text-align:center;
+      }
+      .fare-display-group { display:flex; align-items:center; gap:6px; font-size:12px; background:var(--bg-main); padding:4px 10px; border-radius:4px; border:1px solid var(--border-color); }
+      .fare-btn { background:var(--bg-accent); border:1px solid var(--border-color); color:#fff; padding:0px 6px; border-radius:3px; cursor:pointer; }
+      button.btn-action { background:var(--bg-accent); color:var(--text-main); border:1px solid var(--border-color); padding:6px 10px; border-radius:4px; font-size:12px; cursor:pointer; font-weight:500; }
+      button.btn-action.active { background:var(--transit-blue); color:#0f172a; font-weight:700; border-color:var(--transit-blue); }
+      button.danger-btn.active { background:#ef4444; color:#fff; border-color:#b91c1c; }
+      
+      .line-selector { display:flex; gap:6px; background:var(--bg-main); padding:4px 10px; border-radius:20px; border:1px solid var(--border-color); align-items:center; }
+      .line-dot { width:14px; height:14px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition: transform 0.1s; }
+      .line-dot.selected { border-color:#fff; transform:scale(1.2); }
+      
+      /* Style the native color picker to match the dots */
+      input[type="color"].custom-color-wheel {
+          -webkit-appearance: none;
+          border: none;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          cursor: pointer;
+          padding: 0;
+          background: transparent;
+      }
+      input[type="color"].custom-color-wheel::-webkit-color-swatch-wrapper { padding: 0; }
+      input[type="color"].custom-color-wheel::-webkit-color-swatch { border: 2px solid transparent; border-radius: 50%; }
+      input[type="color"].custom-color-wheel:focus::-webkit-color-swatch { border-color: #fff; transform: scale(1.2); }
+
+      #tooltip { pointer-events: none; position:absolute; background:rgba(7,10,18,.95); border:1px solid var(--border-color); padding:8px 12px; border-radius:4px; font-size:11px; pointer-events:none; display:none; z-index:100; box-shadow:0 10px 15px -3px rgba(0,0,0,.5); }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar">
+      <div>
+        <div class="panel-header">Regional Infrastructure Controls</div>
+        <div class="tab-group"><div class="tab active">Transit Grid Configuration</div></div>
+      </div>
+      <div>
+        <div class="panel-header">1. Track Elevation Profiles</div>
+        <div class="selector-row">
+          <div id="prof-level" class="selector-btn active" onclick="setElevationProfile('level')">
+            Level
+            <br />
+            <span style="color: #10b981; font-size: 9px">1.0x Cost</span>
+          </div>
+          <div id="prof-above" class="selector-btn" onclick="setElevationProfile('above')">
+            Above Ground
+            <br />
+            <span style="color: #fbbf24; font-size: 9px">2.5x Cost</span>
+          </div>
+          <div id="prof-under" class="selector-btn" onclick="setElevationProfile('under')">
+            Underground
+            <br />
+            <span style="color: #ef4444; font-size: 9px">6.0x Cost</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="panel-header">2. Capacity Configuration</div>
+        <div class="selector-row">
+          <div id="way-single" class="selector-btn active" onclick="setTrackWay('single')">Single Line</div>
+          <div id="way-parallel" class="selector-btn" onclick="setTrackWay('parallel')">Parallel Twin</div>
+          <div id="way-quad" class="selector-btn" onclick="setTrackWay('quad')">Quad Trunk</div>
+        </div>
+      </div>
+      <div>
+        <div class="panel-header">3. Switch &amp; Corridor Systems</div>
+        <div class="selector-row">
+          <div id="opt-crossover" class="selector-btn" onclick="toggleCrossoverSystem()">
+            Crossover Switch:
+            <span id="lbl-crossover" style="color: #ef4444; font-weight: bold">OFF</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="panel-header">4. Fleet &amp; Depot Operations</div>
+        <div class="selector-row">
+          <div id="btn-depot" class="selector-btn" onclick="setMode('depot')">
+            + Build Depot
+            <br />
+            <span style="color: #fbbf24; font-size: 9px">$2,000,000</span>
+          </div>
+        </div>
+        <div class="selector-row" style="margin-top: 6px">
+          <div id="class-light" class="selector-btn active" onclick="setTrainClass('light')">
+            Light Rail
+            <br /><span style="color: #38bdf8; font-size: 9px">$1.5M &middot; 80 cap</span>
+          </div>
+          <div id="class-heavy" class="selector-btn" onclick="setTrainClass('heavy')">
+            Heavy Rail
+            <br /><span style="color: #a855f7; font-size: 9px">$3.5M &middot; 160 cap</span>
+          </div>
+        </div>
+        <div id="fleet-list" style="margin-top: 8px"></div>
+      </div>
+      <div>
+        <div class="panel-header">Ridership &amp; Revenue Statistics</div>
+        <div id="stats-panel"></div>
+      </div>
+      <div>
+        <div class="panel-header">Dynamic Share Analytics</div>
+        <div class="mode-row">
+          <div class="mode-info">
+            <span>Transit Link</span>
+            <span id="txt-share-transit">2.3%</span>
+          </div>
+          <div class="mode-bar-container">
+            <div id="bar-share-transit" class="mode-bar" style="width: 2.3%; background: var(--transit-blue)"></div>
+          </div>
+        </div>
+        <div class="mode-row">
+          <div class="mode-info">
+            <span>Highway Commute</span>
+            <span id="txt-share-drive">96.5%</span>
+          </div>
+          <div class="mode-bar-container">
+            <div id="bar-share-drive" class="mode-bar" style="width: 96.5%; background: var(--drive-red)"></div>
+          </div>
+        </div>
+        <div class="mode-row">
+          <div class="mode-info">
+            <span>Pedestrian Link</span>
+            <span id="txt-share-walk">1.2%</span>
+          </div>
+          <div class="mode-bar-container">
+            <div id="bar-share-walk" class="mode-bar" style="width: 1.2%; background: var(--walk-green)"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="panel-header">Temporal Flow Index</div>
+        <div class="chart-container" id="demand-chart"></div>
+      </div>
+      <div>
+        <div class="panel-header">Operational Node Terminals</div>
+        <div id="station-feed-list">
+          <div class="station-card" style="color: var(--text-muted); text-align: center; display: block">
+            No terminals linked.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="main-workspace">
+      <div id="canvas-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="tooltip"></div>
+      </div>
+      <div id="playback-strip">
+        <div
+          id="mouse-coords"
+          style="min-width: 180px; text-align: right; font-family: monospace; color: #7dd3fc; font-size: 12px"
+        >
+          X: 0 Y: 0
+        </div>
+        <div class="strip-section">
+          <div class="time-readout" id="lbl-time">Day 1 &nbsp; 06:00:00</div>
+          <button
+            class="btn-action"
+            id="btn-speed-0"
+            onclick="setSpeed(0)"
+            style="font-family: monospace; font-weight: bold; color: #ef4444"
+          >
+            ||
+          </button>
+          <button class="btn-action active" id="btn-speed-1" onclick="setSpeed(1)">1x</button>
+          <button class="btn-action" id="btn-speed-2" onclick="setSpeed(2)">2x</button>
+          <button class="btn-action" id="btn-speed-4" onclick="setSpeed(4)">4x</button>
+        </div>
+        <div class="strip-section">
+          <button id="btn-pan" class="btn-action active" onclick="setMode('pan')">Pan Map</button>
+          <button id="btn-station" class="btn-action" onclick="setMode('station')">+ Station</button>
+          <button id="btn-track" class="btn-action" onclick="setMode('track')">+ Build Line</button>
+          <button id="btn-rename" class="btn-action" onclick="setMode('rename')">Rename</button>
+          <button id="btn-delete" class="btn-action danger-btn" onclick="setMode('delete')">Demolish</button>
+          
+          <div class="line-selector">
+              <div id="lineSelectorContainer" style="display:flex; gap:6px;"></div>
+              <input type="color" id="custom-line-color" class="custom-color-wheel" value="#38bdf8" title="Pick Custom Color">
+          </div>
+        </div>
+        <div class="strip-section">
+          <div class="fare-display-group">
+            <span style="color: var(--text-muted)">Fare:</span>
+            <button class="fare-btn" onclick="adjustFare(-0.5)">-</button>
+            <span id="fare-display" style="color: #4ade80; font-weight: bold">$2.50</span>
+            <button class="fare-btn" onclick="adjustFare(0.5)">+</button>
+          </div>
+          <div style="font-size: 12px; text-align: right; min-width: 95px">
+            <div style="color: var(--text-muted); font-size: 10px">CREDITS</div>
+            <div style="color: #38bdf8; font-weight: bold; font-family: monospace" id="lbl-budget">$50,000,000</div>
+            <div style="color: #f87171; font-size: 9px; font-family: monospace" id="lbl-opex">OpEx: $0/day</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const canvas  = document.getElementById('gameCanvas');
+      const ctx     = canvas.getContext('2d');
+      const tooltip = document.getElementById('tooltip');
+const STATION_BASE_COST = 250000;
+      let budget=50_000_000, mode='pan', ticketFare=2.50, simSpeed=1;
+let gameTime = {
+    min: 0,
+    hour: 6, // Starting at 06:00
+    day: 1,
+    month: 1, // January
+    year: 2026
+};      let camera={x:0,y:0}, zoom=0.42;
+      const MIN_ZOOM=0.01, MAX_ZOOM=15.0;
+      let isPanning=false, startPan={x:0,y:0}, mouseWorldPos={x:0,y:0};
+      let neighborhoods=[], stations=[], tracks=[], commuters=[], trains=[], routes=[], depots=[];
+      let activeTrackBuild=null, selectedElevationProfile='level', selectedTrackWay='single', crossoverSystemEnabled=false;
+      
+      // Removed fixed array dependence, we now track the active hex color directly
+      let activeColor = '#38bdf8';
+
+      // --- Fleet & Depot Operations ---
+      const TRAIN_SPECS = {
+          light: { label: 'Light Rail', cost: 1500000, capacity: 80, dailyCost: 3000 },
+          heavy: { label: 'Heavy Rail', cost: 3500000, capacity: 160, dailyCost: 6000 }
+      };
+      const EXTRA_CAR_COST = 500000, EXTRA_CAR_CAPACITY = 40, EXTRA_CAR_DAILY_COST = 1200, MAX_EXTRA_CARS = 3;
+      const DEPOT_COST = 2000000, DEPOT_DAILY_COST = 8000, DEPOT_SERVICE_RADIUS = 320;
+      let selectedTrainClass = 'light', trainIdCounter = 1;
+
+      // --- OpEx / Economy ---
+      let lastOpExAmount = 0, bankruptcyStrikes = 0, gameOver = false;
+
+      // --- Commuter patience / mode-share tracking ---
+      let totalBoarded = 0, totalGaveUp = 0;
+
+      // --- Collision / block-signal system ---
+      const MIN_TRAIN_GAP = 0.22; // in path-progress units (node fractions)
+
+      // --- Ridership & revenue statistics ---
+      let dailyRiders = 0, lifetimeRiders = 0, fareRevenueToday = 0, peakConcurrentRiders = 0;
+      let waitTimeSum = 0, waitSamples = 0, tripTimeSum = 0, tripSamples = 0;
+      let overcrowdingEvents = 0;
+      let lastProcessedMinute = -1;
+
+      const ZONING={
+          RESIDENTIAL:{color:'rgba(56,189,248,0.10)',stroke:'rgba(56,189,248,0.40)'},
+          COMMERCIAL:  {color:'rgba(249,115,22,0.10)',stroke:'rgba(249,115,22,0.40)'},
+          OFFICE:      {color:'rgba(168,85,247,0.10)',stroke:'rgba(168,85,247,0.40)'},
+          AIRPORT:     {color:'rgba(250,204,21,0.16)',stroke:'rgba(250,204,21,0.65)'},
+          UNIVERSITY:  {color:'rgba(52,211,153,0.13)',stroke:'rgba(52,211,153,0.50)'},
+          INDUSTRIAL:  {color:'rgba(251,146,60,0.10)',stroke:'rgba(251,146,60,0.40)'},
+          MEDICAL:     {color:'rgba(248,113,113,0.12)',stroke:'rgba(248,113,113,0.50)'},
+          RAIL:        {color:'rgba(148,163,184,0.10)',stroke:'rgba(148,163,184,0.40)'},
+      };
+
+      const HOURLY_DEMAND_MULTIPLIERS = [
+          0.10, 0.05, 0.02, 0.02, 0.05, 0.20, // 00:00 - 05:00
+          0.60, 1.40, 1.60, 1.10, 0.75, 0.80, // 06:00 - 11:00
+          0.90, 0.85, 0.80, 1.10, 1.50, 1.70, // 12:00 - 17:00
+          1.20, 0.80, 0.50, 0.35, 0.25, 0.15  // 18:00 - 23:00
+      ];
+
+function calculateSmoothDemand(baseMultiplier, continuousTime) {
+    // Properly calculate current and next hour using the provided continuousTime
+    const currentHour = Math.floor(continuousTime) % 24;
+    const nextHour = (currentHour + 1) % 24; // Fix: Explicitly define nextHour
+    const minuteWeight = continuousTime % 1; 
+    
+    const currentMultiplier = HOURLY_DEMAND_MULTIPLIERS[currentHour];
+    const nextMultiplier = HOURLY_DEMAND_MULTIPLIERS[nextHour];
+    
+    return baseMultiplier * (currentMultiplier + (nextMultiplier - currentMultiplier) * minuteWeight);
+}
+/**
+ * Calculates the cost of a track segment based on length, elevation, and capacity.
+ * @param {number} distance - The length of the track segment to build.
+ */
+function getActiveTrackCost(distance) {
+    const baseCostPerUnit = 10; // Adjust this value to your preferred cost per distance unit
+    let multiplier = 1.0;
+    
+    // Apply elevation multiplier
+    if (selectedElevationProfile === 'above') multiplier = 2.5;
+    else if (selectedElevationProfile === 'under') multiplier = 6.0;
+    
+    // If distance is missing or invalid, return 0 to prevent NaN
+    if (typeof distance === 'undefined' || isNaN(distance)) return 0;
+    
+    return distance * baseCostPerUnit * multiplier;
+}
+      function project(x, y) { return { x, y }; }
+      function weightedPick(list, weightFn = n => n.weight) {
+          let total = 0;
+          for (const item of list) total += weightFn(item);
+          let r = Math.random() * total;
+          for (const item of list) {
+              r -= weightFn(item);
+              if (r <= 0) return item;
+          }
+          return list[list.length - 1];
+      }
+
+      function drawHighwayLabels() {
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.font = `600 ${Math.max(3, 6 * zoom)}px Inter`;
+          highwayPaths.forEach(hw => {
+              if (hw.points.length < 2) return;
+              const i = Math.floor(hw.points.length / 2);
+              const p1 = hw.points[Math.max(0, i - 1)];
+              const p2 = hw.points[Math.min(hw.points.length - 1, i + 1)];
+              let angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+              if (angle > Math.PI / 2) angle -= Math.PI;
+              if (angle < -Math.PI / 2) angle += Math.PI;
+              const sx = (hw.points[i].x - camera.x) * zoom + canvas.width / 2;
+              const sy = (hw.points[i].y - camera.y) * zoom + canvas.height / 2;
+              ctx.save();
+              ctx.translate(sx, sy);
+              ctx.rotate(angle);
+              ctx.lineWidth = 4;
+              ctx.strokeStyle = "white";
+              ctx.strokeText(hw.name, 0, 0);
+              ctx.fillStyle = "#333";
+              ctx.fillText(hw.name, 0, 0);
+              ctx.restore();
+          });
+          ctx.restore();
+      }
+
+      function updateCoordinateDisplay() {
+          document.getElementById("mouse-coords").textContent =
+              `X: ${Math.round(mouseWorldPos.x)}  Y: ${Math.round(mouseWorldPos.y)}`;
+      }
+
+      function hw(name, width, pts) { return { name, width, textOffset: 0.5, points: pts.map(([x, y]) => ({ x, y: -y })) }; }
+
+      const highwayPaths = [
+          hw("SRT / Highway 121", 0.35, [[198.9,339.8],[155.3,317.0],[68.9,283.5],[2.4,251.5],[-36.3,236.2],[-74.1,215.2],[-104.3,197.2],[-109.2,177.8],[-121.3,158.5],[-135.8,140.9],[-158.2,122.9],[-173.1,116.6],[-186.1,109.4],[-198.7,117.9],[-213.5,111.2],[-234.7,87.4],[-241.4,68.0],[-241.3,37.9],[-263.1,29.3],[-283.3,26.2],[-299.1,23.1],[-304.5,7.3],[-306.3,-13.8],[-306.3,-38.6],[-313.5,-60.6],[-322.5,-73.7],[-332.4,-86.7]]),
+          hw("DNT / Dallas North Tollway", 0.35, [[4.6,424.0],[4.6,404.2],[-7.1,392.5],[-16.5,383.5],[-16.1,321.8],[-9.3,311.5],[1.0,251.2],[2.4,251.6],[0.1,213.4],[-6.2,201.7],[-5.3,147.3],[-4.8,120.2],[-4.4,103.6],[4.2,94.6],[2.8,69.9],[1.9,48.3],[5.5,30.3],[17.7,-10.3],[15.4,-41.3],[11.8,-78.6],[9.1,-114.2],[10.5,-137.1]]),
+          hw("Spur 97", 0.35, [[-241.3, 37.9],[-240.0, -83.5]]),
+          hw("US-75 / Central Expressway", 0.35, [[260.2,558.5],[259.0,530.3],[254.8,486.2],[236.8,468.2],[217.3,450.5],[209.8,417.8],[205.6,362.3],[198.9,339.8],[191.4,312.8],[173.8,290.6],[160.3,255.2],[151.0,222.2],[135.7,184.7],[127.3,163.4],[128.8,134.6],[125.5,108.3],[105.7,74.3],[85.6,47.7],[66.4,29.1],[63.4,12.9],[60.7,-57.0],[53.5,-83.4],[34.9,-126.0],[37.3,-154.5],[50.5,-160.8]]),
+          hw("PGBT", 0.35, [[298.5,-60.8],[302.1,-43.5],[300.8,-26.7],[297.4,-9.6],[298.4,10.6],[302.8,34.1],[299.9,52.3],[282.0,64.9],[238.6,59.5],[214.8,73.2],[180.3,100.7],[174.9,119.1],[162.1,131.7],[128.8,134.6],[90.3,136.6],[71.7,130.2],[50.8,133.6],[35.7,146.3],[-5.3,147.3],[-22.5,147.7],[-32.3,138.2],[-44.4,116.4],[-58.2,110.6],[-115.7,106.5],[-120.9,80.7],[-112.4,67.1],[-120.7,24.2],[-132.6,13.6],[-163.2,-8.7],[-178.0,-20.6],[-210.5,-60.2],[-214.8,-84.8],[-215.3,-149.1],[-225.2,-164.6],[-227.7,-196.8],[-217.2,-209.8],[-216.1,-228.7],[-222.0,-245.5],[-221.1,-296.4]]),
+          hw("TX-114", 0.35, [[-603.7,177.2],[-555.4,175.7],[-530.8,165.8],[-481.6,162.5],[-439.9,147.3],[-436.6,135.5],[-425.5,129.2],[-383.8,111.8],[-374.2,97.1],[-367.0,80.7],[-356.2,76.2],[-337.6,60.2],[-320.5,55.8],[-305.5,50.1],[-298.3,36.5],[-299.1,23.1],[-202.1,16.1],[-163.2,-8.7],[-136.9,-24.2],[-133.5,-43.1],[-115.3,-62.7],[-97.5,-73.2],[-89.4,-83.6]]),
+          hw("I-35E", 0.35, [[-375.5,405.7],[-352.7,391.1],[-324.8,384.8],[-314.6,377.2],[-274.6,343.1],[-239.3,303.2],[-226.7,279.1],[-226.7,240.7],[-212.5,221.5],[-204.0,189.3],[-188.9,171.8],[-172.9,146.3],[-160.7,136.9],[-129.2,116.6],[-115.7,106.5],[-102.9,80.0],[-86.9,52.5],[-81.9,8.2],[-81.5,-45.1],[-72.3,-59.1],[-58.4,-73.7],[-56.2,-95.5],[-42.2,-120.0],[-26.2,-120.2],[-1.5,-132.6],[10.5,-137.1],[13.2,-159.2],[16.8,-169.8],[22.2,-178.3],[16.6,-191.8],[17.5,-204.9],[2.6,-215.0],[-6.2,-257.3],[1.7,-267.0],[1.9,-342.8],[1.5,-536.3],[-10.0,-559.2]]),
+          hw("I-30", 0.35, [[-824.8,-239.1],[-773.2,-238.5],[-729.4,-217.2],[-687.4,-217.2],[-649.3,-222.0],[-595.9,-222.6],[-568.3,-207.6],[-550.9,-206.1],[-531.7,-201.9],[-502.3,-200.1],[-486.4,-189.3],[-462.4,-186.6],[-433.0,-187.8],[-264.8,-187.2],[-227.3,-187.8],[-167.0,-189.9],[-153.5,-184.5],[-121.3,-181.2],[-100.1,-179.1],[-37.1,-177.6],[-24.5,-183.3],[-10.4,-177.6],[16.8,-169.8],[22.2,-178.3],[34.6,-162.5],[50.5,-160.8],[60.9,-157.3],[72.6,-146.1],[100.9,-145.1],[113.5,-141.8],[137.6,-143.4],[165.0,-135.1],[217.9,-102.5],[298.5,-60.8],[312.7,-47.8],[407.8,-2.1],[420.8,14.1],[488.1,35.9],[529.0,76.4],[552.4,92.6],[576.9,104.5],[610.7,104.7],[688.3,154.4],[722.7,196.9],[773.8,245.1],[799.7,262.7],[805.1,283.1],[822.4,296.2],[835.0,310.4],[901.2,306.3],[962.4,304.1],[1030.2,302.5],[1195.1,298.9],[1222.3,288.9],[1297.2,290.1]]),
+          hw("I-635", 0.35, [[-241.4,68.0],[-212.9,55.8],[-193.7,30.3],[-132.6,13.6],[-109.4,6.9],[-81.9,8.2],[-46.7,16.8],[-16.1,30.3],[-5.5,30.3],[66.4,29.1],[81.4,26.4],[121.9,-2.7],[129.4,-16.5],[167.8,-41.7],[192.4,-58.5],[211.6,-76.8],[217.9,-102.5],[222.1,-144.0],[223.0,-174.9],[235.9,-202.8],[235.3,-230.4],[222.1,-262.2]]),
+          hw("Spur 366 (Woodall Rodgers Fwy)", 0.35, [[13.2,-159.2],[35.5,-141.3]]),
+          hw("I-45", 0.35, [[50.5,-160.8],[52.9,-178.9],[64.3,-207.7],[79.3,-265.8],[88.0,-292.2],[107.5,-318.0],[129.1,-330.9],[160.6,-410.1],[184.9,-469.5],[183.1,-494.7],[180.1,-506.7],[177.7,-561.9]]),
+          hw("Loop 288", 0.35, [[-392.5,468.5],[-375.2,471.0],[-345.9,474.8],[-318.0,473.5],[-295.3,454.1],[-293.8,439.3],[-296.4,392.8],[-301.8,384.7],[-314.6,377.2]]),
+          hw("I-35", 0.35, [[-394.7,558.1],[-391.8,538.3],[-392.5,468.5],[-375.5,405.7]]),
+          hw("TX-360", 0.35, [[-304.5,7.3],[-287.3,-11.1],[-277.9,-31.2],[-266.5,-45.6],[-265.3,-67.8],[-260.2,-84.9],[-262.3,-107.1],[-254.0,-126.9],[-264.8,-168.9],[-264.8,-187.2],[-264.5,-296.7],[-265.3,-351.3],[-279.1,-376.8],[-282.7,-420.6],[-290.8,-454.5],[-284.8,-478.3],[-286.6,-499.3]]),
+          hw("Loop 12", 0.35, [[-97.5,-73.2],[-100.7,-85.5],[-107.3,-109.2],[-108.2,-138.9],[-100.1,-179.1],[-106.7,-231.9],[-102.8,-241.2],[-119.3,-258.0],[-124.7,-276.0],[-134.3,-291.9],[-134.3,-306.5]]),
+          hw("TX-183", 0.35, [[-42.2,-120.0],[-77.6,-90.6],[-89.4,-83.6],[-100.7,-85.5],[-214.8,-84.8],[-240.0,-83.5],[-260.2,-84.9],[-332.4,-86.7],[-358.3,-85.8],[-368.5,-80.7],[-400.9,-81.3],[-421.3,-93.6]]),
+          hw("TX-121", 0.35, [[-421.3,-93.6],[-423.7,-112.2],[-433.6,-133.2],[-478.9,-147.3],[-530.2,-177.6],[-548.8,-181.2]]),
+          hw("US-80", 0.35, [[165.0,-135.1],[192.0,-145.4],[222.1,-144.0],[244.6,-145.4],[371.5,-171.5],[385.0,-188.3],[397.3,-192.5],[419.2,-211.4],[517.4,-213.8],[565.9,-240.2]]),
+          hw("US-175", 0.35, [[64.3,-207.7],[81.1,-203.9],[109.9,-206.3],[131.8,-229.1],[170.2,-259.4],[191.2,-264.8],[213.4,-278.6],[282.4,-318.2],[316.6,-335.6],[407.2,-354.2],[424.3,-365.3],[446.5,-377.3],[478.3,-380.9],[495.1,-401.9],[525.4,-410.0],[556.9,-411.8],[562.6,-428.0],[579.4,-436.7],[592.9,-447.2]]),
+          hw("I-20", 0.35, [[1300.0,-518.2],[1264.0,-512.2],[1233.4,-494.2],[1023.8,-401.1],[992.0,-401.7],[851.6,-335.7],[700.4,-293.1],[609.8,-266.1],[572.0,-248.3],[542.1,-248.2],[520.5,-264.4],[491.1,-271.0],[439.9,-272.8],[414.7,-267.4],[381.1,-271.0],[324.1,-266.1],[267.7,-261.9],[222.1,-262.2],[213.4,-278.6],[182.5,-289.5],[144.1,-296.8],[107.5,-318.0],[25.3,-343.5],[1.9,-342.8],[-29.9,-339.3],[-58.1,-323.4],[-85.7,-314.1],[-112.7,-307.5],[-179.3,-302.7],[-221.0,-296.4],[-264.8,-296.8],[-325.7,-295.6],[-347.3,-298.6],[-380.9,-299.2],[-410.3,-299.5],[-426.5,-305.2],[-460.7,-307.6],[-471.5,-319.0],[-507.5,-316.0],[-535.1,-305.7],[-568.1,-314.7],[-617.2,-300.6],[-643.6,-287.8],[-706.0,-288.4],[-720.4,-272.8],[-751.6,-278.2],[-794.2,-269.8],[-824.8,-239.1],[-857.2,-229.5],[-889.6,-224.1],[-969.4,-192.9],[-1080.4,-231.3],[-1174.6,-229.5],[-1209.4,-243.9],[-1300.3,-281.1]]),
+          hw("US-287", 0.35, [[-546.8,-18.9],[-595.0,32.7],[-662.2,87.8],[-675.4,120.8]]),
+          hw("US-287", 0.35, [[-286.7,-499.3],[-309.6,-484.9],[-323.9,-443.2],[-346.7,-422.2],[-371.9,-383.7],[-401.3,-332.1],[-426.5,-305.2]]),
+          hw("Chisholm Trail Pkwy", 0.35, [[-595.9,-222.6],[-623.7,-240.3],[-641.1,-252.3],[-645.9,-267.4],[-643.6,-287.8],[-648.4,-305.2],[-659.2,-319.0],[-655.0,-352.5],[-653.8,-401.7],[-676.0,-425.1],[-677.2,-459.9]]),
+          hw("TX-170", 0.35, [[-425.5,129.2],[-451.0,111.8],[-473.8,110.6],[-524.2,85.4],[-539.8,74.0]]),
+hw("US-287", 0.35, [
+    [-546.7,-193.9],
+    [-527.5,-214.9],
+    [-524.5,-234.7],
+    [-498.7,-252.8],
+    [-481.3,-273.1],
+    [-460.3,-276.1]
+]),
+hw("I-820", 0.35, [
+    [-433.6,-133.2],
+    [-433.0,-187.8],
+    [-445.9,-214.9],
+    [-445.3,-243.7],
+    [-460.3,-276.1],
+    [-460.6,-307.5]
+]),
+hw("I-820", 0.35, [
+    [-421.3,-93.6],
+    [-433.9,-91.4],
+    [-456.7,-81.2],
+    [-543.1,-80.6],
+    [-561.1,-81.8],
+    [-577.9,-77.0],
+    [-651.7,-114.2],
+    [-674.5,-132.8],
+    [-693.1,-138.8],
+    [-721.9,-165.2],
+    [-729.4,-217.2],
+    [-720.4,-272.8]
+]),
+hw("I-35W", 0.35, [
+    [-375.5,405.7],
+    [-424.9,304.0],
+    [-453.7,243.4],
+    [-471.1,202.6],
+    [-511.3,147.4],
+    [-537.7,105.4],
+    [-539.8,74.0],
+    [-540.7,58.0],
+    [-547.9,39.4],
+    [-548.8,-18.9],
+    [-546.1,-44.6],
+    [-543.1,-80.6],
+    [-544.9,-119.6],
+    [-553.3,-139.4],
+    [-548.8,-181.2],
+    [-546.7,-193.9],
+    [-550.9,-206.0],
+    [-550.9,-311.2],
+    [-553.9,-380.6],
+    [-548.5,-397.4],
+    [-550.3,-460.3],
+    [-540.1,-479.5],
+    [-536.5,-507.1],
+    [-507.7,-541.3],
+    [-498.7,-563.5]
+]),
+hw("US-67", 0.35, [
+    [-6.2,-257.3],
+    [-20.1,-270.8],
+    [-28.4,-284.0],
+    [-58.1,-326.4],
+    [-156.2,-433.3],
+    [-170.0,-468.1],
+    [-168.8,-489.7],
+    [-183.2,-535.9],
+    [-204.2,-544.9],
+    [-211.4,-562.0]
+]),
+      ];
+
+      const lakes = [];
+      function lk(name, pts){ lakes.push({ name, points: pts.map(([x,y]) => ({ x, y: -y })) }); }
+      function drawLakes(){
+          ctx.save(); ctx.fillStyle = "#8AA9BF"; ctx.strokeStyle = "#6F8EA6"; ctx.lineWidth = 1.5 / zoom;
+          lakes.forEach(lake=>{
+              ctx.beginPath(); ctx.moveTo(lake.points[0].x, lake.points[0].y);
+              for(let i=1;i<lake.points.length;i++) ctx.lineTo(lake.points[i].x, lake.points[i].y);
+              ctx.closePath(); ctx.fill(); ctx.stroke();
+          }); ctx.restore();
+      }
+
+      lk("Grapevine Lake", [[-263.3,74.7],[-296.9,95.1],[-341.9,115.4],[-355.7,136.5],[-377.9,141.3],[-389.4,165.4],[-367.7,161.1],[-351.8,153.0],[-325.4,139.1],[-267.5,107.6],[-256.7,94.5]]);
+      lk("Lewisville Lake", [[-226.4,441.8],[-251.9,444.8],[-240.5,375.9],[-206.9,286.4],[-176.9,265.4],[-182.3,243.8],[-215.3,257.0],[-265.6,283.3],[-214.7,240.2],[-185.3,220.4],[-137.3,226.4],[-107.3,233.6],[-106.1,249.8],[-123.5,267.8],[-110.9,291.7],[-145.7,296.5],[-116.9,323.6],[-118.7,354.8],[-111.5,374.0],[-145.0,369.2],[-150.4,341.0],[-167.9,299.6],[-185.9,320.0],[-207.5,357.2],[-213.5,417.8]]);
+
+      const LOCATIONS = [
+          [26.7,160.8,"Downtown Dallas","Dallas","OFFICE",18000,165000,8000,45000,30000], [-240.6,8.0,"DFW Intl Airport","Dallas","AIRPORT",500,65000,0,5000,12000],
+          [-25.1,74.1,"Love Field","Dallas","AIRPORT",200,18000,0,2000,5000], [11.5,-261.5,"Stonebriar Mall","Frisco","MALL",2000,4500,0,35000,12000],
+          [-6.9,-276.6,"The Star","Frisco","SPORTS",1200,12000,0,15000,40000], [-8.4,-331.8,"Downtown Frisco","Frisco","DOWNTOWN",18000,22000,1500,12000,8000],
+          [-42.5,-225.1,"Grandscape","The Colony","ENTERTAINMENT",800,7000,0,28000,42000], [-5.2,-233.4,"Legacy West","Plano","OFFICE",3500,60000,0,22000,12000],
+          [227.7,-392.5,"Downtown McKinney","McKinney","DOWNTOWN",17000,12000,1000,7000,5000], [185.7,-295.5,"The Village at Allen","Allen","SHOPPING",1200,2000,0,16000,7000],
+          [-337.6,292.2,"The Parks Mall","Arlington","SHOPPING",800,1800,0,14000,5000], [-508.3,-175.1,"Texas Motor Speedway","Fort Worth","SPORTS",50,600,0,3000,50000],
+          [-284.3,-41.7,"Downtown Grapevine","Grapevine","DOWNTOWN",9000,7000,300,6000,5000], [138.1,-148.1,"Downtown Plano","Plano","DOWNTOWN",22000,42000,1500,15000,8000],
+          [-13.7,-88.8,"Addison Airport","Addison","AIRPORT",100,1800,0,200,500], [55.9,42.0,"NorthPark Center","Dallas","SHOPPING",1000,5000,0,45000,15000],
+          [45.7,81.6,"SMU","Dallas","UNIVERSITY",7000,3500,13000,1200,2500], [82.6,-116.9,"UT Dallas","Richardson","UNIVERSITY",9000,4500,32000,1200,2500],
+          [-242.5,-85.4,"Grapevine Mills","Grapevine","SHOPPING",800,2200,0,26000,9000], [-188.3,-190.1,"Downtown Lewisville","Lewisville","DOWNTOWN",12000,7000,400,5000,3000],
+          [-362.6,-410.9,"University of North Texas","Denton","UNIVERSITY",11000,5500,47000,1800,3500], [-345.8,-414.5,"Downtown Denton","Denton","DOWNTOWN",14000,12000,1200,7000,5000],
+          [-335.0,-430.7,"Texas Woman's University","Denton","UNIVERSITY",5000,1800,11000,500,1200], [74.5,163.6,"Fair Park","Dallas","PARK",500,3000,0,12000,30000],
+          [10.3,219.4,"Dallas Zoo","Dallas","ATTRACTION",300,1200,0,6000,18000], [-307.4,217.6,"Downtown Arlington","Arlington","DOWNTOWN",14000,11000,800,6000,4000],
+          [-321.2,229.9,"UT Arlington","Arlington","UNIVERSITY",9000,2200,41000,1200,2500], [-290.6,200.5,"Stadium District","Arlington","ENTERTAINMENT",200,3500,0,9000,35000],
+          [-272.5,194.1,"Six Flags","Arlington","ENTERTAINMENT",150,2500,0,8000,30000], [254.8,-367.7,"McKinney National Airport","McKinney","AIRPORT",100,1200,0,150,300],
+          [-2.6,-83.0,"Addison Circle","Addison","DOWNTOWN",8000,9000,300,5000,3000], [-111.2,74.8,"University of Dallas","Irving","UNIVERSITY",2500,900,3800,250,600],
+          [-135.5,-116.2,"Downtown Irving","Irving","DOWNTOWN",9000,12000,300,3500,1800], [11.2,-36,"Galleria Dallas","Dallas","SHOPPING",800,5000,0,45000,12000],
+          [-85.1,-65.0,"Downtown Carrollton","Carrollton","DOWNTOWN",10000,8000,500,3500,1800], [-49.7,293.8,"Dallas Executive Airport","Dallas","AIRPORT",50,350,0,50,150],
+          [-22.1,114.9,"UT Southwestern","Dallas","MEDICAL",2500,27000,4200,500,1200], [-680.6,169.0,"Carswell Field","Fort Worth","AIRPORT",0,250,0,0,50],
+          [-602.0,254.4,"TCU","Fort Worth","UNIVERSITY",5500,2600,12000,600,2000], [-596.9,239.7,"Fort Worth Zoo","Fort Worth","ATTRACTION",250,500,0,1200,9000],
+          [-558.5,197.4,"Downtown Fort Worth","Fort Worth","DOWNTOWN",11000,78000,6000,12000,9000], [-411.2,93.7,"Northeast Mall","Hurst","SHOPPING",500,1800,0,17000,2000],
+          [235.9,-68.6,"Firewheel Town Center","Garland","SHOPPING",600,2500,0,18000,2500], [-3.8,-268.4,"Hall Park","Frisco","OFFICE",1200,18000,0,1000,400],
+          [10.9,-246.5,"Granite Park","Plano","OFFICE",800,15000,0,1200,400], [152.8,-245.6,"Watters Creek","Allen","SHOPPING",1800,1800,0,16000,2500],
+          [-194.9,79.3,"Irving Mall","Irving","SHOPPING",600,1000,0,12000,1200], [225.8,124.0,"Town East Mall","Mesquite","SHOPPING",1000,1800,0,18000,2500],
+          [-340.1,-54.8,"Southlake Town Square","Southlake","SHOPPING",1200,2500,0,22000,3000], [-135.5,252.9,"Dallas Baptist University","Dallas","UNIVERSITY",3200,800,4200,200,600],
+          [138.6,-127.7,"CityLine","Richardson","OFFICE",2200,30000,0,2500,800], [-122.6,44.5,"Las Colinas","Irving","OFFICE",15000,65000,1200,7000,3000],
+          [105.7,-61.4,"Downtown Richardson","Richardson","DOWNTOWN",12000,9000,1200,2200,1500], [402.2,-38.6,"Downtown Rockwall","Rockwall","DOWNTOWN",8000,4500,300,1200,800],
+          [247.3,178.0,"Downtown Mesquite","Mesquite","DOWNTOWN",9000,6000,400,1800,1000], [-598.1,109.9,"Fort Worth Meacham Airport","Fort Worth","AIRPORT",50,900,0,50,150],
+          [-637.4,297.0,"Hulen Mall","Fort Worth","SHOPPING",800,2200,0,17000,2200], [-352.1,446.7,"Downtown Mansfield","Mansfield","DOWNTOWN",11000,3500,300,1200,700],
+          [-410.3,75.1,"TCC Northeast","Hurst","UNIVERSITY",1500,600,7000,150,300], [-269.9,-67.1,"Gaylord Texan","Grapevine","HOTEL",500,4200,0,4000,10000],
+          [132.1,-300.7,"121 & Farm","McKinney","SHOPPING",300,700,0,7000,1200],
+[-31.8,-401.9,"Fields","Frisco","MIXED_USE",2500,12000,0,18000,8000],
+
+[0.4,-389.5,"Universal Kids Resort","Frisco","ENTERTAINMENT",200,2200,0,12000,30000],
+
+[-365.6,127.6,"Bell Textron","Fort Worth","INDUSTRIAL",500,6500,0,200,100],
+
+[-275.6,219.4,"GM Arlington Assembly","Arlington","INDUSTRIAL",500,5500,0,300,100],
+
+[-230.6,259.0,"EpicCentral","Grand Prairie","ENTERTAINMENT",500,1800,0,7000,22000],
+
+[-212.6,287.2,"Epic Waters","Grand Prairie","WATERPARK",100,500,0,3000,18000],
+[66.4,-162.1,"Medical City Plano","Plano","MEDICAL",1500,8500,1200,600,1200],
+
+[-12.3,-163.3,"Shops at Willow Bend","Plano","SHOPPING",500,2200,0,18000,3500],
+
+[-16.45,-187.9,"Texas Health Plano","Plano","MEDICAL",1200,5000,600,400,800],
+
+[120.9,-146.5,"Collin Creek","Plano","MIXED_USE",3500,3500,0,12000,5000],
+
+[-0.2,186.4,"Methodist Dallas Medical Center","Dallas","MEDICAL",1500,7000,1800,400,900],
+
+[-324.8,202.6,"Texas Health Arlington Memorial","Arlington","MEDICAL",1200,4500,600,300,700],
+
+[-321.8,91.0,"Texas Health HEB","Bedford","MEDICAL",1000,4200,500,250,600],
+
+[-675.2,212.8,"Ridgmar Mall","Fort Worth","SHOPPING",400,1800,0,12000,1800],
+
+[-561.2,227.8,"JPS Health Network","Fort Worth","MEDICAL",1800,6500,1200,500,1000],
+
+[109.0,-25.4,"Dallas College Richland","Dallas","UNIVERSITY",3000,1200,18000,300,800],
+[126.9,91.0,"Dallas Arboretum","Dallas","ATTRACTION",100,450,0,5000,18000],
+[-29.6,-35.2,"Dallas College Brookhaven","Farmers Branch","UNIVERSITY",2500,1000,15000,300,700],
+
+[382.6,26.0,"Harbor District","Rockwall","MIXED_USE",1800,5000,0,9000,6000],
+
+[339.4,39.8,"Sapphire Bay","Rowlett","ENTERTAINMENT",1200,3500,0,12000,25000],
+
+[69.4,370.3,"Dallas College Cedar Valley","Lancaster","UNIVERSITY",2200,800,9000,200,500],
+
+[-125.6,388.3,"Hillside Village","Cedar Hill","SHOPPING",800,1800,0,14000,2500],
+
+[-627.7,88.4,"Tarrant County College Northwest","Fort Worth","UNIVERSITY",1800,700,9000,150,400],
+
+[-558.2,48.2,"BNSF Railway HQ","Fort Worth","OFFICE",400,3200,0,300,150],
+
+[-546.7,-114.4,"Perot Field Fort Worth Alliance Airport","Fort Worth","AIRPORT",300,9000,0,1200,1800],
+
+[24.4,129.2,"Uptown Dallas","Dallas","MIXED_USE",12000,35000,0,14000,12000],
+
+[32.2,106.4,"West Village","Dallas","MIXED_USE",3500,4500,0,10000,15000],
+
+[18.4,145.9,"Victory Plaza","Dallas","ENTERTAINMENT",300,2500,0,5000,35000],
+      ];
+
+      const MAX_RESIDENTS = Math.max(...LOCATIONS.map(l => l[5]));
+      const MAX_JOBS = Math.max(...LOCATIONS.map(l => l[6]));
+      const MAX_STUDENTS = Math.max(...LOCATIONS.map(l => l[7]));
+      const MAX_RETAIL = Math.max(...LOCATIONS.map(l => l[8]));
+      const MAX_LEISURE = Math.max(...LOCATIONS.map(l => l[9]));
+
+      function generateNodes() {
+          neighborhoods = [];
+          LOCATIONS.forEach((loc, i) => {
+              const [x, y, name, city, type, residents, jobs, students, retailVisitors, leisureVisitors] = loc;
+              const resWeight = residents / MAX_RESIDENTS; const jobWeight = jobs / MAX_JOBS;
+              const studentWeight = students / MAX_STUDENTS; const retailWeight = retailVisitors / MAX_RETAIL;
+              const leisureWeight = leisureVisitors / MAX_LEISURE;
+              const importance = resWeight * 0.30 + jobWeight * 0.30 + studentWeight * 0.15 + retailWeight * 0.15 + leisureWeight * 0.10;
+              const size = 1.2 + Math.sqrt(importance) * 4.5 + (Math.random() - 0.5) * 0.15;
+              neighborhoods.push({
+                  id: i + 1, x, y, name, city, type, residents, jobs, students, retailVisitors, leisureVisitors,
+                  resWeight, jobWeight, studentWeight, retailWeight, leisureWeight, importance, size, neighborhood: name
+              });
+          });
+          spawnCommuters();
+      }
+
+      function spawnCommuters() {
+          commuters = [];
+          const NUM_COMMUTERS = 12000;
+          const allHomes = neighborhoods.filter(n => n.residents > 0.2);
+
+          function chooseDestination(home, field, decay) {
+              return weightedPick(neighborhoods.filter(n => n !== home), n => {
+                  const d = Math.hypot(home.x - n.x, home.y - n.y);
+                  return Math.sqrt(Math.max(0.1, n[field])) * Math.exp(-d / decay);
+              });
+          }
+
+          for (let i = 0; i < NUM_COMMUTERS; i++) {
+              const home = weightedPick(allHomes, n => Math.sqrt(n.residents));
+              const r = Math.random(); let personType = "OFFICE";
+              if (r < .40) personType = "OFFICE"; else if (r < .55) personType = "SERVICE";
+              else if (r < .67) personType = "RETAIL_WORKER"; else if (r < .80) personType = "STUDENT";
+              else if (r < .86) personType = "REMOTE"; else if (r < .94) personType = "RETIREE";
+              else if (r < .98) personType = "SHOPPER"; else personType = "LEISURE";
+
+              let work = null; let school = null;
+              const favoriteRetail = chooseDestination(home,"retailVisitors",140);
+              const favoriteLeisure = chooseDestination(home,"leisureVisitors",220);
+
+              switch(personType){
+                  case "OFFICE": work = chooseDestination(home, "jobs", 420); break;
+                  case "SERVICE": work = chooseDestination(home, "jobs", 250); break;
+                  case "RETAIL_WORKER": work = chooseDestination(home, "retailVisitors", 180); break;
+                  case "AIRPORT": work = weightedPick(neighborhoods.filter(n=>n.type==="AIRPORT"), n=>Math.max(.1,n.jobs)); break;
+                  case "STUDENT": school = chooseDestination(home, "students", 180); break;
+              }
+
+              let transitPreference = 0.04;
+              if(home.city==="Dallas") transitPreference += 0.05;
+              if(home.type==="DOWNTOWN") transitPreference += 0.10;
+              if(work && work.type==="DOWNTOWN") transitPreference += 0.10;
+              if(work && work.type==="OFFICE") transitPreference += 0.05;
+              if(school) transitPreference += 0.08;
+              if(personType==="REMOTE") transitPreference -= 0.10;
+              if(personType==="RETIREE") transitPreference -= 0.05;
+              transitPreference += (Math.random()-.5)*0.06;
+              transitPreference = Math.max(0.02, Math.min(.75,transitPreference));
+
+              const worksToday = personType !== "REMOTE" || Math.random() > 0.70;
+              const attendsSchoolToday = personType !== "STUDENT" || Math.random() < 0.72;
+              const shopsToday = Math.random() < 0.30;
+              const leisureToday = Math.random() < 0.20;
+
+              let departMorning = 8*60; let departEvening = 17*60;
+              switch(personType){
+                  case "OFFICE": departMorning = 420 + Math.random()*120; departEvening = 960 + Math.random()*120; break;
+                  case "SERVICE": departMorning = 360 + Math.random()*300; departEvening = 900 + Math.random()*300; break;
+                  case "STUDENT": departMorning = 450 + Math.random()*90; departEvening = 840 + Math.random()*150; break;
+                  case "RETAIL_WORKER": departMorning = 540 + Math.random()*240; departEvening = 900 + Math.random()*300; break;
+                  case "SHOPPER": departMorning = 600 + Math.random()*240; departEvening = 840 + Math.random()*240; break;
+                  case "RETIREE": departMorning = 600 + Math.random()*240; departEvening = 900 + Math.random()*180; break;
+              }
+
+              commuters.push({
+                  x: home.x, y: home.y, home, work, school, favoriteRetail, favoriteLeisure, personType,
+                  worksToday, attendsSchoolToday, shopsToday, leisureToday, transitPreference,
+                  departMorning, departEvening, currentDestination: null, currentStation: null, route: [], status: "HOME"
+              });
+          }
+      }
+
+      function setupLineSelectorUI() {
+    const container = document.getElementById('lineSelectorContainer');
+    // Clear current dots
+    container.innerHTML = '';
+    
+    // Get unique colors from existing tracks, plus the current active color
+    const usedColors = [...new Set(tracks.map(t => t.color))];
+    if (!usedColors.includes(activeColor)) {
+        usedColors.push(activeColor);
+    }
+    
+    usedColors.forEach(color => {
+        const dot = document.createElement('div');
+        dot.className = `line-dot ${activeColor === color ? 'selected' : ''}`;
+        dot.style.backgroundColor = color;
+        
+        dot.onclick = () => {
+            activeColor = color;
+            // Assuming you have an input for the color picker
+            const picker = document.getElementById('custom-line-color');
+            if (picker) picker.value = color;
+            setupLineSelectorUI(); 
+        };
+        container.appendChild(dot);
+    });
+}
+
+      // Sync the color wheel input
+      document.getElementById('custom-line-color').addEventListener('input', (e) => {
+          activeColor = e.target.value;
+          // When picking a new color, we don't 'select' an old one
+          document.querySelectorAll('.line-dot').forEach(d => d.classList.remove('selected'));
+      });
+      function buildTelemetryCharts(){
+          const chart=document.getElementById('demand-chart'); chart.innerHTML='';
+          [15,20,35,55,85,95,75,45,40,50,65,80,90,60,35,25,20,15,10,5].forEach(v=>{
+              const b=document.createElement('div'); b.className='chart-bar'; b.style.height=`${v}%`; chart.appendChild(b);
+          });
+      }
+
+      function updateHUD(){ document.getElementById('lbl-budget').textContent='$'+Math.round(budget).toLocaleString(); }
+document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLocaleString()}`;      function updateTelemetryData(){
+          const feed=document.getElementById('station-feed-list');
+          if(!stations.length){feed.innerHTML='<div class="station-card" style="color:var(--text-muted);text-align:center;display:block;">No terminals linked.</div>';return;}
+          document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLocaleString()}`;
+
+          const transitUsers = trains.reduce((a,t)=>a+t.riders.length,0) + stations.reduce((a,s)=>a+s.waiting,0);
+          if (transitUsers > peakConcurrentRiders) peakConcurrentRiders = transitUsers;
+          const stationCount = stations.length; const trackCount = tracks.length;
+          const BASE_TRANSIT = 2.3; const WALK_SHARE = 1.2;
+
+          const infrastructureScore = stationCount * 0.20 + trackCount * 0.05;
+          const ridershipScore = Math.log10(transitUsers + 10) * 0.8;
+          // Actual boarding success/failure (patience give-ups) scales the theoretical share,
+          // so a congested network that can't actually move its riders loses transit share.
+          const successRate = (totalBoarded + totalGaveUp) > 0 ? totalBoarded / (totalBoarded + totalGaveUp) : 1;
+          let transitShare = Math.min(15.0, (BASE_TRANSIT + infrastructureScore + ridershipScore) * successRate);
+          const walkShare = WALK_SHARE; const driveShare = 100 - transitShare - walkShare;
+
+          document.getElementById('txt-share-transit').textContent=`${transitShare.toFixed(1)}%`;
+          document.getElementById('bar-share-transit').style.width=`${transitShare.toFixed(1)}%`;
+          document.getElementById('txt-share-drive').textContent=`${driveShare.toFixed(1)}%`;
+          document.getElementById('bar-share-drive').style.width=`${driveShare.toFixed(1)}%`;
+          document.getElementById('txt-share-walk').textContent=`${walkShare.toFixed(1)}%`;
+          document.getElementById('bar-share-walk').style.width=`${walkShare.toFixed(1)}%`;
+          feed.innerHTML='';
+
+          const uniqueColors = [...new Set(tracks.map(t => t.color))];
+          const lineOrder = {};
+          uniqueColors.forEach((c, i) => lineOrder[c] = i);
+
+          [...stations]
+          .sort((a, b) => {
+              const lineA = tracks.find(t => t.startStation === a || t.endStation === a)?.color ?? "#ffffff";
+              const lineB = tracks.find(t => t.startStation === b || t.endStation === b)?.color ?? "#ffffff";
+              const colorDiff = (lineOrder[lineA] ?? 999) - (lineOrder[lineB] ?? 999);
+              if (colorDiff !== 0) return colorDiff;
+              return b.commuters - a.commuters;
+          })
+          .forEach(s => {
+              const nearby = neighborhoods.filter(n => Math.hypot(n.x - s.x, n.y - s.y) < 250);
+              let catchment = 0;
+              nearby.forEach(n => { catchment += n.residents * 0.30 + n.jobs * 0.35 + n.students * 0.15 + n.retailVisitors * 0.10 + n.leisureVisitors * 0.10; });
+
+              const nearbyStations = stations.filter(st => st !== s && Math.hypot(st.x - s.x, st.y - s.y) < 180).length;
+              const competition = Math.max(1, 1 + nearbyStations * 0.35);
+              const transfers = tracks.filter(t => t.startStation === s || t.endStation === s).length;
+              const transferBonus = 1 + Math.max(0, transfers - 2) * 0.20;
+
+              const currentHour = timeTicks / 3600;
+              const timeMultiplier = calculateSmoothDemand(1.0, currentHour);
+              const hourlyCommuters = Math.round((catchment * transferBonus / competition) * 0.02 * timeMultiplier);
+
+              const stationColors = [...new Set(tracks.filter(t => t.startStation === s || t.endStation === s).map(t => t.color))];
+              const colorDots = stationColors.map(c => `<div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${c}; flex-shrink: 0; box-shadow: 0 0 2px rgba(0,0,0,0.5);"></div>`).join('');
+
+              const div = document.createElement("div");
+              div.className = "station-card";
+              div.innerHTML = `
+                  <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
+                      <div style="display: flex; gap: 3px;">${colorDots}</div>
+                      <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.name}</div>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; text-align:right;">
+                      ${hourlyCommuters.toLocaleString()} /hr<br/>
+                      <span style="font-size:9px;">${(s.ridersBoarded||0).toLocaleString()} boarded</span>
+                  </div>
+              `;
+              feed.appendChild(div);
+          });
+          updateFleetPanel();
+          updateStatsPanel();
+      }
+
+      function updateStatsPanel() {
+          const panel = document.getElementById('stats-panel');
+          if (!panel) return;
+          const avgOccupancy = trains.length ? (trains.reduce((a,t)=>a+(t.riders.length/(t.capacity||120)),0) / trains.length * 100) : 0;
+          const avgWaitMin = waitSamples ? (waitTimeSum / waitSamples / 60) : 0;
+          const avgTripMin = tripSamples ? (tripTimeSum / tripSamples / 60) : 0;
+          const rows = [
+              ['Daily Riders', dailyRiders.toLocaleString()],
+              ['Peak Concurrent Riders', peakConcurrentRiders.toLocaleString()],
+              ['Fare Revenue Today', '$' + Math.round(fareRevenueToday).toLocaleString()],
+              ['Lifetime Riders', lifetimeRiders.toLocaleString()],
+              ['Avg Wait Time', avgWaitMin.toFixed(1) + ' min'],
+              ['Avg Trip Time', avgTripMin.toFixed(1) + ' min'],
+              ['Avg Train Occupancy', avgOccupancy.toFixed(0) + '%'],
+              ['Crowding Events (missed boardings)', overcrowdingEvents.toLocaleString()],
+          ];
+          panel.innerHTML = rows.map(([label, value]) => `
+              <div class="mode-row" style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+                  <span style="color:var(--text-muted);">${label}</span>
+                  <span style="color:#fff;font-weight:600;">${value}</span>
+              </div>
+          `).join('');
+      }
+
+      function adjustFare(a){
+          ticketFare = Math.max(1, Math.min(10, ticketFare + a));
+          document.getElementById('fare-display').textContent = '$' + ticketFare.toFixed(2);
+      }
+
+      function setSpeed(s){
+          simSpeed = s;
+          document.querySelectorAll('.strip-section button').forEach(b => {
+              if (b.id && b.id.startsWith('btn-speed-')) b.classList.remove('active');
+          });
+          const target = document.getElementById(`btn-speed-${s}`);
+          if(target) target.classList.add('active');
+      }
+
+      function setMode(m){
+          if (activeTrackBuild) activeTrackBuild = null;
+          mode = m;
+          document.querySelectorAll('#playback-strip button').forEach(b => {
+              if (b.id && b.id.startsWith('btn-')) b.classList.remove('active');
+          });
+          const btn = document.getElementById(`btn-${m}`);
+          if (btn) btn.classList.add('active');
+      }
+
+      function setElevationProfile(p) {
+    selectedElevationProfile = p;
+    document.querySelectorAll('[id^="prof-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById(`prof-${p}`).classList.add('active');
+    
+    // Refresh tooltip if in track mode
+    if (mode === 'track') {
+        tooltip.textContent = `Est. Cost: $${getActiveTrackCost().toLocaleString()}`;
+    }
+}
+      function setTrackWay(w){ selectedTrackWay=w; document.querySelectorAll('[id^="way-"]').forEach(b=>b.classList.remove('active')); document.getElementById(`way-${w}`).classList.add('active'); }
+      
+      function toggleCrossoverSystem(){
+          crossoverSystemEnabled=!crossoverSystemEnabled;
+          const l=document.getElementById('lbl-crossover');
+          l.textContent=crossoverSystemEnabled?'ON':'OFF'; l.style.color=crossoverSystemEnabled?'#10b981':'#ef4444';
+      }
+
+      function findNearestStation(x,y,mx){ let n=null,md=mx; stations.forEach(s=>{const d=Math.hypot(s.x-x,s.y-y);if(d<md){md=d;n=s;}}); return n; }
+      
+      function calculateNetworkRoute(start,end){
+          const q=[[start]],vis=new Set([start.id]);
+          while(q.length){
+              const path=q.shift(),node=path[path.length-1]; if(node===end) return path;
+              tracks.forEach(t=>{
+                  if(t.startStation===node&&!vis.has(t.endStation.id)){vis.add(t.endStation.id);q.push([...path,t.endStation]);}
+                  else if(t.endStation===node&&!vis.has(t.startStation.id)){vis.add(t.startStation.id);q.push([...path,t.startStation]);}
+              });
+          } return null;
+      }
+
+      function traceRouteFrom(startTrack, visited, colorTracks) {
+          const chain = []; const stack = [{ track: startTrack, fromStation: null }]; const localVisited = new Set();
+          while (stack.length) {
+              const { track, fromStation } = stack.pop();
+              if (localVisited.has(track)) continue;
+              localVisited.add(track); visited.add(track); chain.push(track);
+              [track.startStation, track.endStation].forEach(station => {
+                  colorTracks.forEach(t => {
+                      if (!localVisited.has(t) && (t.startStation === station || t.endStation === station)) { stack.push({ track: t, fromStation: station }); }
+                  });
+              });
+          }
+          return chain;
+      }
+
+      function buildGeometryFromChain(chain) {
+          if (!chain.length) return [];
+          const adj = new Map();
+          chain.forEach(t => {
+              if (!adj.has(t.startStation)) adj.set(t.startStation, []);
+              if (!adj.has(t.endStation)) adj.set(t.endStation, []);
+              adj.get(t.startStation).push(t); adj.get(t.endStation).push(t);
+          });
+          let curr = null; for (const [st, tl] of adj.entries()) { if (tl.length === 1) { curr = st; break; } }
+          if (!curr) curr = chain[0].startStation;
+
+          const pts = [{ x: curr.x, y: curr.y, station: curr }]; const vis = new Set();
+          while (true) {
+              const opts = (adj.get(curr) || []).filter(t => !vis.has(t));
+              if (!opts.length) break;
+              const trk = opts[0]; vis.add(trk);
+              const inside = [...trk.waypoints]; const rev = trk.endStation === curr;
+              if (rev) inside.reverse();
+              inside.forEach(p => pts.push({ x: p.x, y: p.y, station: null }));
+              curr = rev ? trk.startStation : trk.endStation;
+              pts.push({ x: curr.x, y: curr.y, station: curr });
+          }
+          return pts;
+      }
+
+      function rebuildRoutes() {
+          routes = [];
+          const visited = new Set();
+          
+          // Rebuild dynamically based on present track colors
+          const uniqueColors = [...new Set(tracks.map(t => t.color))];
+          uniqueColors.forEach(color => {
+              const colorTracks = tracks.filter(t => t.color === color);
+              colorTracks.forEach(seedTrack => {
+                  if (visited.has(seedTrack)) return;
+                  const chain = traceRouteFrom(seedTrack, visited, colorTracks);
+                  if (!chain.length) return;
+                  let trackCount = 1;
+                  if (chain.some(t => t.wayConfig === 'quad')) trackCount = 4;
+                  else if (chain.some(t => t.wayConfig === 'parallel')) trackCount = 2;
+                  const geometry = buildGeometryFromChain(chain);
+                  if (geometry.length < 2) return;
+                  routes.push({ color, geometry, trackCount, trains: [] });
+              });
+          });
+          reconcileFleet();
+      }
+
+      // Trains are no longer auto-spawned. Existing purchased trains are carried over
+      // onto the rebuilt route geometry (color match). Trains whose line no longer
+      // exists are retired for a 50% refund.
+      function reconcileFleet() {
+          const survivors = [];
+          trains.forEach(t => {
+              const route = routes.find(r => r.color === t.lineColor);
+              if (!route || route.geometry.length < 2) {
+                  budget += Math.floor((t.cost || 0) * 0.5);
+                  return;
+              }
+              const geo = route.geometry;
+              t.route = route;
+              t.pathNodes = t.reverse ? [...geo].reverse() : geo;
+              t.currentNodeIdx = Math.max(0, Math.min(t.currentNodeIdx, t.pathNodes.length - 2));
+              const node = t.pathNodes[t.currentNodeIdx];
+              t.x = node.x; t.y = node.y; t.pct = 0; t.state = 'MOVING'; t.dwell = 0;
+              route.trains.push(t);
+              survivors.push(t);
+          });
+          trains = survivors;
+          updateHUD();
+      }
+
+      function manageTrainsRealtime() { rebuildRoutes(); }
+
+      function setTrainClass(cls) {
+          selectedTrainClass = cls;
+          document.getElementById('class-light').classList.toggle('active', cls === 'light');
+          document.getElementById('class-heavy').classList.toggle('active', cls === 'heavy');
+          updateFleetPanel();
+      }
+
+      function routeHasDepot(route) {
+          return depots.some(d => route.geometry.some(pt => Math.hypot(pt.x - d.x, pt.y - d.y) < DEPOT_SERVICE_RADIUS));
+      }
+
+      function flashInsufficientFunds(msg) {
+          const lbl = document.getElementById('lbl-budget');
+          if (!lbl) return;
+          lbl.textContent = msg;
+          lbl.style.color = '#ef4444';
+          setTimeout(() => { updateHUD(); lbl.style.color = '#38bdf8'; }, 1200);
+      }
+
+      function buyTrain(color) {
+          if (gameOver) return;
+          const route = routes.find(r => r.color === color);
+          if (!route) return;
+          if (!routeHasDepot(route)) { flashInsufficientFunds('Needs a Depot on this line'); return; }
+          const spec = TRAIN_SPECS[selectedTrainClass];
+          if (budget < spec.cost) { flashInsufficientFunds('Insufficient Funds'); return; }
+          budget -= spec.cost;
+
+          const depot = depots.find(d => route.geometry.some(pt => Math.hypot(pt.x - d.x, pt.y - d.y) < DEPOT_SERVICE_RADIUS));
+          const existingForward = route.trains.filter(t => !t.reverse).length;
+          const existingReverse = route.trains.filter(t => t.reverse).length;
+          const reverse = route.trackCount > 1 && existingForward > existingReverse;
+          const pathNodes = reverse ? [...route.geometry].reverse() : route.geometry;
+
+          let nearestIdx = 0, nearestDist = Infinity;
+          pathNodes.forEach((pt, idx) => {
+              const d = Math.hypot(pt.x - depot.x, pt.y - depot.y);
+              if (d < nearestDist) { nearestDist = d; nearestIdx = idx; }
+          });
+          nearestIdx = Math.min(nearestIdx, pathNodes.length - 2);
+
+          const train = {
+              id: trainIdCounter++, lineColor: route.color, route, pathNodes,
+              currentNodeIdx: nearestIdx, pct: 0, dir: 1,
+              x: pathNodes[nearestIdx].x, y: pathNodes[nearestIdx].y,
+              riders: [], state: 'MOVING', dwell: 0,
+              reverse, dirKey: reverse ? 'R' : 'F',
+              capacityType: selectedTrainClass, baseCapacity: spec.capacity, extraCars: 0,
+              capacity: spec.capacity, cost: spec.cost
+          };
+          route.trains.push(train); trains.push(train);
+          updateHUD(); updateFleetPanel();
+      }
+
+      function addExtraCar(id) {
+          if (gameOver) return;
+          const t = trains.find(tr => tr.id === id);
+          if (!t || t.extraCars >= MAX_EXTRA_CARS) return;
+          if (budget < EXTRA_CAR_COST) { flashInsufficientFunds('Insufficient Funds'); return; }
+          budget -= EXTRA_CAR_COST;
+          t.extraCars++;
+          t.capacity = t.baseCapacity + t.extraCars * EXTRA_CAR_CAPACITY;
+          t.cost += EXTRA_CAR_COST;
+          updateHUD(); updateFleetPanel();
+      }
+
+      function sellTrain(id) {
+          const idx = trains.findIndex(tr => tr.id === id);
+          if (idx === -1) return;
+          const t = trains[idx];
+          budget += Math.floor((t.cost || 0) * 0.5);
+          trains.splice(idx, 1);
+          if (t.route) t.route.trains = t.route.trains.filter(tr => tr !== t);
+          updateHUD(); updateFleetPanel();
+      }
+
+      function updateFleetPanel() {
+          const container = document.getElementById('fleet-list');
+          if (!container) return;
+          if (!routes.length) {
+              container.innerHTML = '<div class="station-card" style="color:var(--text-muted);text-align:center;display:block;">No active lines to crew.</div>';
+              return;
+          }
+          const spec = TRAIN_SPECS[selectedTrainClass];
+          container.innerHTML = '';
+          routes.forEach((route, idx) => {
+              const hasDepot = routeHasDepot(route);
+              const buyDisabled = !hasDepot || budget < spec.cost || gameOver;
+              const wrap = document.createElement('div');
+              wrap.style.cssText = 'border:1px solid var(--border-color);border-radius:6px;padding:8px;margin-bottom:8px;';
+              wrap.innerHTML = `
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                      <div style="display:flex;align-items:center;gap:6px;">
+                          <div style="width:10px;height:10px;border-radius:50%;background:${route.color};"></div>
+                          <span style="font-weight:600;font-size:12px;">Line ${idx + 1}</span>
+                      </div>
+                      <span style="font-size:10px;color:${hasDepot ? '#10b981' : '#ef4444'};">${hasDepot ? 'Depot Linked' : 'No Depot'}</span>
+                  </div>
+                  <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">${route.trains.length} train(s) in service</div>
+                  <button class="btn-action" style="width:100%;${buyDisabled ? 'opacity:0.45;cursor:not-allowed;' : ''}" ${buyDisabled ? 'disabled' : ''} onclick="buyTrain('${route.color}')">+ Buy ${spec.label} ($${spec.cost.toLocaleString()})</button>
+              `;
+              const trainList = document.createElement('div');
+              route.trains.forEach(t => {
+                  const row = document.createElement('div');
+                  row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;font-size:10px;padding:5px 0;border-top:1px solid var(--border-color);';
+                  row.innerHTML = `
+                      <span>${t.capacityType === 'heavy' ? 'Heavy' : 'Light'} #${t.id} &middot; Cap ${t.capacity} (${t.riders.length} aboard)</span>
+                      <span>
+                          <button class="fare-btn" style="margin-right:4px;${t.extraCars >= MAX_EXTRA_CARS ? 'opacity:0.45;cursor:not-allowed;' : ''}" ${t.extraCars >= MAX_EXTRA_CARS ? 'disabled' : ''} onclick="addExtraCar(${t.id})">+Car</button>
+                          <button class="fare-btn" onclick="sellTrain(${t.id})">Sell</button>
+                      </span>
+                  `;
+                  trainList.appendChild(row);
+              });
+              wrap.appendChild(trainList);
+              container.appendChild(wrap);
+          });
+      }
+
+      // --- OpEx / maintenance economy ---
+      function calculateDailyOpEx() {
+          let trackCost = 0;
+          tracks.forEach(t => {
+              const pts = [t.startStation, ...t.waypoints, t.endStation];
+              let len = 0;
+              for (let i = 0; i < pts.length - 1; i++) len += Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
+              const mE = t.elevation === 'under' ? 2.0 : t.elevation === 'above' ? 1.4 : 1.0;
+              const mW = t.wayConfig === 'quad' ? 3 : t.wayConfig === 'parallel' ? 1.8 : 1;
+              trackCost += len * 1.1 * mE * mW;
+          });
+          const stationCost = stations.length * 4000;
+          const depotCost = depots.length * DEPOT_DAILY_COST;
+          let trainCost = 0;
+          trains.forEach(t => {
+              trainCost += (TRAIN_SPECS[t.capacityType]?.dailyCost || TRAIN_SPECS.light.dailyCost) + t.extraCars * EXTRA_CAR_DAILY_COST;
+          });
+          return trackCost + stationCost + depotCost + trainCost;
+      }
+
+      function applyDailyOpEx() {
+          const opex = calculateDailyOpEx();
+          budget -= opex;
+          lastOpExAmount = opex;
+          const opexLbl = document.getElementById('lbl-opex');
+          if (opexLbl) opexLbl.textContent = `OpEx: $${Math.round(opex).toLocaleString()}/day`;
+          bankruptcyStrikes = budget < 0 ? bankruptcyStrikes + 1 : 0;
+          if (bankruptcyStrikes >= 3) triggerBankruptcy();
+          updateHUD();
+      }
+
+      function triggerBankruptcy() {
+          if (gameOver) return;
+          gameOver = true; simSpeed = 0;
+          const overlay = document.createElement('div');
+          overlay.id = 'bankruptcy-overlay';
+          overlay.style.cssText = 'position:fixed;inset:0;background:rgba(5,5,8,0.94);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;color:#fff;font-family:inherit;';
+          overlay.innerHTML = `
+              <div style="font-size:30px;font-weight:800;color:#ef4444;margin-bottom:10px;">TRANSIT AUTHORITY BANKRUPT</div>
+              <div style="font-size:14px;color:#94a3b8;margin-bottom:20px;max-width:420px;text-align:center;">Operating expenses have exceeded your budget for 3 consecutive days. Maintenance on tracks, stations, depots, and trains was left unpaid.</div>
+              <button onclick="location.reload()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px 24px;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px;">Restart Simulation</button>
+          `;
+          document.body.appendChild(overlay);
+      }
+
+      // --- Dynamic city growth: transit-served neighborhoods slowly densify ---
+      function applyDailyCityGrowth() {
+          const successRate = (totalBoarded + totalGaveUp) > 0 ? totalBoarded / (totalBoarded + totalGaveUp) : 1;
+          neighborhoods.forEach(n => {
+              const nearStations = stations.filter(s => Math.hypot(s.x - n.x, s.y - n.y) < 250).length;
+              let growth = nearStations > 0 ? 0.0015 * Math.min(3, nearStations) * successRate : -0.0004;
+              n.residents = Math.max(0, n.residents * (1 + growth));
+              n.jobs = Math.max(0, n.jobs * (1 + growth * 0.85));
+              n.students = Math.max(0, n.students * (1 + growth * 0.6));
+              const resWeight = n.residents / MAX_RESIDENTS, jobWeight = n.jobs / MAX_JOBS;
+              const studentWeight = n.students / MAX_STUDENTS, retailWeight = n.retailVisitors / MAX_RETAIL, leisureWeight = n.leisureVisitors / MAX_LEISURE;
+              n.importance = resWeight * 0.30 + jobWeight * 0.30 + studentWeight * 0.15 + retailWeight * 0.15 + leisureWeight * 0.10;
+              n.size = 1.2 + Math.sqrt(Math.max(0, n.importance)) * 4.5;
+          });
+      }
+      
+      function calculateTrackCost(p1,p2,elev,cfg){
+          const d=Math.hypot(p2.x-p1.x,p2.y-p1.y); const mE=elev==='under'?6:elev==='above'?2.5:1; const mW=cfg==='quad'?3.5:cfg==='parallel'?2:1;
+          return Math.round(d*450*mE*mW);
+      }
+
+function tickSimulationTime() {
+    if (simSpeed === 0) return;
+
+    // Increment time based on simulation speed
+    gameTime.min += simSpeed; 
+
+    // Safely roll over minutes and hours
+    while (gameTime.min >= 60) {
+        gameTime.min -= 60;
+        gameTime.hour += 1;
+    }
+    while (gameTime.hour >= 24) {
+        gameTime.hour -= 24;
+        gameTime.day += 1;
+        if (!gameOver) { applyDailyOpEx(); applyDailyCityGrowth(); }
+        dailyRiders = 0; fareRevenueToday = 0;
+    }
+
+    // Safely roll over months and years (using 30-day months for simulation simplicity)
+    while (gameTime.day > 30) {
+        gameTime.day -= 30;
+        gameTime.month += 1;
+    }
+    while (gameTime.month > 12) {
+        gameTime.month -= 12;
+        gameTime.year += 1;
+    }
+
+    // Sync global timeTicks (in seconds) for commuter, physics, and telemetry logic
+    window.timeTicks = (gameTime.hour * 3600) + (gameTime.min * 60);
+    if (!gameOver) processCommuterLogic();
+
+    // Update the HUD so the player can see the full Min/Hour/Day/Month/Year
+    const timeReadout = document.getElementById('lbl-time');
+    if (timeReadout) {
+        const displayMin = Math.floor(gameTime.min).toString().padStart(2, '0');
+        const displayHour = gameTime.hour.toString().padStart(2, '0');
+        const displayDay = gameTime.day.toString().padStart(2, '0');
+        const displayMonth = gameTime.month.toString().padStart(2, '0');
+        
+        // Displays as: 01/01/2026  06:00
+        timeReadout.innerHTML = `${displayMonth}/${displayDay}/${gameTime.year} &nbsp; ${displayHour}:${displayMin}`;
+    }
+}
+
+      function processCommuterLogic() {
+    // Safety check: ensure simulation is running and timeTicks exists
+    if (!simSpeed || typeof timeTicks === 'undefined') return;
+    
+    const currentMinute = Math.floor(timeTicks / 60) % (24 * 60);
+    if (currentMinute === lastProcessedMinute) return; // only evaluate departures once per sim-minute
+    lastProcessedMinute = currentMinute;
+    
+    commuters.forEach(c => {
+        if (c.status !== "HOME") return;
+        let destinationNode = null;
+        
+        if (currentMinute >= c.departMorning && currentMinute < c.departMorning + 30) {
+            if (c.personType === "OFFICE" || c.personType === "SERVICE" || c.personType === "RETAIL_WORKER" || c.personType === "AIRPORT") {
+                if (!c.worksToday || !c.work) return; destinationNode = c.work;
+            } else if (c.personType === "STUDENT") { if (!c.attendsSchoolToday || !c.school) return; destinationNode = c.school;
+            } else if (c.personType === "SHOPPER") { if (!c.shopsToday) return; destinationNode = c.favoriteRetail;
+            } else if (c.personType === "LEISURE") { if (!c.leisureToday) return; destinationNode = c.favoriteLeisure;
+            } else return;
+        } else return;
+
+        if (Math.random() > c.transitPreference) return;
+        const origin = findNearestStation(c.home.x, c.home.y, 380); 
+        const destination = findNearestStation(destinationNode.x, destinationNode.y, 380);
+        
+        if (!origin || !destination || origin === destination) return;
+        const route = calculateNetworkRoute(origin, destination); 
+        if (!route || route.length < 2) return;
+        
+        // Fix: Use gameTime.day instead of the undefined currentDay variable
+        if (c.lastDepartureDay === gameTime.day) return;
+
+        c.lastDepartureDay = gameTime.day; 
+        c.status = "WAITING"; 
+        c.currentDestination = destinationNode;
+        c.currentStation = origin; 
+        c.route = route;               // full multi-station path: origin -> [transfers] -> destination
+        c.legIndex = 0;                // index into route of the station we're currently at
+        c.tripStartTime = timeTicks;   // for average trip time stat
+        c.waitStart = timeTicks;       // for average wait stat (reset at each transfer too)
+        c.missedBoardings = 0;
+        origin.queue = origin.queue || [];
+        origin.queue.push(c);
+        origin.waiting++; 
+        origin.boardings = (origin.boardings || 0) + 1;
+
+        // Fare is collected exactly once, when the rider enters the system,
+        // regardless of how many lines/transfers the trip ends up requiring.
+        budget += ticketFare;
+        fareRevenueToday += ticketFare;
+        dailyRiders++; lifetimeRiders++;
+        updateHUD();
+    });
+}
+      function updatePhysics(){
+          if(!simSpeed || gameOver) return;
+
+          // Group trains sharing the same line + direction for block-signal collision checks
+          const laneGroups = {};
+          trains.forEach(t => {
+              const key = t.lineColor + '_' + (t.dirKey || 'F');
+              (laneGroups[key] = laneGroups[key] || []).push(t);
+          });
+
+          trains.forEach(t=>{
+              if(!t.pathNodes||t.pathNodes.length<2) return;
+              const sn=t.pathNodes[t.currentNodeIdx]; const ni=t.currentNodeIdx+t.dir;
+              if (ni >= t.pathNodes.length) { t.currentNodeIdx = 0; t.pct = 0; return; }
+              const en = t.pathNodes[ni]; const sd = Math.hypot(en.x - sn.x, en.y - sn.y);
+
+              const MAP_UNITS_PER_MILE = 18.6585833; const TRAIN_SPEED_MPH = 45; const FPS = 60; const SIM_MINUTES_PER_REAL_SECOND = 1;
+              const unitsPerFrame = (TRAIN_SPEED_MPH / 60) * MAP_UNITS_PER_MILE * SIM_MINUTES_PER_REAL_SECOND / FPS;
+
+              if (t.state === undefined) { t.state = "MOVING"; t.dwell = 0; }
+
+              // --- Collision / block-signal check ---
+              // Trains sharing a line+direction must not pass through one another.
+              // The Crossover Switch, when enabled, lets a blocked train bypass the one ahead.
+              if (t.state !== "DWELLING" && !crossoverSystemEnabled) {
+                  const key = t.lineColor + '_' + (t.dirKey || 'F');
+                  const group = laneGroups[key];
+                  if (group && group.length > 1) {
+                      const myProgress = t.currentNodeIdx + t.pct;
+                      const blockedByAhead = group.some(other => {
+                          if (other === t) return false;
+                          const otherProgress = other.currentNodeIdx + other.pct;
+                          return otherProgress > myProgress && (otherProgress - myProgress) < MIN_TRAIN_GAP;
+                      });
+                      if (blockedByAhead) { t.state = "BLOCKED"; return; }
+                  }
+              }
+              if (t.state === "BLOCKED") t.state = "MOVING";
+
+              if (t.state === "DWELLING") {
+                  t.dwell--; if (t.dwell <= 0) { t.state = "MOVING"; t.currentNodeIdx = ni; t.pct = 0; }
+              } else {
+                  const spd = unitsPerFrame / sd; t.pct += spd;
+                  if (t.pct >= 1) {
+                      t.pct = 1; t.state = "DWELLING"; t.dwell = 20; const cs = en.station;
+                      if (cs) {
+                          // --- Alighting ---
+                          // Tracked commuters get off exactly when this station is their next
+                          // leg's target; anonymous background riders alight probabilistically
+                          // (they represent trips we don't individually simulate end-to-end).
+                          const stayRiders = [];
+                          t.riders.forEach(r => {
+                              if (r.commuterRef) {
+                                  const c = r.commuterRef;
+                                  const nextStation = c.route[c.legIndex + 1];
+                                  if (nextStation === cs) {
+                                      c.legIndex++;
+                                      if (c.legIndex >= c.route.length - 1) {
+                                          // Final destination reached - trip complete.
+                                          tripTimeSum += Math.max(0, timeTicks - c.tripStartTime);
+                                          tripSamples++;
+                                          c.status = "HOME";
+                                      } else {
+                                          // Transfer: re-queue at this station for the next line.
+                                          cs.queue = cs.queue || [];
+                                          cs.queue.push(c);
+                                          cs.waiting++;
+                                          c.waitStart = timeTicks;
+                                      }
+                                  } else {
+                                      stayRiders.push(r);
+                                  }
+                              } else if (Math.random() < 0.40) {
+                                  // background rider ends their (unmodeled) trip here
+                              } else {
+                                  stayRiders.push(r);
+                              }
+                          });
+                          t.riders = stayRiders;
+
+                          // --- Boarding ---
+                          const capacity = t.capacity || 120;
+                          let space = capacity - t.riders.length;
+                          let trackedBoarded = 0;
+                          if (cs.queue && cs.queue.length && space > 0) {
+                              const remainingQueue = [];
+                              cs.queue.forEach(c => {
+                                  const nextStation = c.route[c.legIndex + 1];
+                                  const servesNext = t.pathNodes.some(n => n.station === nextStation);
+                                  if (servesNext && space > 0) {
+                                      waitTimeSum += Math.max(0, timeTicks - c.waitStart); waitSamples++;
+                                      t.riders.push({ status: "EN_ROUTE", commuterRef: c });
+                                      space--; trackedBoarded++;
+                                  } else {
+                                      if (servesNext && space <= 0) {
+                                          // Train serving their line is full - platform crowding penalty.
+                                          c.missedBoardings = (c.missedBoardings || 0) + 1;
+                                          overcrowdingEvents++;
+                                          if (c.missedBoardings >= 2) c.transitPreference = Math.max(0.02, c.transitPreference * 0.85);
+                                      }
+                                      remainingQueue.push(c);
+                                  }
+                              });
+                              cs.queue = remainingQueue;
+                          }
+
+                          const anonymousWaiting = Math.max(0, cs.waiting - (cs.queue ? cs.queue.length : 0));
+                          const anonymousBoarded = Math.min(space, anonymousWaiting);
+                          for (let k = 0; k < anonymousBoarded; k++) t.riders.push({ status: "EN_ROUTE", commuterRef: null });
+
+                          const boardedHere = trackedBoarded + anonymousBoarded;
+                          cs.waiting = Math.max(0, cs.waiting - boardedHere);
+                          cs.ridersBoarded = (cs.ridersBoarded || 0) + boardedHere;
+                          totalBoarded += boardedHere;
+
+                          // Anonymous riders pay their fare on boarding (their only touchpoint);
+                          // tracked commuters already paid once at trip departure.
+                          if (anonymousBoarded > 0) {
+                              budget += anonymousBoarded * ticketFare;
+                              fareRevenueToday += anonymousBoarded * ticketFare;
+                          }
+                          updateHUD();
+                      }
+                  }
+                  t.x = sn.x + (en.x - sn.x) * t.pct; t.y = sn.y + (en.y - sn.y) * t.pct;
+              }
+          });
+
+          stations.forEach(s => {
+              const nearby = neighborhoods.filter(n => Math.hypot(n.x - s.x, n.y - s.y) < 250);
+              let demand = 0;
+              nearby.forEach(n => {
+                  switch(n.type){
+                      case "OFFICE":       demand += n.importance * 14; break;
+                      case "COMMERCIAL":   demand += n.importance * 10; break;
+                      case "AIRPORT":      demand += n.importance * 35; break;
+                      case "UNIVERSITY":   demand += n.importance * 18; break;
+                      case "MEDICAL":      demand += n.importance * 12; break;
+                      case "INDUSTRIAL":   demand += n.importance * 8; break;
+                      default:             demand += n.importance * 6;
+                  }
+              });
+
+              const connections = tracks.filter(t => t.startStation === s || t.endStation === s).length;
+              demand *= (1 + connections * 0.15);
+
+              const currentHour = timeTicks / 3600;
+              let rush = calculateSmoothDemand(1.0, currentHour);
+              if (nearby.some(n => n.type === "AIRPORT")) rush = Math.max(rush, 1.3);
+              demand *= rush;
+
+              if (Math.random() < 0.03 * simSpeed) {
+                  const arriving = Math.round(demand / 40 + Math.random() * demand / 80);
+                  s.waiting = Math.min(5000, s.waiting + arriving);
+              }
+
+              // --- Commuter patience: crowded/long-standing queues gradually give up on transit ---
+              if (s.waiting > 0) {
+                  const giveUpRate = 0.00035 * simSpeed * (1 + s.waiting / 400);
+                  let leaving = Math.min(s.waiting, Math.ceil(s.waiting * giveUpRate));
+                  if (leaving > 0) {
+                      // Tracked commuters who give up abandon the trip and go back to "HOME"
+                      // status (they'll try again on a future day) rather than vanishing silently.
+                      if (s.queue && s.queue.length) {
+                          const fromQueue = Math.min(leaving, s.queue.length);
+                          for (let k = 0; k < fromQueue; k++) {
+                              const c = s.queue.pop();
+                              c.status = "HOME";
+                          }
+                      }
+                      s.waiting -= leaving; totalGaveUp += leaving;
+                  }
+              }
+          });
+      }
+
+      function drawTrackSegment(ctx,p1,p2,color,elev,way,cross){
+          ctx.save();
+          const dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.hypot(dx,dy); if(!len){ctx.restore();return;}
+          const nx=-dy/len,ny=dx/len;
+          const offs = way === 'quad' ? [-2.2, -0.75, 0.75, 2.2] : way === 'parallel' ? [-1.1, 1.1] : [0];
+          offs.forEach(off=>{
+              ctx.beginPath(); ctx.moveTo(p1.x+nx*off,p1.y+ny*off); ctx.lineTo(p2.x+nx*off,p2.y+ny*off);
+              if(elev==='under'){ ctx.strokeStyle=color; ctx.lineWidth=0.625; ctx.setLineDash([4,5]); ctx.globalAlpha=0.55; ctx.stroke(); }
+              else if(elev==='above'){ ctx.strokeStyle='#1e293b'; ctx.lineWidth=1.25; ctx.setLineDash([]); ctx.stroke(); ctx.strokeStyle=color; ctx.lineWidth=0.625; ctx.stroke(); }
+              else{ ctx.strokeStyle=color; ctx.lineWidth=0.75; ctx.setLineDash([]); ctx.stroke(); }
+          });
+          if(cross&&offs.length>1&&len>40){
+              ctx.strokeStyle=color;ctx.lineWidth=1;ctx.setLineDash([2,2]);
+              const mx=p1.x+dx*.5,my=p1.y+dy*.5,sp=way==='quad'?7:3;
+              ctx.beginPath(); ctx.moveTo(mx-dx*.15+nx*sp,my-dy*.15+ny*sp);ctx.lineTo(mx+dx*.15-nx*sp,my+dy*.15-ny*sp);
+              ctx.moveTo(mx-dx*.15-nx*sp,my-dy*.15-ny*sp);ctx.lineTo(mx+dx*.15+nx*sp,my+dy*.15+ny*sp); ctx.stroke();
+          }
+          ctx.restore();
+      }
+
+      function draw(){
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          ctx.fillStyle = "#f8f8f6"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.save(); ctx.translate(-camera.x * zoom, -camera.y * zoom); ctx.scale(zoom, zoom);
+          drawLakes();
+
+          highwayPaths.forEach(hw=>{
+              ctx.lineWidth=2.2; ctx.strokeStyle='#0a0c14'; ctx.setLineDash([]);
+              ctx.beginPath(); hw.points.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke();
+              ctx.lineWidth=0.9; ctx.strokeStyle='#374151'; ctx.setLineDash([]);
+              ctx.beginPath(); hw.points.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke();
+              if (zoom > 2.0 && hw.points.length > 2) {
+                  const spacing = 10;
+                  for (let li = spacing / 2; li < hw.points.length - 1; li += spacing) {
+                      const pA = hw.points[Math.floor(li)]; const pB = hw.points[Math.floor(li) + 1];
+                      if (!pA || !pB) continue;
+                      ctx.save(); ctx.fillStyle = 'rgba(100,116,139,0.8)'; ctx.font = `${3.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                      let ang = Math.atan2(pB.y - pA.y, pB.x - pA.x); if (Math.abs(ang) > Math.PI / 2) ang += Math.PI;
+                      ctx.translate((pA.x + pB.x) / 2, (pA.y + pB.y) / 2); ctx.rotate(ang);
+                      ctx.lineWidth = 2 / zoom; ctx.strokeStyle = "white"; ctx.strokeText(hw.name, 0, -3);
+                      ctx.fillStyle = "#374151"; ctx.fillText(hw.name, 0, -3); ctx.restore();
+                  }
+              }
+          });
+         drawHighwayLabels();
+
+const sm = zoom < 0.5 ? 0.3 + zoom * 0.5 : Math.min(1.2, zoom * 0.9);
+
+neighborhoods.forEach(n => {
+
+    const zc = ZONING[n.type] || ZONING.RESIDENTIAL;
+    const r = n.size * sm;
+
+    ctx.fillStyle = zc.color;
+    ctx.strokeStyle = zc.stroke;
+    ctx.lineWidth = 0.5;
+
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    if (zoom > 1.25 && n.importance >= 0.1) {
+
+        ctx.save();
+
+        // Smaller constant world-space font
+        ctx.font = '600 2.5px "Inter", sans-serif';
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+
+        ctx.lineWidth = 0.5;
+        ctx.strokeStyle = "rgba(255,255,255,0.9)";
+
+        ctx.strokeText(n.name, n.x, n.y + r + 1.5);
+
+        ctx.fillStyle = "#1f2937";
+        ctx.fillText(n.name, n.x, n.y + r + 1.5);
+
+        ctx.restore();
+    }
+
+});
+
+          tracks.forEach(t=>{
+              const pts=[t.startStation,...t.waypoints,t.endStation];
+              for(let i=0;i<pts.length-1;i++) drawTrackSegment(ctx,pts[i],pts[i+1],t.color,t.elevation,t.wayConfig,t.crossover);
+          });
+          
+          if(mode==='track'&&activeTrackBuild){
+              const pts=[activeTrackBuild.startStation,...activeTrackBuild.waypoints,mouseWorldPos];
+              for(let i=0;i<pts.length-1;i++) drawTrackSegment(ctx,pts[i],pts[i+1],activeColor,selectedElevationProfile,selectedTrackWay,crossoverSystemEnabled);
+          }
+
+          depots.forEach(d => {
+              ctx.save();
+              ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#0c0d12'; ctx.lineWidth = 0.6;
+              ctx.beginPath(); ctx.rect(d.x - 3, d.y - 3, 6, 6); ctx.fill(); ctx.stroke();
+              ctx.fillStyle = '#0c0d12'; ctx.font = 'bold 2.4px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+              ctx.fillText('D', d.x, d.y + 0.2);
+              ctx.strokeStyle = 'rgba(251,191,36,0.25)'; ctx.lineWidth = 0.4;
+              ctx.beginPath(); ctx.arc(d.x, d.y, DEPOT_SERVICE_RADIUS, 0, Math.PI * 2); ctx.stroke();
+              ctx.restore();
+          });
+
+          stations.forEach(s=>{
+              ctx.fillStyle='black'; ctx.strokeStyle='#fff'; ctx.lineWidth=0.7;
+              ctx.beginPath(); ctx.arc(s.x,s.y,2,0,Math.PI*2); ctx.fill(); ctx.stroke();
+              if(s.waiting>0){
+                  ctx.strokeStyle='rgba(56,189,248,0.45)'; ctx.lineWidth=0.4;
+                  ctx.beginPath(); ctx.arc(s.x,s.y,2+Math.min(9,s.waiting*.043),0,Math.PI*2); ctx.stroke();
+              }
+              ctx.save(); ctx.fillStyle='#fff'; ctx.font='bold 1.7px sans-serif'; ctx.textAlign='center';
+              ctx.shadowColor='#000'; ctx.shadowBlur=2; ctx.fillText(s.name,s.x,s.y-4); ctx.restore();
+          });
+
+          trains.forEach(t => {
+              ctx.save(); ctx.translate(t.x, t.y);
+              ctx.fillStyle = t.lineColor;
+              ctx.strokeStyle = t.state === 'BLOCKED' ? '#ef4444' : '#0c0d12';
+              ctx.lineWidth = t.state === 'BLOCKED' ? 0.6 : 0.375;
+              const w = (t.capacityType === 'heavy' ? 2.6 : 2) + (t.extraCars || 0) * 0.35;
+              ctx.fillRect(-w, -1, w * 2, 2); ctx.strokeRect(-w, -1, w * 2, 2);
+              ctx.restore();
+          });
+          ctx.restore();
+      }
+
+      function getPos(e){
+          const r=canvas.getBoundingClientRect(); const sx=e.clientX-r.left,sy=e.clientY-r.top;
+          return{screenX:sx,screenY:sy,worldX:(sx/zoom)+camera.x,worldY:(sy/zoom)+camera.y};
+      }
+
+      function onMouseDown(e) {
+          const p = getPos(e); // Calculate world position once
+
+          if (mode === 'pan') { 
+              isPanning = true; 
+              startPan = { x: p.screenX, y: p.screenY }; 
+          } 
+          else if (mode === 'depot') {
+              if (gameOver) return;
+              if (budget >= DEPOT_COST) {
+                  budget -= DEPOT_COST;
+                  depots.push({ id: depots.length + 1, x: p.worldX, y: p.worldY });
+                  updateHUD(); updateFleetPanel();
+              } else {
+                  flashInsufficientFunds('Insufficient Funds');
+              }
+          }
+          else if (mode === 'station') {
+              if (budget >= 500000) {
+                  budget -= 500000; 
+                  let near = null, md = Infinity;
+                  neighborhoods.forEach(n => { const d = Math.hypot(n.x - p.worldX, n.y - p.worldY); if (d < md) { md = d; near = n; } });
+                  const label = near && md < 180 ? near.name.substring(0, 18) : `Terminal ${stations.length + 1}`;
+                  stations.push({ id: stations.length + 1, x: p.worldX, y: p.worldY, name: label, waiting: 0, queue: [], ridersBoarded: 0, boardings: 0 });
+                  updateHUD(); 
+                  updateTelemetryData();
+              }
+          } 
+          else if (mode === 'track') {
+const CLICK_THRESHOLD = 22 / Math.sqrt(zoom);
+const clicked = stations.find(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < CLICK_THRESHOLD);
+              if (!activeTrackBuild) { 
+                  if (clicked) {
+                      activeTrackBuild = { startStation: clicked, waypoints: [] }; 
+                  }
+              } else {
+                  if (clicked && clicked !== activeTrackBuild.startStation) {
+                      const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
+                      const cost = calculateTrackCost(last, clicked, selectedElevationProfile, selectedTrackWay);
+                      if (budget >= cost) { 
+                          budget -= cost; 
+                          tracks.push({ startStation: activeTrackBuild.startStation, endStation: clicked, waypoints: activeTrackBuild.waypoints, color: activeColor, elevation: selectedElevationProfile, wayConfig: selectedTrackWay, crossover: crossoverSystemEnabled }); 
+                          activeTrackBuild = null; 
+                          updateHUD(); 
+                          manageTrainsRealtime(); 
+                      } else {
+                          alert('Insufficient structural configuration funds!');
+                      }
+                  } else if (!clicked) {
+                      const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
+                      const cost = calculateTrackCost(last, { x: p.worldX, y: p.worldY }, selectedElevationProfile, selectedTrackWay);
+                      if (budget >= cost) { 
+                          budget -= cost; 
+                          activeTrackBuild.waypoints.push({ x: p.worldX, y: p.worldY }); 
+                          updateHUD(); 
+                      }
+                  }
+              }
+          } 
+          else if (mode === 'rename') {
+              const s = stations.find(st => Math.hypot(st.x - p.worldX, st.y - p.worldY) < 22);
+              if (s) { 
+                  const n = prompt('Enter new terminal designation name:', s.name); 
+                  if (n && n.trim()) s.name = n.trim(); 
+                  updateTelemetryData(); 
+              }
+              setMode('pan');
+          } 
+          else if (mode === 'delete') {
+    const depotIdx = depots.findIndex(d => Math.hypot(d.x - p.worldX, d.y - p.worldY) < 18);
+    const idx = stations.findIndex(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < 22);
+    if (depotIdx !== -1 && idx === -1) {
+        budget += Math.floor(DEPOT_COST * 0.5);
+        depots.splice(depotIdx, 1);
+        updateHUD(); updateFleetPanel();
+    }
+    else if (idx !== -1) { 
+        const s = stations[idx]; 
+        
+        // --- NEW: Add 50% Refund ---
+        const refund = Math.floor(STATION_BASE_COST * 0.5);
+        budget += refund;
+        
+        tracks = tracks.filter(t => t.startStation !== s && t.endStation !== s); 
+        stations.splice(idx, 1); 
+        
+        updateHUD(); 
+        manageTrainsRealtime(); 
+        updateTelemetryData(); 
+        setupLineSelectorUI(); 
+    }
+}
+      }
+
+      function onMouseMove(e) {
+    const p = getPos(e); // Define 'p' properly for the entire function!
+    const container = document.getElementById('canvas-container');
+    const rect = container.getBoundingClientRect();
+    // Update global tracking variables
+    mouseWorldPos.x = p.worldX;
+    mouseWorldPos.y = p.worldY;
+    updateCoordinateDisplay();
+
+    // 1. Handle Map Panning
+    if (isPanning) {
+        camera.x -= (p.screenX - startPan.x) / zoom;
+        camera.y -= (p.screenY - startPan.y) / zoom;
+        startPan = { x: p.screenX, y: p.screenY };
+        return; // Skip tooltips while panning
+    }
+
+    let showingTooltip = false;
+
+const ttx = e.clientX - rect.left;
+    const tty = e.clientY - rect.top;
+    // --- NEW: Station Hover Cost ---
+    if (mode === 'station') {
+        tooltip.style.display = 'block';
+tooltip.style.left = (ttx + 10) + 'px';
+    tooltip.style.top = (tty + 10) + 'px';
+        
+        // Show cost, colored red if funds are insufficient
+        if (budget >= STATION_BASE_COST) {
+            tooltip.textContent = `Build Station: $${STATION_BASE_COST.toLocaleString()}`;
+            tooltip.style.color = '#38bdf8'; // Blue
+        } else {
+            tooltip.textContent = `Insufficient Funds: $${STATION_BASE_COST.toLocaleString()}`;
+            tooltip.style.color = '#ef4444'; // Red
+        }
+        showingTooltip = true;
+    }
+
+    // 1b. Handle Depot Hover Cost
+    if (mode === 'depot') {
+        tooltip.style.display = 'block';
+        tooltip.style.left = (ttx + 10) + 'px';
+        tooltip.style.top = (tty + 10) + 'px';
+        if (budget >= DEPOT_COST) {
+            tooltip.textContent = `Build Depot: $${DEPOT_COST.toLocaleString()}`;
+            tooltip.style.color = '#38bdf8';
+        } else {
+            tooltip.textContent = `Insufficient Funds: $${DEPOT_COST.toLocaleString()}`;
+            tooltip.style.color = '#ef4444';
+        }
+        showingTooltip = true;
+    }
+
+    // 2. Handle Track Building Cost Hover
+    if (mode === 'track' && activeTrackBuild) {
+    const lastNode = activeTrackBuild.waypoints.length ? 
+                     activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : 
+                     activeTrackBuild.startStation;
+    
+    if (lastNode) {
+        // Calculate distance for cost
+        const dist = Math.hypot(p.worldX - lastNode.x, p.worldY - lastNode.y);
+        const cost = getActiveTrackCost(dist);
+        
+        tooltip.style.display = 'block';
+        
+        // Use the same ttx/tty variables that you confirmed work for the station
+        tooltip.style.left = (ttx + 10) + 'px';
+        tooltip.style.top = (tty + 10) + 'px';
+        
+        tooltip.textContent = `Est. Cost: $${Math.round(cost).toLocaleString()}`;
+        showingTooltip = true;
+    }
+}
+
+    // 3. Handle Neighborhood Hover (Only if not actively building a track or station)
+    if (!showingTooltip) {
+        const hov = neighborhoods.find(n => Math.hypot(n.x - p.worldX, n.y - p.worldY) < Math.max(4, n.size * (1.2 / Math.sqrt(zoom))));
+        if (hov) {
+            tooltip.style.display = "block";
+tooltip.style.left = (ttx + 10) + 'px';
+    tooltip.style.top = (tty + 10) + 'px';
+            tooltip.innerHTML = `
+                <div style="font-weight:600;font-size:13px;margin-bottom:4px;">${hov.name}</div>
+                <div style="color:#666;font-size:11px;margin-bottom:6px;">${hov.city} • ${hov.type}</div>
+                <table style="font-size:12px">
+                    <tr><td>👨‍👩‍👧 Residents</td><td style="padding-left:12px;text-align:right;"><b>${hov.residents.toLocaleString()}</b></td></tr>
+                    <tr><td>💼 Jobs</td><td style="padding-left:12px;text-align:right;"><b>${hov.jobs.toLocaleString()}</b></td></tr>
+                    <tr><td>🎓 Students</td><td style="padding-left:12px;text-align:right;"><b>${hov.students.toLocaleString()}</b></td></tr>
+                    <tr><td>🛍️ Retail</td><td style="padding-left:12px;text-align:right;"><b>${hov.retailVisitors.toLocaleString()}</b></td></tr>
+                    <tr><td>🎭 Leisure</td><td style="padding-left:12px;text-align:right;"><b>${hov.leisureVisitors.toLocaleString()}</b></td></tr>
+                </table>
+            `;
+            showingTooltip = true;
+        }
+    }
+
+    // Hide tooltip if hovered over nothing
+    if (!showingTooltip) {
+        tooltip.style.display = "none";
+    }
+}
+
+      function onMouseUp(){ isPanning=false; }
+      
+      function onWheel(e) {
+          e.preventDefault();
+          const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
+          const worldXBefore = (mouseX / zoom) + camera.x; const worldYBefore = (mouseY / zoom) + camera.y;
+          const delta = e.deltaY > 0 ? 0.9 : 1.1; zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom * delta));
+          camera.x = worldXBefore - (mouseX / zoom); camera.y = worldYBefore - (mouseY / zoom);
+      }
+
+      function resizeCanvas(){ canvas.width=document.getElementById('canvas-container').clientWidth; canvas.height=document.getElementById('canvas-container').clientHeight; }
+      function gameLoop(){ updatePhysics(); draw(); requestAnimationFrame(gameLoop); }
+            function init(){
+          resizeCanvas(); window.addEventListener('resize',resizeCanvas);
+    generateNodes(); setupLineSelectorUI(); buildTelemetryCharts(); updateFleetPanel();
+    camera.x = -canvas.width / (2 * zoom);
+    camera.y = -canvas.height / (2 * zoom);
+
+    setInterval(tickSimulationTime,1000/60);
+    setInterval(updateTelemetryData,1000);
+          canvas.addEventListener('mousedown',onMouseDown); canvas.addEventListener('mousemove',onMouseMove);
+          window.addEventListener('mouseup',onMouseUp); canvas.addEventListener('wheel',onWheel,{passive:false});
+          updateHUD(); gameLoop();
+      }
+      init();
+    </script>
+  </body>
+</html>
