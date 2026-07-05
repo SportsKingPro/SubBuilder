@@ -637,12 +637,12 @@ hw("US-67", 0.35, [
                   case "STUDENT": school = chooseDestination(home, "students", 180); break;
               }
 
-              let transitPreference = 0.04;
+              let transitPreference = 0.08;
               if(home.city==="Dallas") transitPreference += 0.05;
               if(home.type==="DOWNTOWN") transitPreference += 0.10;
               if(work && work.type==="DOWNTOWN") transitPreference += 0.10;
               if(work && work.type==="OFFICE") transitPreference += 0.05;
-              if(school) transitPreference += 0.08;
+              if(school) transitPreference += 0.15;
               if(personType==="REMOTE") transitPreference -= 0.10;
               if(personType==="RETIREE") transitPreference -= 0.05;
               transitPreference += (Math.random()-.5)*0.06;
@@ -1074,23 +1074,24 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
 
       // --- OpEx / maintenance economy ---
       function calculateDailyOpEx() {
-          let trackCost = 0;
-          tracks.forEach(t => {
-              const pts = [t.startStation, ...t.waypoints, t.endStation];
-              let len = 0;
-              for (let i = 0; i < pts.length - 1; i++) len += Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
-              const mE = t.elevation === 'under' ? 2.0 : t.elevation === 'above' ? 1.4 : 1.0;
-              const mW = t.wayConfig === 'quad' ? 3 : t.wayConfig === 'parallel' ? 1.8 : 1;
-              trackCost += len * 1.1 * mE * mW;
-          });
-          const stationCost = stations.length * 4000;
-          const depotCost = depots.length * DEPOT_DAILY_COST;
-          let trainCost = 0;
-          trains.forEach(t => {
-              trainCost += (TRAIN_SPECS[t.capacityType]?.dailyCost || TRAIN_SPECS.light.dailyCost) + t.extraCars * EXTRA_CAR_DAILY_COST;
-          });
-          return trackCost + stationCost + depotCost + trainCost;
-      }
+    let trackCost = 0;
+    tracks.forEach(t => {
+        const pts = [t.startStation, ...t.waypoints, t.endStation];
+        let len = 0;
+        for (let i = 0; i < pts.length - 1; i++) len += Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
+        const mE = t.elevation === 'under' ? 2.0 : t.elevation === 'above' ? 1.4 : 1.0;
+        const mW = t.wayConfig === 'quad' ? 3 : t.wayConfig === 'parallel' ? 1.8 : 1;
+        trackCost += len * 0.5 * mE * mW; // Reduced track weight from 1.1 to 0.5
+    });
+    
+    const stationCost = stations.length * 1200; // Reduced from 4000 to 1200
+    const depotCost = depots.length * 3500;     // Reduced from 8000 to 3500
+    let trainCost = 0;
+    trains.forEach(t => {
+        trainCost += ((TRAIN_SPECS[t.capacityType]?.dailyCost || TRAIN_SPECS.light.dailyCost) * 0.5) + t.extraCars * EXTRA_CAR_DAILY_COST * 0.5; // halved train opex
+    });
+    return trackCost + stationCost + depotCost + trainCost;
+}
 
       function applyDailyOpEx() {
           const opex = calculateDailyOpEx();
