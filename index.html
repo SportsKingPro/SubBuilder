@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DFW Regional Metroplex Simulation Engine - Pro Edition</title>
     <style>
@@ -43,17 +40,7 @@
       canvas { display:block; width:100%; height:100%; }
       #playback-strip { height:56px; background:var(--bg-panel); border-top:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; padding:0 16px; box-sizing:border-box; z-index:10; }
       .strip-section { display:flex; align-items:center; gap:8px; }
-      .time-readout {
-          font-family:monospace;
-          font-size:12px;
-          color:#fff;
-          background:rgba(18,20,28,0.80);
-          padding:5px 10px;
-          border-radius:4px;
-          border:1px solid var(--border-color);
-          min-width:120px;
-          text-align:center;
-      }
+      .time-readout { font-family:monospace; font-size:12px; color:#fff; background:rgba(18,20,28,0.80); padding:5px 10px; border-radius:4px; border:1px solid var(--border-color); min-width:120px; text-align:center; }
       .fare-display-group { display:flex; align-items:center; gap:6px; font-size:12px; background:var(--bg-main); padding:4px 10px; border-radius:4px; border:1px solid var(--border-color); }
       .fare-btn { background:var(--bg-accent); border:1px solid var(--border-color); color:#fff; padding:0px 6px; border-radius:3px; cursor:pointer; }
       button.btn-action { background:var(--bg-accent); color:var(--text-main); border:1px solid var(--border-color); padding:6px 10px; border-radius:4px; font-size:12px; cursor:pointer; font-weight:500; }
@@ -64,22 +51,16 @@
       .line-dot { width:14px; height:14px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition: transform 0.1s; }
       .line-dot.selected { border-color:#fff; transform:scale(1.2); }
       
-      /* Style the native color picker to match the dots */
-      input[type="color"].custom-color-wheel {
-          -webkit-appearance: none;
-          border: none;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          cursor: pointer;
-          padding: 0;
-          background: transparent;
-      }
+      input[type="color"].custom-color-wheel { -webkit-appearance: none; border: none; width: 18px; height: 18px; border-radius: 50%; cursor: pointer; padding: 0; background: transparent; }
       input[type="color"].custom-color-wheel::-webkit-color-swatch-wrapper { padding: 0; }
       input[type="color"].custom-color-wheel::-webkit-color-swatch { border: 2px solid transparent; border-radius: 50%; }
       input[type="color"].custom-color-wheel:focus::-webkit-color-swatch { border-color: #fff; transform: scale(1.2); }
 
-      #tooltip { pointer-events: none; position:absolute; background:rgba(7,10,18,.95); border:1px solid var(--border-color); padding:8px 12px; border-radius:4px; font-size:11px; pointer-events:none; display:none; z-index:100; box-shadow:0 10px 15px -3px rgba(0,0,0,.5); }
+      #tooltip { pointer-events: none; position:absolute; background:rgba(7,10,18,.95); border:1px solid var(--border-color); padding:8px 12px; border-radius:4px; font-size:11px; display:none; z-index:100; box-shadow:0 10px 15px -3px rgba(0,0,0,.5); }
+      
+      /* Notification Animation */
+      @keyframes slideDown { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+      .notification { position:absolute; top:20px; left:50%; transform:translateX(-50%); background:rgba(16, 185, 129, 0.95); border:1px solid #047857; color:#fff; padding:12px 24px; border-radius:8px; font-weight:bold; font-size:14px; z-index:1000; pointer-events:none; animation: slideDown 0.3s ease-out; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
     </style>
   </head>
   <body>
@@ -89,23 +70,29 @@
         <div class="tab-group"><div class="tab active">Transit Grid Configuration</div></div>
       </div>
       <div>
+        <div class="panel-header">Financial Operations (Loans)</div>
+        <div class="selector-row" style="flex-direction: column; gap:8px;">
+            <div style="display:flex; justify-content:space-between; font-size: 11px;">
+                <span style="color:var(--text-muted)">Current Debt:</span>
+                <span id="ui-debt" style="color:#ef4444; font-family:monospace; font-weight:bold;">$0</span>
+            </div>
+<div>
+        <div class="panel-header">Available Grants</div>
+        <div id="bonus-list" style="display: flex; flex-direction: column; gap: 4px;">
+          </div>
+      </div>
+            <div class="selector-row">
+                <button class="selector-btn" onclick="takeLoan()" style="color:#10b981; border-color:#10b981;">+ Borrow $250k</button>
+                <button class="selector-btn" id="btn-repay-loan" onclick="repayLoan()" style="opacity:0.5;" disabled>- Repay $250k</button>
+            </div>
+        </div>
+      </div>
+      <div>
         <div class="panel-header">1. Track Elevation Profiles</div>
         <div class="selector-row">
-          <div id="prof-level" class="selector-btn active" onclick="setElevationProfile('level')">
-            Level
-            <br />
-            <span style="color: #10b981; font-size: 9px">1.0x Cost</span>
-          </div>
-          <div id="prof-above" class="selector-btn" onclick="setElevationProfile('above')">
-            Above Ground
-            <br />
-            <span style="color: #fbbf24; font-size: 9px">2.5x Cost</span>
-          </div>
-          <div id="prof-under" class="selector-btn" onclick="setElevationProfile('under')">
-            Underground
-            <br />
-            <span style="color: #ef4444; font-size: 9px">6.0x Cost</span>
-          </div>
+          <div id="prof-level" class="selector-btn active" onclick="setElevationProfile('level')">Level<br /><span style="color: #10b981; font-size: 9px">1.0x Cost</span></div>
+          <div id="prof-above" class="selector-btn" onclick="setElevationProfile('above')">Above Ground<br /><span style="color: #fbbf24; font-size: 9px">2.5x Cost</span></div>
+          <div id="prof-under" class="selector-btn" onclick="setElevationProfile('under')">Underground<br /><span style="color: #ef4444; font-size: 9px">6.0x Cost</span></div>
         </div>
       </div>
       <div>
@@ -117,67 +104,39 @@
         </div>
       </div>
       <div>
-        <div class="panel-header">3. Switch &amp; Corridor Systems</div>
+        <div class="panel-header">3. Switch & Corridor Systems</div>
         <div class="selector-row">
-          <div id="opt-crossover" class="selector-btn" onclick="toggleCrossoverSystem()">
-            Crossover Switch:
-            <span id="lbl-crossover" style="color: #ef4444; font-weight: bold">OFF</span>
-          </div>
+          <div id="opt-crossover" class="selector-btn" onclick="toggleCrossoverSystem()">Crossover Switch: <span id="lbl-crossover" style="color: #ef4444; font-weight: bold">OFF</span></div>
         </div>
       </div>
       <div>
-        <div class="panel-header">4. Fleet &amp; Depot Operations</div>
+        <div class="panel-header">4. Fleet & Depot Operations</div>
         <div class="selector-row">
-          <div id="btn-depot" class="selector-btn" onclick="setMode('depot')">
-            + Build Depot
-            <br />
-            <span style="color: #fbbf24; font-size: 9px">$2,000,000</span>
-          </div>
+          <div id="btn-depot" class="selector-btn" onclick="setMode('depot')">+ Build Depot<br /><span style="color: #fbbf24; font-size: 9px">$2,000,000</span></div>
         </div>
         <div class="selector-row" style="margin-top: 6px">
-          <div id="class-light" class="selector-btn active" onclick="setTrainClass('light')">
-            Light Rail
-            <br /><span style="color: #38bdf8; font-size: 9px">$1.5M &middot; 80 cap</span>
-          </div>
-          <div id="class-heavy" class="selector-btn" onclick="setTrainClass('heavy')">
-            Heavy Rail
-            <br /><span style="color: #a855f7; font-size: 9px">$3.5M &middot; 160 cap</span>
-          </div>
+          <div id="class-light" class="selector-btn active" onclick="setTrainClass('light')">Light Rail<br /><span style="color: #38bdf8; font-size: 9px">$1.5M &middot; 80 cap</span></div>
+          <div id="class-heavy" class="selector-btn" onclick="setTrainClass('heavy')">Heavy Rail<br /><span style="color: #a855f7; font-size: 9px">$3.5M &middot; 160 cap</span></div>
         </div>
         <div id="fleet-list" style="margin-top: 8px"></div>
       </div>
       <div>
-        <div class="panel-header">Ridership &amp; Revenue Statistics</div>
+        <div class="panel-header">Ridership & Revenue Statistics</div>
         <div id="stats-panel"></div>
       </div>
       <div>
         <div class="panel-header">Dynamic Share Analytics</div>
         <div class="mode-row">
-          <div class="mode-info">
-            <span>Transit Link</span>
-            <span id="txt-share-transit">2.3%</span>
-          </div>
-          <div class="mode-bar-container">
-            <div id="bar-share-transit" class="mode-bar" style="width: 2.3%; background: var(--transit-blue)"></div>
-          </div>
+          <div class="mode-info"><span>Transit Link</span><span id="txt-share-transit">2.3%</span></div>
+          <div class="mode-bar-container"><div id="bar-share-transit" class="mode-bar" style="width: 2.3%; background: var(--transit-blue)"></div></div>
         </div>
         <div class="mode-row">
-          <div class="mode-info">
-            <span>Highway Commute</span>
-            <span id="txt-share-drive">96.5%</span>
-          </div>
-          <div class="mode-bar-container">
-            <div id="bar-share-drive" class="mode-bar" style="width: 96.5%; background: var(--drive-red)"></div>
-          </div>
+          <div class="mode-info"><span>Highway Commute</span><span id="txt-share-drive">96.5%</span></div>
+          <div class="mode-bar-container"><div id="bar-share-drive" class="mode-bar" style="width: 96.5%; background: var(--drive-red)"></div></div>
         </div>
         <div class="mode-row">
-          <div class="mode-info">
-            <span>Pedestrian Link</span>
-            <span id="txt-share-walk">1.2%</span>
-          </div>
-          <div class="mode-bar-container">
-            <div id="bar-share-walk" class="mode-bar" style="width: 1.2%; background: var(--walk-green)"></div>
-          </div>
+          <div class="mode-info"><span>Pedestrian Link</span><span id="txt-share-walk">1.2%</span></div>
+          <div class="mode-bar-container"><div id="bar-share-walk" class="mode-bar" style="width: 1.2%; background: var(--walk-green)"></div></div>
         </div>
       </div>
       <div>
@@ -187,9 +146,7 @@
       <div>
         <div class="panel-header">Operational Node Terminals</div>
         <div id="station-feed-list">
-          <div class="station-card" style="color: var(--text-muted); text-align: center; display: block">
-            No terminals linked.
-          </div>
+          <div class="station-card" style="color: var(--text-muted); text-align: center; display: block">No terminals linked.</div>
         </div>
       </div>
     </div>
@@ -200,22 +157,10 @@
         <div id="tooltip"></div>
       </div>
       <div id="playback-strip">
-        <div
-          id="mouse-coords"
-          style="min-width: 180px; text-align: right; font-family: monospace; color: #7dd3fc; font-size: 12px"
-        >
-          X: 0 Y: 0
-        </div>
+        <div id="mouse-coords" style="min-width: 180px; text-align: right; font-family: monospace; color: #7dd3fc; font-size: 12px">X: 0 Y: 0</div>
         <div class="strip-section">
           <div class="time-readout" id="lbl-time">Day 1 &nbsp; 06:00:00</div>
-          <button
-            class="btn-action"
-            id="btn-speed-0"
-            onclick="setSpeed(0)"
-            style="font-family: monospace; font-weight: bold; color: #ef4444"
-          >
-            ||
-          </button>
+          <button class="btn-action" id="btn-speed-0" onclick="setSpeed(0)" style="font-family: monospace; font-weight: bold; color: #ef4444">||</button>
           <button class="btn-action active" id="btn-speed-1" onclick="setSpeed(1)">1x</button>
           <button class="btn-action" id="btn-speed-2" onclick="setSpeed(2)">2x</button>
           <button class="btn-action" id="btn-speed-4" onclick="setSpeed(4)">4x</button>
@@ -239,10 +184,10 @@
             <span id="fare-display" style="color: #4ade80; font-weight: bold">$2.50</span>
             <button class="fare-btn" onclick="adjustFare(0.5)">+</button>
           </div>
-          <div style="font-size: 12px; text-align: right; min-width: 95px">
-            <div style="color: var(--text-muted); font-size: 10px">CREDITS</div>
+          <div style="font-size: 12px; text-align: right; min-width: 140px">
+            <div style="color: var(--text-muted); font-size: 10px">BUDGET</div>
             <div style="color: #38bdf8; font-weight: bold; font-family: monospace" id="lbl-budget">$50,000,000</div>
-            <div style="color: #f87171; font-size: 9px; font-family: monospace" id="lbl-opex">OpEx: $0/day</div>
+            <div style="color: #f87171; font-size: 9px; font-family: monospace; white-space:nowrap;" id="lbl-opex">OpEx: $0/day</div>
           </div>
         </div>
       </div>
@@ -252,24 +197,33 @@
       const canvas  = document.getElementById('gameCanvas');
       const ctx     = canvas.getContext('2d');
       const tooltip = document.getElementById('tooltip');
-const STATION_BASE_COST = 250000;
-      let budget=50_000_000, mode='pan', ticketFare=2.50, simSpeed=1;
-let gameTime = {
-    min: 0,
-    hour: 6, // Starting at 06:00
-    day: 1,
-    month: 1, // January
-    year: 2026
-};      let camera={x:0,y:0}, zoom=0.42;
+      const STATION_BASE_COST = 250000;
+      
+      let budget=50000000, mode='pan', ticketFare=2.50, simSpeed=1;
+      
+      // --- NEW BANKING SYSTEM VARIABLES ---
+      let currentDebt = 0;
+      const LOAN_INCREMENT = 250000;         
+      const DAILY_INTEREST_RATE = 0.005; 
+
+      // --- NEW CONNECTION BONUSES ---
+      const LOCATION_BONUSES = {
+          "DFW Intl Airport": { claimed: false, amount: 5000000, msg: "DFW Airport Connection Grant" },
+          "Downtown Dallas": { claimed: false, amount: 3500000, msg: "Dallas Core Infrastructure Grant" },
+          "Downtown Fort Worth": { claimed: false, amount: 3000000, msg: "Fort Worth Core Infrastructure Grant" },
+          "Universal Kids Resort": { claimed: false, amount: 2000000, msg: "Frisco Entertainment Tourism Grant" },
+          "Texas Motor Speedway": { claimed: false, amount: 1500000, msg: "TMS Event Routing Subsidy" },
+          "Love Field": { claimed: false, amount: 2000000, msg: "Love Field Connection Grant" }
+      };
+
+      let gameTime = { min: 0, hour: 6, day: 1, month: 1, year: 2026 };      
+      let camera={x:0,y:0}, zoom=0.42;
       const MIN_ZOOM=0.01, MAX_ZOOM=15.0;
       let isPanning=false, startPan={x:0,y:0}, mouseWorldPos={x:0,y:0};
       let neighborhoods=[], stations=[], tracks=[], commuters=[], trains=[], routes=[], depots=[];
       let activeTrackBuild=null, selectedElevationProfile='level', selectedTrackWay='single', crossoverSystemEnabled=false;
-      
-      // Removed fixed array dependence, we now track the active hex color directly
       let activeColor = '#38bdf8';
 
-      // --- Fleet & Depot Operations ---
       const TRAIN_SPECS = {
           light: { label: 'Light Rail', cost: 1500000, capacity: 80, dailyCost: 3000 },
           heavy: { label: 'Heavy Rail', cost: 3500000, capacity: 160, dailyCost: 6000 }
@@ -278,16 +232,9 @@ let gameTime = {
       const DEPOT_COST = 2000000, DEPOT_DAILY_COST = 8000, DEPOT_SERVICE_RADIUS = 320;
       let selectedTrainClass = 'light', trainIdCounter = 1;
 
-      // --- OpEx / Economy ---
       let lastOpExAmount = 0, bankruptcyStrikes = 0, gameOver = false;
-
-      // --- Commuter patience / mode-share tracking ---
       let totalBoarded = 0, totalGaveUp = 0;
-
-      // --- Collision / block-signal system ---
-      const MIN_TRAIN_GAP = 0.22; // in path-progress units (node fractions)
-
-      // --- Ridership & revenue statistics ---
+      const MIN_TRAIN_GAP = 0.22; 
       let dailyRiders = 0, lifetimeRiders = 0, fareRevenueToday = 0, peakConcurrentRiders = 0;
       let waitTimeSum = 0, waitSamples = 0, tripTimeSum = 0, tripSamples = 0;
       let overcrowdingEvents = 0;
@@ -311,34 +258,98 @@ let gameTime = {
           1.20, 0.80, 0.50, 0.35, 0.25, 0.15  // 18:00 - 23:00
       ];
 
-function calculateSmoothDemand(baseMultiplier, continuousTime) {
-    // Properly calculate current and next hour using the provided continuousTime
-    const currentHour = Math.floor(continuousTime) % 24;
-    const nextHour = (currentHour + 1) % 24; // Fix: Explicitly define nextHour
-    const minuteWeight = continuousTime % 1; 
-    
-    const currentMultiplier = HOURLY_DEMAND_MULTIPLIERS[currentHour];
-    const nextMultiplier = HOURLY_DEMAND_MULTIPLIERS[nextHour];
-    
-    return baseMultiplier * (currentMultiplier + (nextMultiplier - currentMultiplier) * minuteWeight);
-}
-/**
- * Calculates the cost of a track segment based on length, elevation, and capacity.
- * @param {number} distance - The length of the track segment to build.
- */
-function getActiveTrackCost(distance) {
-    const baseCostPerUnit = 10; // Adjust this value to your preferred cost per distance unit
-    let multiplier = 1.0;
-    
-    // Apply elevation multiplier
-    if (selectedElevationProfile === 'above') multiplier = 2.5;
-    else if (selectedElevationProfile === 'under') multiplier = 6.0;
-    
-    // If distance is missing or invalid, return 0 to prevent NaN
-    if (typeof distance === 'undefined' || isNaN(distance)) return 0;
-    
-    return distance * baseCostPerUnit * multiplier;
-}
+      // --- CRITICAL FIX: Restored HUD Logic for Financial Sync ---
+      function updateHUD() {
+          const lblBudget = document.getElementById('lbl-budget');
+          if (lblBudget) lblBudget.textContent = '$' + Math.floor(budget).toLocaleString();
+          
+          const uiDebt = document.getElementById('ui-debt');
+          if (uiDebt) uiDebt.textContent = '$' + Math.floor(currentDebt).toLocaleString();
+          
+          const btnRepay = document.getElementById('btn-repay-loan');
+          if (btnRepay) {
+              if (currentDebt > 0 && budget >= Math.min(LOAN_INCREMENT, currentDebt)) {
+                  btnRepay.style.opacity = '1';
+                  btnRepay.disabled = false;
+              } else {
+                  btnRepay.style.opacity = '0.5';
+                  btnRepay.disabled = true;
+              }
+          }
+      }
+function updateBonusPanel() {
+          const container = document.getElementById('bonus-list');
+          if (!container) return;
+          container.innerHTML = '';
+          
+          let allClaimed = true;
+          for (const [locName, bonus] of Object.entries(LOCATION_BONUSES)) {
+              if (!bonus.claimed) {
+                  allClaimed = false;
+                  const div = document.createElement('div');
+                  div.className = 'station-card';
+                  div.style.cssText = 'flex-direction: column; align-items: flex-start; gap: 2px; margin-bottom: 2px;';
+                  div.innerHTML = `
+                      <div style="font-weight:700; color: #10b981; font-size: 12px;">💰 +$${(bonus.amount/1000000).toFixed(1)}M</div>
+                      <div style="color:var(--text-main); font-size: 11px;">Connect: <b>${locName}</b></div>
+                      <div style="color:var(--text-muted); font-size: 9px;">${bonus.msg}</div>
+                  `;
+                  container.appendChild(div);
+              }
+          }
+          if (allClaimed) {
+              container.innerHTML = '<div class="station-card" style="color:var(--text-muted);text-align:center;display:block;">All regional grants claimed!</div>';
+          }
+      }
+      // --- BANKING LOGIC ---
+      function takeLoan() {
+          currentDebt += LOAN_INCREMENT;
+          budget += LOAN_INCREMENT;
+          updateHUD();
+      }
+
+      function repayLoan() {
+          if (budget >= LOAN_INCREMENT && currentDebt >= LOAN_INCREMENT) {
+              currentDebt -= LOAN_INCREMENT;
+              budget -= LOAN_INCREMENT;
+              updateHUD();
+          } else if (currentDebt > 0 && budget >= currentDebt && currentDebt < LOAN_INCREMENT) {
+              budget -= currentDebt;
+              currentDebt = 0;
+              updateHUD();
+          }
+      }
+
+      function showNotification(msg) {
+          const notif = document.createElement('div');
+          notif.className = 'notification';
+          notif.textContent = msg;
+          document.body.appendChild(notif);
+          setTimeout(() => { 
+              notif.style.transition = 'opacity 1s ease';
+              notif.style.opacity = '0'; 
+              setTimeout(()=>notif.remove(), 1000); 
+          }, 4000);
+      }
+
+      function calculateSmoothDemand(baseMultiplier, continuousTime) {
+          const currentHour = Math.floor(continuousTime) % 24;
+          const nextHour = (currentHour + 1) % 24; 
+          const minuteWeight = continuousTime % 1; 
+          const currentMultiplier = HOURLY_DEMAND_MULTIPLIERS[currentHour];
+          const nextMultiplier = HOURLY_DEMAND_MULTIPLIERS[nextHour];
+          return baseMultiplier * (currentMultiplier + (nextMultiplier - currentMultiplier) * minuteWeight);
+      }
+
+      function getActiveTrackCost(distance) {
+          const baseCostPerUnit = 10; 
+          let multiplier = 1.0;
+          if (selectedElevationProfile === 'above') multiplier = 2.5;
+          else if (selectedElevationProfile === 'under') multiplier = 6.0;
+          if (typeof distance === 'undefined' || isNaN(distance)) return 0;
+          return distance * baseCostPerUnit * multiplier;
+      }
+
       function project(x, y) { return { x, y }; }
       function weightedPick(list, weightFn = n => n.weight) {
           let total = 0;
@@ -380,8 +391,7 @@ function getActiveTrackCost(distance) {
       }
 
       function updateCoordinateDisplay() {
-          document.getElementById("mouse-coords").textContent =
-              `X: ${Math.round(mouseWorldPos.x)}  Y: ${Math.round(mouseWorldPos.y)}`;
+          document.getElementById("mouse-coords").textContent = `X: ${Math.round(mouseWorldPos.x)}  Y: ${Math.round(mouseWorldPos.y)}`;
       }
 
       function hw(name, width, pts) { return { name, width, textOffset: 0.5, points: pts.map(([x, y]) => ({ x, y: -y })) }; }
@@ -411,75 +421,11 @@ function getActiveTrackCost(distance) {
           hw("US-287", 0.35, [[-286.7,-499.3],[-309.6,-484.9],[-323.9,-443.2],[-346.7,-422.2],[-371.9,-383.7],[-401.3,-332.1],[-426.5,-305.2]]),
           hw("Chisholm Trail Pkwy", 0.35, [[-595.9,-222.6],[-623.7,-240.3],[-641.1,-252.3],[-645.9,-267.4],[-643.6,-287.8],[-648.4,-305.2],[-659.2,-319.0],[-655.0,-352.5],[-653.8,-401.7],[-676.0,-425.1],[-677.2,-459.9]]),
           hw("TX-170", 0.35, [[-425.5,129.2],[-451.0,111.8],[-473.8,110.6],[-524.2,85.4],[-539.8,74.0]]),
-hw("US-287", 0.35, [
-    [-546.7,-193.9],
-    [-527.5,-214.9],
-    [-524.5,-234.7],
-    [-498.7,-252.8],
-    [-481.3,-273.1],
-    [-460.3,-276.1]
-]),
-hw("I-820", 0.35, [
-    [-433.6,-133.2],
-    [-433.0,-187.8],
-    [-445.9,-214.9],
-    [-445.3,-243.7],
-    [-460.3,-276.1],
-    [-460.6,-307.5]
-]),
-hw("I-820", 0.35, [
-    [-421.3,-93.6],
-    [-433.9,-91.4],
-    [-456.7,-81.2],
-    [-543.1,-80.6],
-    [-561.1,-81.8],
-    [-577.9,-77.0],
-    [-651.7,-114.2],
-    [-674.5,-132.8],
-    [-693.1,-138.8],
-    [-721.9,-165.2],
-    [-729.4,-217.2],
-    [-720.4,-272.8]
-]),
-hw("I-35W", 0.35, [
-    [-375.5,405.7],
-    [-424.9,304.0],
-    [-453.7,243.4],
-    [-471.1,202.6],
-    [-511.3,147.4],
-    [-537.7,105.4],
-    [-539.8,74.0],
-    [-540.7,58.0],
-    [-547.9,39.4],
-    [-548.8,-18.9],
-    [-546.1,-44.6],
-    [-543.1,-80.6],
-    [-544.9,-119.6],
-    [-553.3,-139.4],
-    [-548.8,-181.2],
-    [-546.7,-193.9],
-    [-550.9,-206.0],
-    [-550.9,-311.2],
-    [-553.9,-380.6],
-    [-548.5,-397.4],
-    [-550.3,-460.3],
-    [-540.1,-479.5],
-    [-536.5,-507.1],
-    [-507.7,-541.3],
-    [-498.7,-563.5]
-]),
-hw("US-67", 0.35, [
-    [-6.2,-257.3],
-    [-20.1,-270.8],
-    [-28.4,-284.0],
-    [-58.1,-326.4],
-    [-156.2,-433.3],
-    [-170.0,-468.1],
-    [-168.8,-489.7],
-    [-183.2,-535.9],
-    [-204.2,-544.9],
-    [-211.4,-562.0]
-]),
+          hw("US-287", 0.35, [[-546.7,-193.9],[-527.5,-214.9],[-524.5,-234.7],[-498.7,-252.8],[-481.3,-273.1],[-460.3,-276.1]]),
+          hw("I-820", 0.35, [[-433.6,-133.2],[-433.0,-187.8],[-445.9,-214.9],[-445.3,-243.7],[-460.3,-276.1],[-460.6,-307.5]]),
+          hw("I-820", 0.35, [[-421.3,-93.6],[-433.9,-91.4],[-456.7,-81.2],[-543.1,-80.6],[-561.1,-81.8],[-577.9,-77.0],[-651.7,-114.2],[-674.5,-132.8],[-693.1,-138.8],[-721.9,-165.2],[-729.4,-217.2],[-720.4,-272.8]]),
+          hw("I-35W", 0.35, [[-375.5,405.7],[-424.9,304.0],[-453.7,243.4],[-471.1,202.6],[-511.3,147.4],[-537.7,105.4],[-539.8,74.0],[-540.7,58.0],[-547.9,39.4],[-548.8,-18.9],[-546.1,-44.6],[-543.1,-80.6],[-544.9,-119.6],[-553.3,-139.4],[-548.8,-181.2],[-546.7,-193.9],[-550.9,-206.0],[-550.9,-311.2],[-553.9,-380.6],[-548.5,-397.4],[-550.3,-460.3],[-540.1,-479.5],[-536.5,-507.1],[-507.7,-541.3],[-498.7,-563.5]]),
+          hw("US-67", 0.35, [[-6.2,-257.3],[-20.1,-270.8],[-28.4,-284.0],[-58.1,-326.4],[-156.2,-433.3],[-170.0,-468.1],[-168.8,-489.7],[-183.2,-535.9],[-204.2,-544.9],[-211.4,-562.0]])
       ];
 
       const lakes = [];
@@ -527,59 +473,21 @@ hw("US-67", 0.35, [
           [247.3,178.0,"Downtown Mesquite","Mesquite","DOWNTOWN",9000,6000,400,1800,1000], [-598.1,109.9,"Fort Worth Meacham Airport","Fort Worth","AIRPORT",50,900,0,50,150],
           [-637.4,297.0,"Hulen Mall","Fort Worth","SHOPPING",800,2200,0,17000,2200], [-352.1,446.7,"Downtown Mansfield","Mansfield","DOWNTOWN",11000,3500,300,1200,700],
           [-410.3,75.1,"TCC Northeast","Hurst","UNIVERSITY",1500,600,7000,150,300], [-269.9,-67.1,"Gaylord Texan","Grapevine","HOTEL",500,4200,0,4000,10000],
-          [132.1,-300.7,"121 & Farm","McKinney","SHOPPING",300,700,0,7000,1200],
-[-31.8,-401.9,"Fields","Frisco","MIXED_USE",2500,12000,0,18000,8000],
-
-[0.4,-389.5,"Universal Kids Resort","Frisco","ENTERTAINMENT",200,2200,0,12000,30000],
-
-[-365.6,127.6,"Bell Textron","Fort Worth","INDUSTRIAL",500,6500,0,200,100],
-
-[-275.6,219.4,"GM Arlington Assembly","Arlington","INDUSTRIAL",500,5500,0,300,100],
-
-[-230.6,259.0,"EpicCentral","Grand Prairie","ENTERTAINMENT",500,1800,0,7000,22000],
-
-[-212.6,287.2,"Epic Waters","Grand Prairie","WATERPARK",100,500,0,3000,18000],
-[66.4,-162.1,"Medical City Plano","Plano","MEDICAL",1500,8500,1200,600,1200],
-
-[-12.3,-163.3,"Shops at Willow Bend","Plano","SHOPPING",500,2200,0,18000,3500],
-
-[-16.45,-187.9,"Texas Health Plano","Plano","MEDICAL",1200,5000,600,400,800],
-
-[120.9,-146.5,"Collin Creek","Plano","MIXED_USE",3500,3500,0,12000,5000],
-
-[-0.2,186.4,"Methodist Dallas Medical Center","Dallas","MEDICAL",1500,7000,1800,400,900],
-
-[-324.8,202.6,"Texas Health Arlington Memorial","Arlington","MEDICAL",1200,4500,600,300,700],
-
-[-321.8,91.0,"Texas Health HEB","Bedford","MEDICAL",1000,4200,500,250,600],
-
-[-675.2,212.8,"Ridgmar Mall","Fort Worth","SHOPPING",400,1800,0,12000,1800],
-
-[-561.2,227.8,"JPS Health Network","Fort Worth","MEDICAL",1800,6500,1200,500,1000],
-
-[109.0,-25.4,"Dallas College Richland","Dallas","UNIVERSITY",3000,1200,18000,300,800],
-[126.9,91.0,"Dallas Arboretum","Dallas","ATTRACTION",100,450,0,5000,18000],
-[-29.6,-35.2,"Dallas College Brookhaven","Farmers Branch","UNIVERSITY",2500,1000,15000,300,700],
-
-[382.6,26.0,"Harbor District","Rockwall","MIXED_USE",1800,5000,0,9000,6000],
-
-[339.4,39.8,"Sapphire Bay","Rowlett","ENTERTAINMENT",1200,3500,0,12000,25000],
-
-[69.4,370.3,"Dallas College Cedar Valley","Lancaster","UNIVERSITY",2200,800,9000,200,500],
-
-[-125.6,388.3,"Hillside Village","Cedar Hill","SHOPPING",800,1800,0,14000,2500],
-
-[-627.7,88.4,"Tarrant County College Northwest","Fort Worth","UNIVERSITY",1800,700,9000,150,400],
-
-[-558.2,48.2,"BNSF Railway HQ","Fort Worth","OFFICE",400,3200,0,300,150],
-
-[-546.7,-114.4,"Perot Field Fort Worth Alliance Airport","Fort Worth","AIRPORT",300,9000,0,1200,1800],
-
-[24.4,129.2,"Uptown Dallas","Dallas","MIXED_USE",12000,35000,0,14000,12000],
-
-[32.2,106.4,"West Village","Dallas","MIXED_USE",3500,4500,0,10000,15000],
-
-[18.4,145.9,"Victory Plaza","Dallas","ENTERTAINMENT",300,2500,0,5000,35000],
+          [132.1,-300.7,"121 & Farm","McKinney","SHOPPING",300,700,0,7000,1200], [-31.8,-401.9,"Fields","Frisco","MIXED_USE",2500,12000,0,18000,8000],
+          [0.4,-389.5,"Universal Kids Resort","Frisco","ENTERTAINMENT",200,2200,0,12000,30000], [-365.6,127.6,"Bell Textron","Fort Worth","INDUSTRIAL",500,6500,0,200,100],
+          [-275.6,219.4,"GM Arlington Assembly","Arlington","INDUSTRIAL",500,5500,0,300,100], [-230.6,259.0,"EpicCentral","Grand Prairie","ENTERTAINMENT",500,1800,0,7000,22000],
+          [-212.6,287.2,"Epic Waters","Grand Prairie","WATERPARK",100,500,0,3000,18000], [66.4,-162.1,"Medical City Plano","Plano","MEDICAL",1500,8500,1200,600,1200],
+          [-12.3,-163.3,"Shops at Willow Bend","Plano","SHOPPING",500,2200,0,18000,3500], [-16.45,-187.9,"Texas Health Plano","Plano","MEDICAL",1200,5000,600,400,800],
+          [120.9,-146.5,"Collin Creek","Plano","MIXED_USE",3500,3500,0,12000,5000], [-0.2,186.4,"Methodist Dallas Medical Center","Dallas","MEDICAL",1500,7000,1800,400,900],
+          [-324.8,202.6,"Texas Health Arlington Memorial","Arlington","MEDICAL",1200,4500,600,300,700], [-321.8,91.0,"Texas Health HEB","Bedford","MEDICAL",1000,4200,500,250,600],
+          [-675.2,212.8,"Ridgmar Mall","Fort Worth","SHOPPING",400,1800,0,12000,1800], [-561.2,227.8,"JPS Health Network","Fort Worth","MEDICAL",1800,6500,1200,500,1000],
+          [109.0,-25.4,"Dallas College Richland","Dallas","UNIVERSITY",3000,1200,18000,300,800], [126.9,91.0,"Dallas Arboretum","Dallas","ATTRACTION",100,450,0,5000,18000],
+          [-29.6,-35.2,"Dallas College Brookhaven","Farmers Branch","UNIVERSITY",2500,1000,15000,300,700], [382.6,26.0,"Harbor District","Rockwall","MIXED_USE",1800,5000,0,9000,6000],
+          [339.4,39.8,"Sapphire Bay","Rowlett","ENTERTAINMENT",1200,3500,0,12000,25000], [69.4,370.3,"Dallas College Cedar Valley","Lancaster","UNIVERSITY",2200,800,9000,200,500],
+          [-125.6,388.3,"Hillside Village","Cedar Hill","SHOPPING",800,1800,0,14000,2500], [-627.7,88.4,"Tarrant County College Northwest","Fort Worth","UNIVERSITY",1800,700,9000,150,400],
+          [-558.2,48.2,"BNSF Railway HQ","Fort Worth","OFFICE",400,3200,0,300,150], [-546.7,-114.4,"Perot Field Fort Worth Alliance Airport","Fort Worth","AIRPORT",300,9000,0,1200,1800],
+          [24.4,129.2,"Uptown Dallas","Dallas","MIXED_USE",12000,35000,0,14000,12000], [32.2,106.4,"West Village","Dallas","MIXED_USE",3500,4500,0,10000,15000],
+          [18.4,145.9,"Victory Plaza","Dallas","ENTERTAINMENT",300,2500,0,5000,35000]
       ];
 
       const MAX_RESIDENTS = Math.max(...LOCATIONS.map(l => l[5]));
@@ -637,16 +545,19 @@ hw("US-67", 0.35, [
                   case "STUDENT": school = chooseDestination(home, "students", 180); break;
               }
 
-              let transitPreference = 0.08;
-              if(home.city==="Dallas") transitPreference += 0.05;
-              if(home.type==="DOWNTOWN") transitPreference += 0.10;
-              if(work && work.type==="DOWNTOWN") transitPreference += 0.10;
-              if(work && work.type==="OFFICE") transitPreference += 0.05;
-              if(school) transitPreference += 0.15;
-              if(personType==="REMOTE") transitPreference -= 0.10;
+              // --- ECONOMY TWEAK: Boosted Base Transit Preference ---
+              let transitPreference = 0.20; 
+              if(home.city==="Dallas") transitPreference += 0.10;
+              if(home.type==="DOWNTOWN") transitPreference += 0.15;
+              if(work && work.type==="DOWNTOWN") transitPreference += 0.15;
+              if(work && work.type==="OFFICE") transitPreference += 0.08;
+              if(school) transitPreference += 0.12;
+              if(personType==="REMOTE") transitPreference -= 0.15;
               if(personType==="RETIREE") transitPreference -= 0.05;
-              transitPreference += (Math.random()-.5)*0.06;
-              transitPreference = Math.max(0.02, Math.min(.75,transitPreference));
+              
+              const fareImpact = (2.50 - ticketFare) * 0.05; 
+              transitPreference += fareImpact;
+              transitPreference = Math.max(0.05, Math.min(0.85, transitPreference));
 
               const worksToday = personType !== "REMOTE" || Math.random() > 0.70;
               const attendsSchoolToday = personType !== "STUDENT" || Math.random() < 0.72;
@@ -672,50 +583,46 @@ hw("US-67", 0.35, [
       }
 
       function setupLineSelectorUI() {
-    const container = document.getElementById('lineSelectorContainer');
-    // Clear current dots
-    container.innerHTML = '';
-    
-    // Get unique colors from existing tracks, plus the current active color
-    const usedColors = [...new Set(tracks.map(t => t.color))];
-    if (!usedColors.includes(activeColor)) {
-        usedColors.push(activeColor);
-    }
-    
-    usedColors.forEach(color => {
-        const dot = document.createElement('div');
-        dot.className = `line-dot ${activeColor === color ? 'selected' : ''}`;
-        dot.style.backgroundColor = color;
-        
-        dot.onclick = () => {
-            activeColor = color;
-            // Assuming you have an input for the color picker
-            const picker = document.getElementById('custom-line-color');
-            if (picker) picker.value = color;
-            setupLineSelectorUI(); 
-        };
-        container.appendChild(dot);
-    });
-}
-
-      // Sync the color wheel input
-      document.getElementById('custom-line-color').addEventListener('input', (e) => {
-          activeColor = e.target.value;
-          // When picking a new color, we don't 'select' an old one
-          document.querySelectorAll('.line-dot').forEach(d => d.classList.remove('selected'));
-      });
-      function buildTelemetryCharts(){
-          const chart=document.getElementById('demand-chart'); chart.innerHTML='';
-          [15,20,35,55,85,95,75,45,40,50,65,80,90,60,35,25,20,15,10,5].forEach(v=>{
-              const b=document.createElement('div'); b.className='chart-bar'; b.style.height=`${v}%`; chart.appendChild(b);
+          const container = document.getElementById('lineSelectorContainer');
+          container.innerHTML = '';
+          const usedColors = [...new Set(tracks.map(t => t.color))];
+          if (!usedColors.includes(activeColor)) { usedColors.push(activeColor); }
+          usedColors.forEach(color => {
+              const dot = document.createElement('div');
+              dot.className = `line-dot ${activeColor === color ? 'selected' : ''}`;
+              dot.style.backgroundColor = color;
+              dot.onclick = () => {
+                  activeColor = color;
+                  const picker = document.getElementById('custom-line-color');
+                  if (picker) picker.value = color;
+                  setupLineSelectorUI(); 
+              };
+              container.appendChild(dot);
           });
       }
 
-      function updateHUD(){ document.getElementById('lbl-budget').textContent='$'+Math.round(budget).toLocaleString(); }
-document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLocaleString()}`;      function updateTelemetryData(){
+      document.getElementById('custom-line-color').addEventListener('input', (e) => {
+          activeColor = e.target.value;
+          document.querySelectorAll('.line-dot').forEach(d => d.classList.remove('selected'));
+      });
+
+      function buildTelemetryCharts() {
+          const chart = document.getElementById('demand-chart');
+          if (!chart) return; // Exit if the element doesn't exist
+
+          chart.innerHTML = ''; 
+          [15, 20, 35, 55, 85, 95, 75, 45, 40, 50, 65, 80, 90, 60, 35, 25, 20, 15, 10, 5].forEach(v => {
+              const b = document.createElement('div');
+              b.className = 'chart-bar';
+              b.style.height = `${v}%`;
+              chart.appendChild(b);
+          });
+      }
+
+      function updateTelemetryData(){
           const feed=document.getElementById('station-feed-list');
           if(!stations.length){feed.innerHTML='<div class="station-card" style="color:var(--text-muted);text-align:center;display:block;">No terminals linked.</div>';return;}
-          document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLocaleString()}`;
+          updateHUD();
 
           const transitUsers = trains.reduce((a,t)=>a+t.riders.length,0) + stations.reduce((a,s)=>a+s.waiting,0);
           if (transitUsers > peakConcurrentRiders) peakConcurrentRiders = transitUsers;
@@ -724,8 +631,6 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
 
           const infrastructureScore = stationCount * 0.20 + trackCount * 0.05;
           const ridershipScore = Math.log10(transitUsers + 10) * 0.8;
-          // Actual boarding success/failure (patience give-ups) scales the theoretical share,
-          // so a congested network that can't actually move its riders loses transit share.
           const successRate = (totalBoarded + totalGaveUp) > 0 ? totalBoarded / (totalBoarded + totalGaveUp) : 1;
           let transitShare = Math.min(15.0, (BASE_TRANSIT + infrastructureScore + ridershipScore) * successRate);
           const walkShare = WALK_SHARE; const driveShare = 100 - transitShare - walkShare;
@@ -799,7 +704,7 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
               ['Avg Wait Time', avgWaitMin.toFixed(1) + ' min'],
               ['Avg Trip Time', avgTripMin.toFixed(1) + ' min'],
               ['Avg Train Occupancy', avgOccupancy.toFixed(0) + '%'],
-              ['Crowding Events (missed boardings)', overcrowdingEvents.toLocaleString()],
+              ['Crowding Events (missed)', overcrowdingEvents.toLocaleString()],
           ];
           panel.innerHTML = rows.map(([label, value]) => `
               <div class="mode-row" style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
@@ -834,15 +739,10 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
       }
 
       function setElevationProfile(p) {
-    selectedElevationProfile = p;
-    document.querySelectorAll('[id^="prof-"]').forEach(b => b.classList.remove('active'));
-    document.getElementById(`prof-${p}`).classList.add('active');
-    
-    // Refresh tooltip if in track mode
-    if (mode === 'track') {
-        tooltip.textContent = `Est. Cost: $${getActiveTrackCost().toLocaleString()}`;
-    }
-}
+          selectedElevationProfile = p;
+          document.querySelectorAll('[id^="prof-"]').forEach(b => b.classList.remove('active'));
+          document.getElementById(`prof-${p}`).classList.add('active');
+      }
       function setTrackWay(w){ selectedTrackWay=w; document.querySelectorAll('[id^="way-"]').forEach(b=>b.classList.remove('active')); document.getElementById(`way-${w}`).classList.add('active'); }
       
       function toggleCrossoverSystem(){
@@ -907,8 +807,6 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
       function rebuildRoutes() {
           routes = [];
           const visited = new Set();
-          
-          // Rebuild dynamically based on present track colors
           const uniqueColors = [...new Set(tracks.map(t => t.color))];
           uniqueColors.forEach(color => {
               const colorTracks = tracks.filter(t => t.color === color);
@@ -927,9 +825,6 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
           reconcileFleet();
       }
 
-      // Trains are no longer auto-spawned. Existing purchased trains are carried over
-      // onto the rebuilt route geometry (color match). Trains whose line no longer
-      // exists are retired for a 50% refund.
       function reconcileFleet() {
           const survivors = [];
           trains.forEach(t => {
@@ -960,9 +855,7 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
           updateFleetPanel();
       }
 
-      function routeHasDepot(route) {
-          return depots.some(d => route.geometry.some(pt => Math.hypot(pt.x - d.x, pt.y - d.y) < DEPOT_SERVICE_RADIUS));
-      }
+      function routeHasDepot(route) { return depots.some(d => route.geometry.some(pt => Math.hypot(pt.x - d.x, pt.y - d.y) < DEPOT_SERVICE_RADIUS)); }
 
       function flashInsufficientFunds(msg) {
           const lbl = document.getElementById('lbl-budget');
@@ -1072,33 +965,41 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
           });
       }
 
-      // --- OpEx / maintenance economy ---
       function calculateDailyOpEx() {
-    let trackCost = 0;
-    tracks.forEach(t => {
-        const pts = [t.startStation, ...t.waypoints, t.endStation];
-        let len = 0;
-        for (let i = 0; i < pts.length - 1; i++) len += Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
-        const mE = t.elevation === 'under' ? 2.0 : t.elevation === 'above' ? 1.4 : 1.0;
-        const mW = t.wayConfig === 'quad' ? 3 : t.wayConfig === 'parallel' ? 1.8 : 1;
-        trackCost += len * 0.5 * mE * mW; // Reduced track weight from 1.1 to 0.5
-    });
-    
-    const stationCost = stations.length * 1200; // Reduced from 4000 to 1200
-    const depotCost = depots.length * 3500;     // Reduced from 8000 to 3500
-    let trainCost = 0;
-    trains.forEach(t => {
-        trainCost += ((TRAIN_SPECS[t.capacityType]?.dailyCost || TRAIN_SPECS.light.dailyCost) * 0.5) + t.extraCars * EXTRA_CAR_DAILY_COST * 0.5; // halved train opex
-    });
-    return trackCost + stationCost + depotCost + trainCost;
-}
+          let trackCost = 0;
+          tracks.forEach(t => {
+              const pts = [t.startStation, ...t.waypoints, t.endStation];
+              let len = 0;
+              for (let i = 0; i < pts.length - 1; i++) len += Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
+              const mE = t.elevation === 'under' ? 2.0 : t.elevation === 'above' ? 1.4 : 1.0;
+              const mW = t.wayConfig === 'quad' ? 3 : t.wayConfig === 'parallel' ? 1.8 : 1;
+              trackCost += len * 0.5 * mE * mW; 
+          });
+          
+          const stationCost = stations.length * 1200; 
+          const depotCost = depots.length * 3500;     
+          let trainCost = 0;
+          trains.forEach(t => {
+              trainCost += ((TRAIN_SPECS[t.capacityType]?.dailyCost || TRAIN_SPECS.light.dailyCost) * 0.5) + t.extraCars * EXTRA_CAR_DAILY_COST * 0.5;
+          });
+          return trackCost + stationCost + depotCost + trainCost;
+      }
 
       function applyDailyOpEx() {
           const opex = calculateDailyOpEx();
-          budget -= opex;
+          const interest = currentDebt * DAILY_INTEREST_RATE; 
+          budget -= (opex + interest);
           lastOpExAmount = opex;
+          
           const opexLbl = document.getElementById('lbl-opex');
-          if (opexLbl) opexLbl.textContent = `OpEx: $${Math.round(opex).toLocaleString()}/day`;
+          if (opexLbl) {
+              if (currentDebt > 0) {
+                  opexLbl.textContent = `OpEx: $${Math.round(opex).toLocaleString()}/day | Int: $${Math.round(interest).toLocaleString()}/day`;
+              } else {
+                  opexLbl.textContent = `OpEx: $${Math.round(opex).toLocaleString()}/day`;
+              }
+          }
+          
           bankruptcyStrikes = budget < 0 ? bankruptcyStrikes + 1 : 0;
           if (bankruptcyStrikes >= 3) triggerBankruptcy();
           updateHUD();
@@ -1118,7 +1019,6 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
           document.body.appendChild(overlay);
       }
 
-      // --- Dynamic city growth: transit-served neighborhoods slowly densify ---
       function applyDailyCityGrowth() {
           const successRate = (totalBoarded + totalGaveUp) > 0 ? totalBoarded / (totalBoarded + totalGaveUp) : 1;
           neighborhoods.forEach(n => {
@@ -1139,109 +1039,83 @@ document.getElementById('lbl-budget').textContent = `$${Math.floor(budget).toLoc
           return Math.round(d*450*mE*mW);
       }
 
-function tickSimulationTime() {
-    if (simSpeed === 0) return;
+      function tickSimulationTime() {
+          if (simSpeed === 0) return;
+          gameTime.min += simSpeed; 
+          while (gameTime.min >= 60) { gameTime.min -= 60; gameTime.hour += 1; }
+          while (gameTime.hour >= 24) {
+              gameTime.hour -= 24; gameTime.day += 1;
+              if (!gameOver) { applyDailyOpEx(); applyDailyCityGrowth(); }
+              dailyRiders = 0; fareRevenueToday = 0;
+          }
+          while (gameTime.day > 30) { gameTime.day -= 30; gameTime.month += 1; }
+          while (gameTime.month > 12) { gameTime.month -= 12; gameTime.year += 1; }
 
-    // Increment time based on simulation speed
-    gameTime.min += simSpeed; 
+          window.timeTicks = (gameTime.hour * 3600) + (gameTime.min * 60);
+          if (!gameOver) processCommuterLogic();
 
-    // Safely roll over minutes and hours
-    while (gameTime.min >= 60) {
-        gameTime.min -= 60;
-        gameTime.hour += 1;
-    }
-    while (gameTime.hour >= 24) {
-        gameTime.hour -= 24;
-        gameTime.day += 1;
-        if (!gameOver) { applyDailyOpEx(); applyDailyCityGrowth(); }
-        dailyRiders = 0; fareRevenueToday = 0;
-    }
-
-    // Safely roll over months and years (using 30-day months for simulation simplicity)
-    while (gameTime.day > 30) {
-        gameTime.day -= 30;
-        gameTime.month += 1;
-    }
-    while (gameTime.month > 12) {
-        gameTime.month -= 12;
-        gameTime.year += 1;
-    }
-
-    // Sync global timeTicks (in seconds) for commuter, physics, and telemetry logic
-    window.timeTicks = (gameTime.hour * 3600) + (gameTime.min * 60);
-    if (!gameOver) processCommuterLogic();
-
-    // Update the HUD so the player can see the full Min/Hour/Day/Month/Year
-    const timeReadout = document.getElementById('lbl-time');
-    if (timeReadout) {
-        const displayMin = Math.floor(gameTime.min).toString().padStart(2, '0');
-        const displayHour = gameTime.hour.toString().padStart(2, '0');
-        const displayDay = gameTime.day.toString().padStart(2, '0');
-        const displayMonth = gameTime.month.toString().padStart(2, '0');
-        
-        // Displays as: 01/01/2026  06:00
-        timeReadout.innerHTML = `${displayMonth}/${displayDay}/${gameTime.year} &nbsp; ${displayHour}:${displayMin}`;
-    }
-}
+          const timeReadout = document.getElementById('lbl-time');
+          if (timeReadout) {
+              const displayMin = Math.floor(gameTime.min).toString().padStart(2, '0');
+              const displayHour = gameTime.hour.toString().padStart(2, '0');
+              const displayDay = gameTime.day.toString().padStart(2, '0');
+              const displayMonth = gameTime.month.toString().padStart(2, '0');
+              timeReadout.innerHTML = `${displayMonth}/${displayDay}/${gameTime.year} &nbsp; ${displayHour}:${displayMin}`;
+          }
+      }
 
       function processCommuterLogic() {
-    // Safety check: ensure simulation is running and timeTicks exists
-    if (!simSpeed || typeof timeTicks === 'undefined') return;
-    
-    const currentMinute = Math.floor(timeTicks / 60) % (24 * 60);
-    if (currentMinute === lastProcessedMinute) return; // only evaluate departures once per sim-minute
-    lastProcessedMinute = currentMinute;
-    
-    commuters.forEach(c => {
-        if (c.status !== "HOME") return;
-        let destinationNode = null;
-        
-        if (currentMinute >= c.departMorning && currentMinute < c.departMorning + 30) {
-            if (c.personType === "OFFICE" || c.personType === "SERVICE" || c.personType === "RETAIL_WORKER" || c.personType === "AIRPORT") {
-                if (!c.worksToday || !c.work) return; destinationNode = c.work;
-            } else if (c.personType === "STUDENT") { if (!c.attendsSchoolToday || !c.school) return; destinationNode = c.school;
-            } else if (c.personType === "SHOPPER") { if (!c.shopsToday) return; destinationNode = c.favoriteRetail;
-            } else if (c.personType === "LEISURE") { if (!c.leisureToday) return; destinationNode = c.favoriteLeisure;
-            } else return;
-        } else return;
+          if (!simSpeed || typeof timeTicks === 'undefined') return;
+          const currentMinute = Math.floor(timeTicks / 60) % (24 * 60);
+          if (currentMinute === lastProcessedMinute) return; 
+          lastProcessedMinute = currentMinute;
+          
+          commuters.forEach(c => {
+              if (c.status !== "HOME") return;
+              let destinationNode = null;
+              
+              if (currentMinute >= c.departMorning && currentMinute < c.departMorning + 30) {
+                  if (c.personType === "OFFICE" || c.personType === "SERVICE" || c.personType === "RETAIL_WORKER" || c.personType === "AIRPORT") {
+                      if (!c.worksToday || !c.work) return; destinationNode = c.work;
+                  } else if (c.personType === "STUDENT") { if (!c.attendsSchoolToday || !c.school) return; destinationNode = c.school;
+                  } else if (c.personType === "SHOPPER") { if (!c.shopsToday) return; destinationNode = c.favoriteRetail;
+                  } else if (c.personType === "LEISURE") { if (!c.leisureToday) return; destinationNode = c.favoriteLeisure;
+                  } else return;
+              } else return;
 
-        if (Math.random() > c.transitPreference) return;
-        const origin = findNearestStation(c.home.x, c.home.y, 380); 
-        const destination = findNearestStation(destinationNode.x, destinationNode.y, 380);
-        
-        if (!origin || !destination || origin === destination) return;
-        const route = calculateNetworkRoute(origin, destination); 
-        if (!route || route.length < 2) return;
-        
-        // Fix: Use gameTime.day instead of the undefined currentDay variable
-        if (c.lastDepartureDay === gameTime.day) return;
+              if (Math.random() > c.transitPreference) return;
+              const origin = findNearestStation(c.home.x, c.home.y, 380); 
+              const destination = findNearestStation(destinationNode.x, destinationNode.y, 380);
+              
+              if (!origin || !destination || origin === destination) return;
+              const route = calculateNetworkRoute(origin, destination); 
+              if (!route || route.length < 2) return;
+              if (c.lastDepartureDay === gameTime.day) return;
 
-        c.lastDepartureDay = gameTime.day; 
-        c.status = "WAITING"; 
-        c.currentDestination = destinationNode;
-        c.currentStation = origin; 
-        c.route = route;               // full multi-station path: origin -> [transfers] -> destination
-        c.legIndex = 0;                // index into route of the station we're currently at
-        c.tripStartTime = timeTicks;   // for average trip time stat
-        c.waitStart = timeTicks;       // for average wait stat (reset at each transfer too)
-        c.missedBoardings = 0;
-        origin.queue = origin.queue || [];
-        origin.queue.push(c);
-        origin.waiting++; 
-        origin.boardings = (origin.boardings || 0) + 1;
+              c.lastDepartureDay = gameTime.day; 
+              c.status = "WAITING"; 
+              c.currentDestination = destinationNode;
+              c.currentStation = origin; 
+              c.route = route;               
+              c.legIndex = 0;                
+              c.tripStartTime = timeTicks;   
+              c.waitStart = timeTicks;       
+              c.missedBoardings = 0;
+              origin.queue = origin.queue || [];
+              origin.queue.push(c);
+              origin.waiting++; 
+              origin.boardings = (origin.boardings || 0) + 1;
 
-        // Fare is collected exactly once, when the rider enters the system,
-        // regardless of how many lines/transfers the trip ends up requiring.
-        budget += ticketFare;
-        fareRevenueToday += ticketFare;
-        dailyRiders++; lifetimeRiders++;
-        updateHUD();
-    });
-}
+              budget += ticketFare;
+              fareRevenueToday += ticketFare;
+              dailyRiders++; lifetimeRiders++;
+              updateHUD();
+          });
+      }
+
       function updatePhysics(){
           if(!simSpeed || gameOver) return;
 
-          // Group trains sharing the same line + direction for block-signal collision checks
           const laneGroups = {};
           trains.forEach(t => {
               const key = t.lineColor + '_' + (t.dirKey || 'F');
@@ -1259,9 +1133,6 @@ function tickSimulationTime() {
 
               if (t.state === undefined) { t.state = "MOVING"; t.dwell = 0; }
 
-              // --- Collision / block-signal check ---
-              // Trains sharing a line+direction must not pass through one another.
-              // The Crossover Switch, when enabled, lets a blocked train bypass the one ahead.
               if (t.state !== "DWELLING" && !crossoverSystemEnabled) {
                   const key = t.lineColor + '_' + (t.dirKey || 'F');
                   const group = laneGroups[key];
@@ -1284,10 +1155,6 @@ function tickSimulationTime() {
                   if (t.pct >= 1) {
                       t.pct = 1; t.state = "DWELLING"; t.dwell = 20; const cs = en.station;
                       if (cs) {
-                          // --- Alighting ---
-                          // Tracked commuters get off exactly when this station is their next
-                          // leg's target; anonymous background riders alight probabilistically
-                          // (they represent trips we don't individually simulate end-to-end).
                           const stayRiders = [];
                           t.riders.forEach(r => {
                               if (r.commuterRef) {
@@ -1296,32 +1163,17 @@ function tickSimulationTime() {
                                   if (nextStation === cs) {
                                       c.legIndex++;
                                       if (c.legIndex >= c.route.length - 1) {
-                                          // Final destination reached - trip complete.
-                                          tripTimeSum += Math.max(0, timeTicks - c.tripStartTime);
-                                          tripSamples++;
-                                          c.status = "HOME";
+                                          tripTimeSum += Math.max(0, timeTicks - c.tripStartTime); tripSamples++; c.status = "HOME";
                                       } else {
-                                          // Transfer: re-queue at this station for the next line.
-                                          cs.queue = cs.queue || [];
-                                          cs.queue.push(c);
-                                          cs.waiting++;
-                                          c.waitStart = timeTicks;
+                                          cs.queue = cs.queue || []; cs.queue.push(c); cs.waiting++; c.waitStart = timeTicks;
                                       }
-                                  } else {
-                                      stayRiders.push(r);
-                                  }
-                              } else if (Math.random() < 0.40) {
-                                  // background rider ends their (unmodeled) trip here
-                              } else {
-                                  stayRiders.push(r);
-                              }
+                                  } else { stayRiders.push(r); }
+                              } else if (Math.random() > 0.40) { stayRiders.push(r); }
                           });
                           t.riders = stayRiders;
 
-                          // --- Boarding ---
                           const capacity = t.capacity || 120;
-                          let space = capacity - t.riders.length;
-                          let trackedBoarded = 0;
+                          let space = capacity - t.riders.length; let trackedBoarded = 0;
                           if (cs.queue && cs.queue.length && space > 0) {
                               const remainingQueue = [];
                               cs.queue.forEach(c => {
@@ -1329,13 +1181,10 @@ function tickSimulationTime() {
                                   const servesNext = t.pathNodes.some(n => n.station === nextStation);
                                   if (servesNext && space > 0) {
                                       waitTimeSum += Math.max(0, timeTicks - c.waitStart); waitSamples++;
-                                      t.riders.push({ status: "EN_ROUTE", commuterRef: c });
-                                      space--; trackedBoarded++;
+                                      t.riders.push({ status: "EN_ROUTE", commuterRef: c }); space--; trackedBoarded++;
                                   } else {
                                       if (servesNext && space <= 0) {
-                                          // Train serving their line is full - platform crowding penalty.
-                                          c.missedBoardings = (c.missedBoardings || 0) + 1;
-                                          overcrowdingEvents++;
+                                          c.missedBoardings = (c.missedBoardings || 0) + 1; overcrowdingEvents++;
                                           if (c.missedBoardings >= 2) c.transitPreference = Math.max(0.02, c.transitPreference * 0.85);
                                       }
                                       remainingQueue.push(c);
@@ -1353,11 +1202,8 @@ function tickSimulationTime() {
                           cs.ridersBoarded = (cs.ridersBoarded || 0) + boardedHere;
                           totalBoarded += boardedHere;
 
-                          // Anonymous riders pay their fare on boarding (their only touchpoint);
-                          // tracked commuters already paid once at trip departure.
                           if (anonymousBoarded > 0) {
-                              budget += anonymousBoarded * ticketFare;
-                              fareRevenueToday += anonymousBoarded * ticketFare;
+                              budget += anonymousBoarded * ticketFare; fareRevenueToday += anonymousBoarded * ticketFare;
                           }
                           updateHUD();
                       }
@@ -1371,13 +1217,13 @@ function tickSimulationTime() {
               let demand = 0;
               nearby.forEach(n => {
                   switch(n.type){
-                      case "OFFICE":       demand += n.importance * 14; break;
-                      case "COMMERCIAL":   demand += n.importance * 10; break;
-                      case "AIRPORT":      demand += n.importance * 35; break;
-                      case "UNIVERSITY":   demand += n.importance * 18; break;
-                      case "MEDICAL":      demand += n.importance * 12; break;
-                      case "INDUSTRIAL":   demand += n.importance * 8; break;
-                      default:             demand += n.importance * 6;
+                      case "OFFICE": demand += n.importance * 14; break;
+                      case "COMMERCIAL": demand += n.importance * 10; break;
+                      case "AIRPORT": demand += n.importance * 35; break;
+                      case "UNIVERSITY": demand += n.importance * 18; break;
+                      case "MEDICAL": demand += n.importance * 12; break;
+                      case "INDUSTRIAL": demand += n.importance * 8; break;
+                      default: demand += n.importance * 6;
                   }
               });
 
@@ -1394,19 +1240,13 @@ function tickSimulationTime() {
                   s.waiting = Math.min(5000, s.waiting + arriving);
               }
 
-              // --- Commuter patience: crowded/long-standing queues gradually give up on transit ---
               if (s.waiting > 0) {
                   const giveUpRate = 0.00035 * simSpeed * (1 + s.waiting / 400);
                   let leaving = Math.min(s.waiting, Math.ceil(s.waiting * giveUpRate));
                   if (leaving > 0) {
-                      // Tracked commuters who give up abandon the trip and go back to "HOME"
-                      // status (they'll try again on a future day) rather than vanishing silently.
                       if (s.queue && s.queue.length) {
                           const fromQueue = Math.min(leaving, s.queue.length);
-                          for (let k = 0; k < fromQueue; k++) {
-                              const c = s.queue.pop();
-                              c.status = "HOME";
-                          }
+                          for (let k = 0; k < fromQueue; k++) { const c = s.queue.pop(); c.status = "HOME"; }
                       }
                       s.waiting -= leaving; totalGaveUp += leaving;
                   }
@@ -1458,46 +1298,29 @@ function tickSimulationTime() {
                   }
               }
           });
-         drawHighwayLabels();
+          drawHighwayLabels();
 
-const sm = zoom < 0.5 ? 0.3 + zoom * 0.5 : Math.min(1.2, zoom * 0.9);
+          const sm = zoom < 0.5 ? 0.3 + zoom * 0.5 : Math.min(1.2, zoom * 0.9);
 
-neighborhoods.forEach(n => {
-
-    const zc = ZONING[n.type] || ZONING.RESIDENTIAL;
-    const r = n.size * sm;
-
-    ctx.fillStyle = zc.color;
-    ctx.strokeStyle = zc.stroke;
-    ctx.lineWidth = 0.5;
-
-    ctx.beginPath();
-    ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    if (zoom > 1.25 && n.importance >= 0.1) {
-
-        ctx.save();
-
-        // Smaller constant world-space font
-        ctx.font = '600 2.5px "Inter", sans-serif';
-
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-
-        ctx.lineWidth = 0.5;
-        ctx.strokeStyle = "rgba(255,255,255,0.9)";
-
-        ctx.strokeText(n.name, n.x, n.y + r + 1.5);
-
-        ctx.fillStyle = "#1f2937";
-        ctx.fillText(n.name, n.x, n.y + r + 1.5);
-
-        ctx.restore();
-    }
-
-});
+          neighborhoods.forEach(n => {
+              const zc = ZONING[n.type] || ZONING.RESIDENTIAL; const r = n.size * sm;
+              ctx.fillStyle = zc.color; ctx.strokeStyle = zc.stroke; ctx.lineWidth = 0.5;
+              ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+if (LOCATION_BONUSES[n.name] && !LOCATION_BONUSES[n.name].claimed) {
+                  const pulse = 1 + Math.sin(Date.now() / 300) * 0.2; // Creates a gentle pulsing effect
+                  ctx.strokeStyle = "rgba(251, 191, 36, 0.9)"; // Gold color
+                  ctx.lineWidth = 1.0;
+                  ctx.beginPath(); 
+                  ctx.arc(n.x, n.y, (r + 2) * pulse, 0, Math.PI * 2); 
+                  ctx.stroke();
+              }
+              if (zoom > 1.25 && n.importance >= 0.1) {
+                  ctx.save(); ctx.font = '600 2.5px "Inter", sans-serif'; ctx.textAlign = "center"; ctx.textBaseline = "top";
+                  ctx.lineWidth = 0.5; ctx.strokeStyle = "rgba(255,255,255,0.9)";
+                  ctx.strokeText(n.name, n.x, n.y + r + 1.5);
+                  ctx.fillStyle = "#1f2937"; ctx.fillText(n.name, n.x, n.y + r + 1.5); ctx.restore();
+              }
+          });
 
           tracks.forEach(t=>{
               const pts=[t.startStation,...t.waypoints,t.endStation];
@@ -1533,12 +1356,10 @@ neighborhoods.forEach(n => {
 
           trains.forEach(t => {
               ctx.save(); ctx.translate(t.x, t.y);
-              ctx.fillStyle = t.lineColor;
-              ctx.strokeStyle = t.state === 'BLOCKED' ? '#ef4444' : '#0c0d12';
+              ctx.fillStyle = t.lineColor; ctx.strokeStyle = t.state === 'BLOCKED' ? '#ef4444' : '#0c0d12';
               ctx.lineWidth = t.state === 'BLOCKED' ? 0.6 : 0.375;
               const w = (t.capacityType === 'heavy' ? 2.6 : 2) + (t.extraCars || 0) * 0.35;
-              ctx.fillRect(-w, -1, w * 2, 2); ctx.strokeRect(-w, -1, w * 2, 2);
-              ctx.restore();
+              ctx.fillRect(-w, -1, w * 2, 2); ctx.strokeRect(-w, -1, w * 2, 2); ctx.restore();
           });
           ctx.restore();
       }
@@ -1549,201 +1370,157 @@ neighborhoods.forEach(n => {
       }
 
       function onMouseDown(e) {
-          const p = getPos(e); // Calculate world position once
+    const p = getPos(e); 
 
-          if (mode === 'pan') { 
-              isPanning = true; 
-              startPan = { x: p.screenX, y: p.screenY }; 
-          } 
-          else if (mode === 'depot') {
-              if (gameOver) return;
-              if (budget >= DEPOT_COST) {
-                  budget -= DEPOT_COST;
-                  depots.push({ id: depots.length + 1, x: p.worldX, y: p.worldY });
-                  updateHUD(); updateFleetPanel();
-              } else {
-                  flashInsufficientFunds('Insufficient Funds');
-              }
-          }
-          else if (mode === 'station') {
-              if (budget >= 500000) {
-                  budget -= 500000; 
-                  let near = null, md = Infinity;
-                  neighborhoods.forEach(n => { const d = Math.hypot(n.x - p.worldX, n.y - p.worldY); if (d < md) { md = d; near = n; } });
-                  const label = near && md < 180 ? near.name.substring(0, 18) : `Terminal ${stations.length + 1}`;
-                  stations.push({ id: stations.length + 1, x: p.worldX, y: p.worldY, name: label, waiting: 0, queue: [], ridersBoarded: 0, boardings: 0 });
-                  updateHUD(); 
-                  updateTelemetryData();
-              }
-          } 
-          else if (mode === 'track') {
-const CLICK_THRESHOLD = 22 / Math.sqrt(zoom);
-const clicked = stations.find(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < CLICK_THRESHOLD);
-              if (!activeTrackBuild) { 
-                  if (clicked) {
-                      activeTrackBuild = { startStation: clicked, waypoints: [] }; 
-                  }
-              } else {
-                  if (clicked && clicked !== activeTrackBuild.startStation) {
-                      const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
-                      const cost = calculateTrackCost(last, clicked, selectedElevationProfile, selectedTrackWay);
-                      if (budget >= cost) { 
-                          budget -= cost; 
-                          tracks.push({ startStation: activeTrackBuild.startStation, endStation: clicked, waypoints: activeTrackBuild.waypoints, color: activeColor, elevation: selectedElevationProfile, wayConfig: selectedTrackWay, crossover: crossoverSystemEnabled }); 
-                          activeTrackBuild = null; 
-                          updateHUD(); 
-                          manageTrainsRealtime(); 
-                      } else {
-                          alert('Insufficient structural configuration funds!');
-                      }
-                  } else if (!clicked) {
-                      const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
-                      const cost = calculateTrackCost(last, { x: p.worldX, y: p.worldY }, selectedElevationProfile, selectedTrackWay);
-                      if (budget >= cost) { 
-                          budget -= cost; 
-                          activeTrackBuild.waypoints.push({ x: p.worldX, y: p.worldY }); 
-                          updateHUD(); 
-                      }
-                  }
-              }
-          } 
+    if (mode === 'pan') { 
+        isPanning = true; startPan = { x: p.screenX, y: p.screenY }; 
+    } 
+    else if (mode === 'depot') {
+        if (gameOver) return;
+        if (budget >= DEPOT_COST) {
+            budget -= DEPOT_COST; depots.push({ id: depots.length + 1, x: p.worldX, y: p.worldY });
+            updateHUD(); updateFleetPanel();
+        } else { flashInsufficientFunds('Insufficient Funds'); }
+    }
+    else if (mode === 'station') {
+        if (budget >= STATION_BASE_COST) {
+            budget -= STATION_BASE_COST; 
+            let near = null, md = Infinity;
+            neighborhoods.forEach(n => { const d = Math.hypot(n.x - p.worldX, n.y - p.worldY); if (d < md) { md = d; near = n; } });
+            
+            const label = near && md < 180 ? near.name : `Terminal ${stations.length + 1}`;
+            stations.push({ id: stations.length + 1, x: p.worldX, y: p.worldY, name: label, waiting: 0, queue: [], ridersBoarded: 0, boardings: 0 });
+            updateHUD(); updateTelemetryData();
+        }
+    } 
+    else if (mode === 'track') {
+        const CLICK_THRESHOLD = 22 / Math.sqrt(zoom);
+        const clicked = stations.find(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < CLICK_THRESHOLD);
+        if (!activeTrackBuild) { 
+            if (clicked) { activeTrackBuild = { startStation: clicked, waypoints: [] }; }
+        } else {
+            if (clicked && clicked !== activeTrackBuild.startStation) {
+                const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
+                const cost = calculateTrackCost(last, clicked, selectedElevationProfile, selectedTrackWay);
+                if (budget >= cost) { 
+                    budget -= cost; 
+                    tracks.push({ startStation: activeTrackBuild.startStation, endStation: clicked, waypoints: activeTrackBuild.waypoints, color: activeColor, elevation: selectedElevationProfile, wayConfig: selectedTrackWay, crossover: crossoverSystemEnabled }); 
+                    
+                    [activeTrackBuild.startStation, clicked].forEach(st => {
+                        const bonus = LOCATION_BONUSES[st.name];
+                        if (bonus && !bonus.claimed) {
+                            bonus.claimed = true;
+                            budget += bonus.amount;
+                            showNotification(`🎉 ${bonus.msg}: +$${(bonus.amount).toLocaleString()}!`);
+                            // --- CALL REFRESH HERE ---
+                            updateBonusPanel(); 
+                        }
+                    });
+
+                    activeTrackBuild = null; 
+                    updateHUD(); manageTrainsRealtime(); 
+                } else { alert('Insufficient structural configuration funds!'); }
+            } else if (!clicked) {
+                const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
+                const cost = calculateTrackCost(last, { x: p.worldX, y: p.worldY }, selectedElevationProfile, selectedTrackWay);
+                if (budget >= cost) { budget -= cost; activeTrackBuild.waypoints.push({ x: p.worldX, y: p.worldY }); updateHUD(); }
+            }
+        }
+    }
           else if (mode === 'rename') {
               const s = stations.find(st => Math.hypot(st.x - p.worldX, st.y - p.worldY) < 22);
-              if (s) { 
-                  const n = prompt('Enter new terminal designation name:', s.name); 
-                  if (n && n.trim()) s.name = n.trim(); 
-                  updateTelemetryData(); 
-              }
+              if (s) { const n = prompt('Enter new terminal designation name:', s.name); if (n && n.trim()) s.name = n.trim(); updateTelemetryData(); }
               setMode('pan');
           } 
           else if (mode === 'delete') {
-    const depotIdx = depots.findIndex(d => Math.hypot(d.x - p.worldX, d.y - p.worldY) < 18);
-    const idx = stations.findIndex(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < 22);
-    if (depotIdx !== -1 && idx === -1) {
-        budget += Math.floor(DEPOT_COST * 0.5);
-        depots.splice(depotIdx, 1);
-        updateHUD(); updateFleetPanel();
-    }
-    else if (idx !== -1) { 
-        const s = stations[idx]; 
-        
-        // --- NEW: Add 50% Refund ---
-        const refund = Math.floor(STATION_BASE_COST * 0.5);
-        budget += refund;
-        
-        tracks = tracks.filter(t => t.startStation !== s && t.endStation !== s); 
-        stations.splice(idx, 1); 
-        
-        updateHUD(); 
-        manageTrainsRealtime(); 
-        updateTelemetryData(); 
-        setupLineSelectorUI(); 
-    }
-}
+              const depotIdx = depots.findIndex(d => Math.hypot(d.x - p.worldX, d.y - p.worldY) < 18);
+              const idx = stations.findIndex(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < 22);
+              if (depotIdx !== -1 && idx === -1) {
+                  budget += Math.floor(DEPOT_COST * 0.5); depots.splice(depotIdx, 1);
+                  updateHUD(); updateFleetPanel();
+              }
+              else if (idx !== -1) { 
+                  const s = stations[idx]; 
+                  budget += Math.floor(STATION_BASE_COST * 0.5);
+                  tracks = tracks.filter(t => t.startStation !== s && t.endStation !== s); 
+                  stations.splice(idx, 1); 
+                  updateHUD(); manageTrainsRealtime(); updateTelemetryData(); setupLineSelectorUI(); 
+              }
+          }
       }
 
       function onMouseMove(e) {
-    const p = getPos(e); // Define 'p' properly for the entire function!
-    const container = document.getElementById('canvas-container');
-    const rect = container.getBoundingClientRect();
-    // Update global tracking variables
-    mouseWorldPos.x = p.worldX;
-    mouseWorldPos.y = p.worldY;
-    updateCoordinateDisplay();
+          const p = getPos(e); 
+          const container = document.getElementById('canvas-container');
+          const rect = container.getBoundingClientRect();
+          mouseWorldPos.x = p.worldX; mouseWorldPos.y = p.worldY;
+          updateCoordinateDisplay();
 
-    // 1. Handle Map Panning
-    if (isPanning) {
-        camera.x -= (p.screenX - startPan.x) / zoom;
-        camera.y -= (p.screenY - startPan.y) / zoom;
-        startPan = { x: p.screenX, y: p.screenY };
-        return; // Skip tooltips while panning
-    }
+          if (isPanning) {
+              camera.x -= (p.screenX - startPan.x) / zoom; camera.y -= (p.screenY - startPan.y) / zoom;
+              startPan = { x: p.screenX, y: p.screenY }; return; 
+          }
 
-    let showingTooltip = false;
+          let showingTooltip = false;
+          const ttx = e.clientX - rect.left; const tty = e.clientY - rect.top;
 
-const ttx = e.clientX - rect.left;
-    const tty = e.clientY - rect.top;
-    // --- NEW: Station Hover Cost ---
-    if (mode === 'station') {
-        tooltip.style.display = 'block';
-tooltip.style.left = (ttx + 10) + 'px';
-    tooltip.style.top = (tty + 10) + 'px';
-        
-        // Show cost, colored red if funds are insufficient
-        if (budget >= STATION_BASE_COST) {
-            tooltip.textContent = `Build Station: $${STATION_BASE_COST.toLocaleString()}`;
-            tooltip.style.color = '#38bdf8'; // Blue
-        } else {
-            tooltip.textContent = `Insufficient Funds: $${STATION_BASE_COST.toLocaleString()}`;
-            tooltip.style.color = '#ef4444'; // Red
-        }
-        showingTooltip = true;
-    }
+          if (mode === 'station') {
+              tooltip.style.display = 'block'; tooltip.style.left = (ttx + 10) + 'px'; tooltip.style.top = (tty + 10) + 'px';
+              if (budget >= STATION_BASE_COST) {
+                  tooltip.textContent = `Build Station: $${STATION_BASE_COST.toLocaleString()}`; tooltip.style.color = '#38bdf8'; 
+              } else {
+                  tooltip.textContent = `Insufficient Funds: $${STATION_BASE_COST.toLocaleString()}`; tooltip.style.color = '#ef4444'; 
+              }
+              showingTooltip = true;
+          }
 
-    // 1b. Handle Depot Hover Cost
-    if (mode === 'depot') {
-        tooltip.style.display = 'block';
-        tooltip.style.left = (ttx + 10) + 'px';
-        tooltip.style.top = (tty + 10) + 'px';
-        if (budget >= DEPOT_COST) {
-            tooltip.textContent = `Build Depot: $${DEPOT_COST.toLocaleString()}`;
-            tooltip.style.color = '#38bdf8';
-        } else {
-            tooltip.textContent = `Insufficient Funds: $${DEPOT_COST.toLocaleString()}`;
-            tooltip.style.color = '#ef4444';
-        }
-        showingTooltip = true;
-    }
+          if (mode === 'depot') {
+              tooltip.style.display = 'block'; tooltip.style.left = (ttx + 10) + 'px'; tooltip.style.top = (tty + 10) + 'px';
+              if (budget >= DEPOT_COST) {
+                  tooltip.textContent = `Build Depot: $${DEPOT_COST.toLocaleString()}`; tooltip.style.color = '#38bdf8';
+              } else {
+                  tooltip.textContent = `Insufficient Funds: $${DEPOT_COST.toLocaleString()}`; tooltip.style.color = '#ef4444';
+              }
+              showingTooltip = true;
+          }
 
-    // 2. Handle Track Building Cost Hover
-    if (mode === 'track' && activeTrackBuild) {
-    const lastNode = activeTrackBuild.waypoints.length ? 
-                     activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : 
-                     activeTrackBuild.startStation;
-    
-    if (lastNode) {
-        // Calculate distance for cost
-        const dist = Math.hypot(p.worldX - lastNode.x, p.worldY - lastNode.y);
-        const cost = getActiveTrackCost(dist);
-        
-        tooltip.style.display = 'block';
-        
-        // Use the same ttx/tty variables that you confirmed work for the station
-        tooltip.style.left = (ttx + 10) + 'px';
-        tooltip.style.top = (tty + 10) + 'px';
-        
-        tooltip.textContent = `Est. Cost: $${Math.round(cost).toLocaleString()}`;
-        showingTooltip = true;
-    }
-}
+          if (mode === 'track' && activeTrackBuild) {
+              const lastNode = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
+              if (lastNode) {
+                  const dist = Math.hypot(p.worldX - lastNode.x, p.worldY - lastNode.y); const cost = getActiveTrackCost(dist);
+                  tooltip.style.display = 'block'; tooltip.style.left = (ttx + 10) + 'px'; tooltip.style.top = (tty + 10) + 'px';
+                  tooltip.textContent = `Est. Cost: $${Math.round(cost).toLocaleString()}`; showingTooltip = true;
+              }
+          }
 
-    // 3. Handle Neighborhood Hover (Only if not actively building a track or station)
-    if (!showingTooltip) {
-        const hov = neighborhoods.find(n => Math.hypot(n.x - p.worldX, n.y - p.worldY) < Math.max(4, n.size * (1.2 / Math.sqrt(zoom))));
-        if (hov) {
-            tooltip.style.display = "block";
-tooltip.style.left = (ttx + 10) + 'px';
-    tooltip.style.top = (tty + 10) + 'px';
-            tooltip.innerHTML = `
-                <div style="font-weight:600;font-size:13px;margin-bottom:4px;">${hov.name}</div>
-                <div style="color:#666;font-size:11px;margin-bottom:6px;">${hov.city} • ${hov.type}</div>
-                <table style="font-size:12px">
-                    <tr><td>👨‍👩‍👧 Residents</td><td style="padding-left:12px;text-align:right;"><b>${hov.residents.toLocaleString()}</b></td></tr>
-                    <tr><td>💼 Jobs</td><td style="padding-left:12px;text-align:right;"><b>${hov.jobs.toLocaleString()}</b></td></tr>
-                    <tr><td>🎓 Students</td><td style="padding-left:12px;text-align:right;"><b>${hov.students.toLocaleString()}</b></td></tr>
-                    <tr><td>🛍️ Retail</td><td style="padding-left:12px;text-align:right;"><b>${hov.retailVisitors.toLocaleString()}</b></td></tr>
-                    <tr><td>🎭 Leisure</td><td style="padding-left:12px;text-align:right;"><b>${hov.leisureVisitors.toLocaleString()}</b></td></tr>
-                </table>
-            `;
-            showingTooltip = true;
-        }
-    }
+          if (!showingTooltip) {
+              const hov = neighborhoods.find(n => Math.hypot(n.x - p.worldX, n.y - p.worldY) < Math.max(4, n.size * (1.2 / Math.sqrt(zoom))));
+              if (hov) {
+                  tooltip.style.display = "block"; tooltip.style.left = (ttx + 10) + 'px'; tooltip.style.top = (tty + 10) + 'px';
+                  
+                  let bonusText = '';
+                  if (LOCATION_BONUSES[hov.name] && !LOCATION_BONUSES[hov.name].claimed) {
+                      bonusText = `<div style="color:#10b981; font-weight:bold; font-size:10px; margin-top:4px;">💰 +$${(LOCATION_BONUSES[hov.name].amount/1000000).toFixed(1)}M Connection Grant</div>`;
+                  }
 
-    // Hide tooltip if hovered over nothing
-    if (!showingTooltip) {
-        tooltip.style.display = "none";
-    }
-}
+                  tooltip.innerHTML = `
+                      <div style="font-weight:600;font-size:13px;margin-bottom:4px;">${hov.name}</div>
+                      <div style="color:#666;font-size:11px;margin-bottom:6px;">${hov.city} • ${hov.type}</div>
+                      <table style="font-size:12px">
+                          <tr><td>👨‍👩‍👧 Residents</td><td style="padding-left:12px;text-align:right;"><b>${hov.residents.toLocaleString()}</b></td></tr>
+                          <tr><td>💼 Jobs</td><td style="padding-left:12px;text-align:right;"><b>${hov.jobs.toLocaleString()}</b></td></tr>
+                          <tr><td>🎓 Students</td><td style="padding-left:12px;text-align:right;"><b>${hov.students.toLocaleString()}</b></td></tr>
+                          <tr><td>🛍️ Retail</td><td style="padding-left:12px;text-align:right;"><b>${hov.retailVisitors.toLocaleString()}</b></td></tr>
+                          <tr><td>🎭 Leisure</td><td style="padding-left:12px;text-align:right;"><b>${hov.leisureVisitors.toLocaleString()}</b></td></tr>
+                      </table>
+                      ${bonusText}
+                  `;
+                  showingTooltip = true;
+              }
+          }
+
+          if (!showingTooltip) { tooltip.style.display = "none"; }
+      }
 
       function onMouseUp(){ isPanning=false; }
       
@@ -1757,14 +1534,14 @@ tooltip.style.left = (ttx + 10) + 'px';
 
       function resizeCanvas(){ canvas.width=document.getElementById('canvas-container').clientWidth; canvas.height=document.getElementById('canvas-container').clientHeight; }
       function gameLoop(){ updatePhysics(); draw(); requestAnimationFrame(gameLoop); }
-            function init(){
+      function init(){
           resizeCanvas(); window.addEventListener('resize',resizeCanvas);
-    generateNodes(); setupLineSelectorUI(); buildTelemetryCharts(); updateFleetPanel();
-    camera.x = -canvas.width / (2 * zoom);
-    camera.y = -canvas.height / (2 * zoom);
+          generateNodes(); setupLineSelectorUI(); buildTelemetryCharts(); updateFleetPanel();
+updateBonusPanel(); // <-- ADD THIS HERE
+          camera.x = -canvas.width / (2 * zoom); camera.y = -canvas.height / (2 * zoom);
 
-    setInterval(tickSimulationTime,1000/60);
-    setInterval(updateTelemetryData,1000);
+          setInterval(tickSimulationTime,1000/60);
+          setInterval(updateTelemetryData,1000);
           canvas.addEventListener('mousedown',onMouseDown); canvas.addEventListener('mousemove',onMouseMove);
           window.addEventListener('mouseup',onMouseUp); canvas.addEventListener('wheel',onWheel,{passive:false});
           updateHUD(); gameLoop();
