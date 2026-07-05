@@ -20,7 +20,7 @@
           --walk-green: #10b981;
       }
       body { margin:0; background-color:var(--bg-main); color:var(--text-main); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; display:flex; height:100vh; width:100vw; overflow:hidden; user-select:none; }
-      #sidebar { width:340px; background:var(--bg-panel); border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:18px; box-sizing:border-box; gap:16px; overflow-y:auto; z-index:10; }
+      #sidebar { width:340px; flex-shrink: 0; /* Add this line */ background:var(--bg-panel); border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:18px; box-sizing:border-box; gap:16px; overflow-y:auto; z-index:10; }
       .panel-header { font-size:11px; font-weight:700; letter-spacing:.05em; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; }
       .tab-group { display:flex; background:var(--bg-main); padding:3px; border-radius:6px; border:1px solid var(--border-color); }
       .tab { flex:1; text-align:center; padding:6px; font-size:11px; font-weight:600; border-radius:4px; cursor:pointer; color:var(--text-muted); }
