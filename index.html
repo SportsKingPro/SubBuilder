@@ -20,11 +20,28 @@
           --walk-green: #10b981;
       }
       body { margin:0; background-color:var(--bg-main); color:var(--text-main); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; display:flex; height:100vh; width:100vw; overflow:hidden; user-select:none; }
-      #sidebar { width:340px; flex-shrink: 0; /* Add this line */ background:var(--bg-panel); border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:18px; box-sizing:border-box; gap:16px; overflow-y:auto; z-index:10; }
+      #sidebar { width:340px; background:var(--bg-panel); border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:18px; box-sizing:border-box; gap:16px; overflow-y:auto; z-index:10; }
       .panel-header { font-size:11px; font-weight:700; letter-spacing:.05em; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; }
       .tab-group { display:flex; background:var(--bg-main); padding:3px; border-radius:6px; border:1px solid var(--border-color); }
       .tab { flex:1; text-align:center; padding:6px; font-size:11px; font-weight:600; border-radius:4px; cursor:pointer; color:var(--text-muted); }
       .tab.active { background:var(--bg-accent); color:#fff; }
+
+      /* Game-style nav groups */
+      #sidebar-brand { display:flex; align-items:center; gap:10px; padding:2px 2px 14px; border-bottom:1px solid var(--border-color); }
+      #sidebar-brand .brand-icon { font-size:22px; line-height:1; }
+      #sidebar-brand .brand-title { font-size:15px; font-weight:800; color:#fff; letter-spacing:.01em; }
+      #sidebar-brand .brand-sub { font-size:10px; color:var(--text-muted); margin-top:1px; }
+      .nav-group { border-bottom:1px solid var(--border-color); padding-bottom:14px; }
+      .nav-group:last-child { border-bottom:none; padding-bottom:0; }
+      .nav-group-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:6px 2px; user-select:none; }
+      .nav-group-header .label { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:#fff; }
+      
+      /* Accordion fixes - start closed */
+      .nav-group-header .arrow { font-size:10px; color:var(--text-muted); transition:transform .2s; transform: rotate(-90deg); }
+      .nav-group-body { display:none; flex-direction:column; gap:14px; overflow:hidden; padding-top:4px; }
+      
+      .nav-subsection { display:flex; flex-direction:column; }
+      .nav-subsection-title { font-size:10px; font-weight:700; letter-spacing:.05em; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; padding-left:2px; }
       .selector-row { display:flex; gap:4px; margin-top:4px; }
       .selector-btn { flex:1; background:var(--bg-main); border:1px solid var(--border-color); color:var(--text-muted); padding:6px 4px; font-size:11px; border-radius:4px; cursor:pointer; font-weight:500; text-align:center; transition:all .2s; }
       .selector-btn.active { background:var(--bg-accent); border-color:var(--transit-blue); color:#fff; }
@@ -57,105 +74,288 @@
       input[type="color"].custom-color-wheel:focus::-webkit-color-swatch { border-color: #fff; transform: scale(1.2); }
 
       #tooltip { pointer-events: none; position:absolute; background:rgba(7,10,18,.95); border:1px solid var(--border-color); padding:8px 12px; border-radius:4px; font-size:11px; display:none; z-index:100; box-shadow:0 10px 15px -3px rgba(0,0,0,.5); }
+
+      /* Station Inspector */
+      #station-inspector { position:absolute; top:16px; right:16px; width:270px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.5); z-index:60; display:none; color:var(--text-main); }
+      #station-inspector.open { display:block; }
+      .si-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--border-color); }
+      .si-title { font-size:15px; font-weight:800; color:#fff; line-height:1.2; }
+      .si-subtitle { font-size:10px; color:var(--text-muted); margin-top:3px; }
+      .si-close { cursor:pointer; color:var(--text-muted); font-size:14px; line-height:1; padding:3px 7px; border-radius:4px; }
+      .si-close:hover { color:#fff; background:var(--bg-accent); }
+      .si-row { display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:8px; gap:8px; }
+      .si-row .si-label { color:var(--text-muted); display:flex; align-items:center; gap:6px; white-space:nowrap; }
+      .si-row .si-value { color:#fff; font-weight:700; font-family:monospace; text-align:right; }
+      .si-cap-bar-container { height:5px; background:var(--bg-main); border-radius:3px; overflow:hidden; margin:-2px 0 10px; }
+      .si-cap-bar { height:100%; border-radius:3px; transition:width .3s ease; }
+      .si-lines { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+      .si-line-chip { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:#fff; background:var(--bg-main); border:1px solid var(--border-color); padding:2px 7px; border-radius:10px; }
+      .si-line-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+      .si-actions { display:flex; flex-direction:column; gap:6px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border-color); }
+      .si-btn { background:var(--bg-accent); border:1px solid var(--border-color); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; text-align:center; }
+      .si-btn:hover { filter:brightness(1.15); }
+      .si-btn.upgrade { border-color:#10b981; color:#10b981; }
+      .si-btn.upgrade.maxed { opacity:.5; cursor:not-allowed; color:var(--text-muted); border-color:var(--border-color); filter:none; }
+      .si-btn.delete { border-color:#ef4444; color:#ef4444; }
       
       /* Notification Animation */
       @keyframes slideDown { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
       .notification { position:absolute; top:20px; left:50%; transform:translateX(-50%); background:rgba(16, 185, 129, 0.95); border:1px solid #047857; color:#fff; padding:12px 24px; border-radius:8px; font-weight:bold; font-size:14px; z-index:1000; pointer-events:none; animation: slideDown 0.3s ease-out; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+
+      /* Tutorial System Styles */
+      .tutorial-backdrop {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(8, 10, 16, 0.75);
+          backdrop-filter: blur(2px);
+          z-index: 3000;
+          display: none;
+          pointer-events: auto;
+      }
+
+      .tutorial-highlight-box {
+          position: fixed;
+          border: 2px solid var(--transit-blue);
+          box-shadow: 0 0 0 9999px rgba(8, 10, 16, 0.75), 0 0 20px var(--transit-blue);
+          border-radius: 8px;
+          z-index: 3001;
+          display: none;
+          pointer-events: none;
+          transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+
+      .tutorial-card {
+          position: fixed;
+          z-index: 3005;
+          background: var(--bg-panel);
+          border: 1px solid var(--border-color);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+          border-radius: 12px;
+          width: 420px;
+          max-width: 90vw;
+          display: none;
+          flex-direction: column;
+          overflow: hidden;
+      }
+
+      .tutorial-card::after {
+          content: '';
+          position: absolute;
+          border: 10px solid transparent;
+          display: none;
+      }
+      
+      .tutorial-card.arrow-top::after { border-bottom-color: var(--bg-panel); top: -20px; left: 50%; transform: translateX(-50%); display: block; }
+      .tutorial-card.arrow-bottom::after { border-top-color: var(--bg-panel); bottom: -20px; left: 50%; transform: translateX(-50%); display: block; }
+      .tutorial-card.arrow-left::after { border-right-color: var(--bg-panel); left: -20px; top: 50%; transform: translateY(-50%); display: block; }
+      .tutorial-card.arrow-right::after { border-left-color: var(--bg-panel); right: -20px; top: 50%; transform: translateY(-50%); display: block; }
+
+      .tutorial-card-header { padding: 16px 20px; background: var(--bg-accent); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+      .tutorial-card-title { font-size: 15px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px; }
+      .tutorial-progress-pill { background: var(--bg-main); border: 1px solid var(--border-color); color: var(--transit-blue); font-family: monospace; font-size: 11px; padding: 2px 8px; border-radius: 12px; }
+      .tutorial-card-body { padding: 20px; font-size: 13px; line-height: 1.6; color: var(--text-main); max-height: 250px; overflow-y: auto; }
+      .tutorial-card-body b { color: #ffffff; }
+      .tutorial-card-body ul, .tutorial-card-body ol { margin: 8px 0 0 0; padding-left: 20px; color: var(--text-main); }
+      .tutorial-card-body li { margin-bottom: 4px; }
+      .tutorial-card-footer { padding: 12px 20px; background: var(--bg-accent); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+      .tut-link-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; text-decoration: underline; padding: 4px 0; }
+      .tut-link-btn:hover { color: var(--drive-red); }
+      .tut-action-group { display: flex; gap: 8px; }
+      .tut-nav-btn { background: var(--bg-main); border: 1px solid var(--border-color); color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+      .tut-nav-btn:hover:not(:disabled) { background: var(--border-color); border-color: var(--text-muted); }
+      .tut-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+      .tut-nav-btn.primary-action { background: var(--transit-blue); color: #0c0d12; border-color: var(--transit-blue); }
+      .tut-nav-btn.primary-action:hover { filter: brightness(1.15); box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
     </style>
   </head>
   <body>
     <div id="sidebar">
-      <div>
-        <div class="panel-header">Regional Infrastructure Controls</div>
-        <div class="tab-group"><div class="tab active">Transit Grid Configuration</div></div>
+      <div id="sidebar-brand">
+        <div class="brand-icon">🚇</div>
+        <div>
+          <div class="brand-title">DFW Metro Builder</div>
+          <div class="brand-sub">Design. Build. Connect the Metroplex.</div>
+        </div>
       </div>
-      <div>
-        <div class="panel-header">Financial Operations (Loans)</div>
-        <div class="selector-row" style="flex-direction: column; gap:8px;">
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-                <span style="color:var(--text-muted)">Current Debt:</span>
-                <span id="ui-debt" style="color:#ef4444; font-family:monospace; font-weight:bold;">$0</span>
-            </div>
-<div>
-        <div class="panel-header">Available Grants</div>
-        <div id="bonus-list" style="display: flex; flex-direction: column; gap: 4px;">
-          </div>
-      </div>
+
+      <div class="nav-group" id="grp-build">
+        <div class="nav-group-header" onclick="toggleSection('grp-build')">
+          <div class="label"><span class="emoji">🚇</span><span>Build</span></div>
+          <span class="arrow" id="arrow-grp-build">▼</span>
+        </div>
+        <div class="nav-group-body" id="body-grp-build">
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Track Elevation</div>
             <div class="selector-row">
-                <button class="selector-btn" onclick="takeLoan()" style="color:#10b981; border-color:#10b981;">+ Borrow $250k</button>
-                <button class="selector-btn" id="btn-repay-loan" onclick="repayLoan()" style="opacity:0.5;" disabled>- Repay $250k</button>
+              <div id="prof-level" class="selector-btn active" onclick="setElevationProfile('level')">Level<br /><span style="color: #10b981; font-size: 9px">1.0x Cost</span></div>
+              <div id="prof-above" class="selector-btn" onclick="setElevationProfile('above')">Above Ground<br /><span style="color: #fbbf24; font-size: 9px">2.5x Cost</span></div>
+              <div id="prof-under" class="selector-btn" onclick="setElevationProfile('under')">Underground<br /><span style="color: #ef4444; font-size: 9px">6.0x Cost</span></div>
             </div>
+          </div>
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Track Capacity</div>
+            <div class="selector-row">
+              <div id="way-single" class="selector-btn active" onclick="setTrackWay('single')">Single Line</div>
+              <div id="way-parallel" class="selector-btn" onclick="setTrackWay('parallel')">Parallel Twin</div>
+              <div id="way-quad" class="selector-btn" onclick="setTrackWay('quad')">Quad Trunk</div>
+            </div>
+          </div>
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Switches</div>
+            <div class="selector-row">
+              <div id="opt-crossover" class="selector-btn" onclick="toggleCrossoverSystem()">Crossover Switch: <span id="lbl-crossover" style="color: #ef4444; font-weight: bold">OFF</span></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div>
-        <div class="panel-header">1. Track Elevation Profiles</div>
-        <div class="selector-row">
-          <div id="prof-level" class="selector-btn active" onclick="setElevationProfile('level')">Level<br /><span style="color: #10b981; font-size: 9px">1.0x Cost</span></div>
-          <div id="prof-above" class="selector-btn" onclick="setElevationProfile('above')">Above Ground<br /><span style="color: #fbbf24; font-size: 9px">2.5x Cost</span></div>
-          <div id="prof-under" class="selector-btn" onclick="setElevationProfile('under')">Underground<br /><span style="color: #ef4444; font-size: 9px">6.0x Cost</span></div>
+
+      <div class="nav-group" id="grp-operations">
+        <div class="nav-group-header" onclick="toggleSection('grp-operations')">
+          <div class="label"><span class="emoji">🚆</span><span>Operations</span></div>
+          <span class="arrow" id="arrow-grp-operations">▼</span>
+        </div>
+        <div class="nav-group-body" id="body-grp-operations">
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Fleet &amp; Depots</div>
+            <div class="selector-row">
+              <div id="btn-depot" class="selector-btn" onclick="setMode('depot')">+ Build Depot<br /><span style="color: #fbbf24; font-size: 9px">$2,000,000</span></div>
+            </div>
+            <div class="selector-row" style="margin-top: 6px">
+              <div id="class-light" class="selector-btn active" onclick="setTrainClass('light')">Light Rail<br /><span style="color: #38bdf8; font-size: 9px">$1.5M &middot; 80 cap</span></div>
+              <div id="class-heavy" class="selector-btn" onclick="setTrainClass('heavy')">Heavy Rail<br /><span style="color: #a855f7; font-size: 9px">$3.5M &middot; 160 cap</span></div>
+            </div>
+            <div id="fleet-list" style="margin-top: 8px"></div>
+          </div>
         </div>
       </div>
-      <div>
-        <div class="panel-header">2. Capacity Configuration</div>
-        <div class="selector-row">
-          <div id="way-single" class="selector-btn active" onclick="setTrackWay('single')">Single Line</div>
-          <div id="way-parallel" class="selector-btn" onclick="setTrackWay('parallel')">Parallel Twin</div>
-          <div id="way-quad" class="selector-btn" onclick="setTrackWay('quad')">Quad Trunk</div>
+
+      <div class="nav-group" id="grp-economy">
+        <div class="nav-group-header" onclick="toggleSection('grp-economy')">
+          <div class="label"><span class="emoji">💰</span><span>Economy</span></div>
+          <span class="arrow" id="arrow-grp-economy">▼</span>
+        </div>
+        <div class="nav-group-body" id="body-grp-economy">
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Budget</div>
+            <div class="selector-row" style="flex-direction: column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; font-size: 11px;">
+                    <span style="color:var(--text-muted)">Current Debt:</span>
+                    <span id="ui-debt" style="color:#ef4444; font-family:monospace; font-weight:bold;">$0</span>
+                </div>
+                <div class="selector-row">
+                    <button class="selector-btn" onclick="takeLoan()" style="color:#10b981; border-color:#10b981;">+ Borrow $250k</button>
+                    <button class="selector-btn" id="btn-repay-loan" onclick="repayLoan()" style="opacity:0.5;" disabled>- Repay $250k</button>
+                </div>
+            </div>
+          </div>
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Grants</div>
+            <div>
+              <div class="panel-header" onclick="toggleGrants()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom:0;">
+                <span>Available Grants</span>
+                <span id="grants-toggle-arrow" style="transition: transform 0.2s;">▼</span>
+              </div>
+              <div id="bonus-list" style="display: flex; flex-direction: column; gap: 4px; transition: max-height 0.25s ease-out; overflow: hidden; margin-top:6px;">
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div>
-        <div class="panel-header">3. Switch & Corridor Systems</div>
-        <div class="selector-row">
-          <div id="opt-crossover" class="selector-btn" onclick="toggleCrossoverSystem()">Crossover Switch: <span id="lbl-crossover" style="color: #ef4444; font-weight: bold">OFF</span></div>
-        </div>
-      </div>
-      <div>
-        <div class="panel-header">4. Fleet & Depot Operations</div>
-        <div class="selector-row">
-          <div id="btn-depot" class="selector-btn" onclick="setMode('depot')">+ Build Depot<br /><span style="color: #fbbf24; font-size: 9px">$2,000,000</span></div>
-        </div>
-        <div class="selector-row" style="margin-top: 6px">
-          <div id="class-light" class="selector-btn active" onclick="setTrainClass('light')">Light Rail<br /><span style="color: #38bdf8; font-size: 9px">$1.5M &middot; 80 cap</span></div>
-          <div id="class-heavy" class="selector-btn" onclick="setTrainClass('heavy')">Heavy Rail<br /><span style="color: #a855f7; font-size: 9px">$3.5M &middot; 160 cap</span></div>
-        </div>
-        <div id="fleet-list" style="margin-top: 8px"></div>
-      </div>
-      <div>
-        <div class="panel-header">Ridership & Revenue Statistics</div>
-        <div id="stats-panel"></div>
-      </div>
-      <div>
-        <div class="panel-header">Dynamic Share Analytics</div>
-        <div class="mode-row">
-          <div class="mode-info"><span>Transit Link</span><span id="txt-share-transit">2.3%</span></div>
-          <div class="mode-bar-container"><div id="bar-share-transit" class="mode-bar" style="width: 2.3%; background: var(--transit-blue)"></div></div>
-        </div>
-        <div class="mode-row">
-          <div class="mode-info"><span>Highway Commute</span><span id="txt-share-drive">96.5%</span></div>
-          <div class="mode-bar-container"><div id="bar-share-drive" class="mode-bar" style="width: 96.5%; background: var(--drive-red)"></div></div>
-        </div>
-        <div class="mode-row">
-          <div class="mode-info"><span>Pedestrian Link</span><span id="txt-share-walk">1.2%</span></div>
-          <div class="mode-bar-container"><div id="bar-share-walk" class="mode-bar" style="width: 1.2%; background: var(--walk-green)"></div></div>
-        </div>
-      </div>
-      <div>
-        <div class="panel-header">Temporal Flow Index</div>
-        <div class="chart-container" id="demand-chart"></div>
-      </div>
-      <div>
-        <div class="panel-header">Operational Node Terminals</div>
-        <div id="station-feed-list">
-          <div class="station-card" style="color: var(--text-muted); text-align: center; display: block">No terminals linked.</div>
-        </div>
+
+<div class="nav-group" id="grp-audio">
+  <div class="nav-group-header" onclick="toggleSection('grp-audio')">
+    <div class="label"><span class="emoji">🔊</span><span>Atmosphere</span></div>
+    <span class="arrow" id="arrow-grp-audio">▼</span>
+  </div>
+  <div class="nav-group-body" id="body-grp-audio">
+    <div class="nav-subsection">
+      <div class="selector-row" style="flex-direction: column; gap: 4px;">
+        <button id="audio-city" class="selector-btn" onclick="toggleAudio('city')">City Ambience</button>
+        <button id="audio-crowd" class="selector-btn" onclick="toggleAudio('crowd')">Station Crowd</button>
       </div>
     </div>
+  </div>
+</div>
 
-    <div id="main-workspace">
+      <div class="nav-group" id="grp-analytics">
+        <div class="nav-group-header" onclick="toggleSection('grp-analytics')">
+          <div class="label"><span class="emoji">📊</span><span>Analytics</span></div>
+          <span class="arrow" id="arrow-grp-analytics">▼</span>
+        </div>
+        <div class="nav-group-body" id="body-grp-analytics">
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Ridership &amp; Revenue</div>
+            <div id="stats-panel"></div>
+          </div>
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Mode Share</div>
+            <div class="mode-row">
+              <div class="mode-info"><span>Transit Link</span><span id="txt-share-transit">2.3%</span></div>
+              <div class="mode-bar-container"><div id="bar-share-transit" class="mode-bar" style="width: 2.3%; background: var(--transit-blue)"></div></div>
+            </div>
+            <div class="mode-row">
+              <div class="mode-info"><span>Highway Commute</span><span id="txt-share-drive">96.5%</span></div>
+              <div class="mode-bar-container"><div id="bar-share-drive" class="mode-bar" style="width: 96.5%; background: var(--drive-red)"></div></div>
+            </div>
+            <div class="mode-row">
+              <div class="mode-info"><span>Pedestrian Link</span><span id="txt-share-walk">1.2%</span></div>
+              <div class="mode-bar-container"><div id="bar-share-walk" class="mode-bar" style="width: 1.2%; background: var(--walk-green)"></div></div>
+            </div>
+          </div>
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Congestion / Flow</div>
+            <div class="chart-container" id="demand-chart"></div>
+          </div>
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Nodes</div>
+            <div id="station-feed-list">
+              <div class="station-card" style="color: var(--text-muted); text-align: center; display: block">No terminals linked.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="selector-btn" onclick="startTutorialSystem(true)" style="margin: 12px 16px; width: calc(100% - 32px); border-color: var(--border-color); color: var(--text-muted); font-size: 11px; padding: 6px; background: transparent; box-sizing: border-box;">
+          🔄 Replay Network Walkthrough
+      </button>
+
+    </div> <div id="main-workspace">
       <div id="canvas-container">
         <canvas id="gameCanvas"></canvas>
         <div id="tooltip"></div>
+        <div id="station-inspector">
+          <div class="si-header">
+            <div>
+              <div class="si-title" id="si-name">Station Name</div>
+              <div class="si-subtitle" id="si-subtitle">Terminal #0</div>
+            </div>
+            <div class="si-close" onclick="closeStationInspector()">✕</div>
+          </div>
+
+          <div class="si-row"><span class="si-label">🧍 Passengers</span><span class="si-value" id="si-waiting">0 waiting</span></div>
+
+          <div class="si-row"><span class="si-label">📈 Capacity</span><span class="si-value" id="si-capacity">0%</span></div>
+          <div class="si-cap-bar-container"><div id="si-capacity-bar" class="si-cap-bar" style="width:0%; background:var(--transit-blue);"></div></div>
+
+          <div class="si-row" style="align-items:flex-start;">
+            <span class="si-label">🚈 Connected Lines</span>
+            <div class="si-lines" id="si-lines"><span style="color:var(--text-muted); font-size:11px;">None</span></div>
+          </div>
+
+          <div class="si-row"><span class="si-label">💰 Revenue Today</span><span class="si-value" id="si-revenue" style="color:#4ade80;">$0</span></div>
+          <div class="si-row"><span class="si-label">🏘️ Nearby Population</span><span class="si-value" id="si-population">0</span></div>
+
+          <div class="si-actions">
+            <button class="si-btn upgrade" id="si-btn-upgrade" onclick="inspectorUpgrade()">⬆ Upgrade Platform</button>
+            <button class="si-btn" onclick="inspectorRename()">✏️ Rename</button>
+            <button class="si-btn delete" onclick="inspectorDelete()">🗑 Delete</button>
+          </div>
+        </div>
       </div>
+      
       <div id="playback-strip">
         <div id="mouse-coords" style="min-width: 180px; text-align: right; font-family: monospace; color: #7dd3fc; font-size: 12px">X: 0 Y: 0</div>
         <div class="strip-section">
@@ -193,33 +393,306 @@
       </div>
     </div>
 
+    <div id="tutBackdrop" class="tutorial-backdrop" onclick="/* Prevent dismissal clicking outside */"></div>
+    <div id="tutHighlightBox" class="tutorial-highlight-box"></div>
+    
+    <div id="tutCard" class="tutorial-card">
+      <div class="tutorial-card-header">
+        <div class="tutorial-card-title">
+          <span id="tutCardIcon">🗺️</span>
+          <span id="tutCardTitle">Tutorial Step</span>
+        </div>
+        <span class="tutorial-progress-pill" id="tutCardBadge">1 / 5</span>
+      </div>
+      <div class="tutorial-card-body" id="tutCardBody">
+        Step description goes here...
+      </div>
+      <div class="tutorial-card-footer">
+        <button class="tut-link-btn" onclick="abortTutorial()">Skip Setup</button>
+        <div class="tut-action-group">
+          <button class="tut-nav-btn" id="tutBtnBack" onclick="stepBackTutorial()">Back</button>
+          <button class="tut-nav-btn primary-action" id="tutBtnNext" onclick="stepNextTutorial()">Next</button>
+        </div>
+      </div>
+    </div>
+
     <script>
+      // --- TUTORIAL LOGIC ---
+      const systemTutorialSteps = [
+          {
+              title: "Welcome Director!",
+              icon: "🗺️",
+              targetSelector: null,
+              placement: "center",
+              body: `Welcome to the <b>DFW Regional Metroplex Simulation Engine</b>. You are in control of laying out transit routes, scheduling heavy rail assets, and modernizing platforms across North Texas.<br><br>Let's take a quick architectural tour of your control interfaces.`,
+              onEnter: () => { if (typeof simSpeed !== 'undefined') setSpeed(0); } // pause sim
+          },
+          {
+              title: "The Sandbox Workspace",
+              icon: "👁️",
+              targetSelector: "#canvas-container",
+              placement: "inside-bottom",
+              body: `This is your primary visual projection matrix. You can <b>Right-Click + Drag</b> to pan around Dallas, Fort Worth, Arlington, and DFW Airport. Use your <b>Scroll Wheel</b> to focus zoom on target sub-regions.<br><br>Populations continuously compute trip targets across this space in real time.`
+          },
+          {
+              title: "Temporal Controls",
+              icon: "⏱️",
+              targetSelector: "#playback-strip",
+              placement: "top",
+              body: `Manage simulation velocity here. You can toggle live operations or fast-forward processing scales up to <b>4x speeds</b> to monitor infrastructure performance during peak transit commute rush hours.`
+          },
+          {
+              title: "Infrastructure Engineering Options",
+              icon: "🚧",
+              targetSelector: "#grp-build", 
+              placement: "right",
+              body: `Use this panel to adjust your track elevation configurations (Level, Above Ground, Underground) and track cross-sections. This is where you configure engineering blueprints.`,
+              onEnter: () => { openSection('grp-build'); },
+              onLeave: () => { closeSection('grp-build'); }
+          },
+          {
+              title: "Telemetry & Budget Matrix",
+              icon: "📊",
+              targetSelector: "#grp-analytics", 
+              placement: "right",
+              body: `Your operational health is displayed here. Track your <b>Real-time Transit Mode Share</b>, active ridership data, and view line performance charts to spot congestion bottlenecks.`,
+              onEnter: () => { openSection('grp-analytics'); },
+              onLeave: () => { closeSection('grp-analytics'); }
+          }
+      ];
+
+      let activeTutIndex = 0;
+      let previousTutIndex = -1;
+      const TUTORIAL_STORAGE_KEY = "dfw_simulation_tutorial_completed";
+
+      function startTutorialSystem(forceRestart = false) {
+          if (localStorage.getItem(TUTORIAL_STORAGE_KEY) === "true" && !forceRestart) {
+              console.log("Tutorial skipped: User has already completed it previously.");
+              return;
+          }
+          activeTutIndex = 0; previousTutIndex = -1;
+          document.getElementById('tutBackdrop').style.display = 'block';
+          document.getElementById('tutHighlightBox').style.display = 'block';
+          document.getElementById('tutCard').style.display = 'flex';
+          renderActiveTutorialStep();
+      }
+
+      function renderActiveTutorialStep() {
+          const step = systemTutorialSteps[activeTutIndex];
+          const prevStep = systemTutorialSteps[previousTutIndex];
+
+          if (prevStep && typeof prevStep.onLeave === 'function') { prevStep.onLeave(); }
+          previousTutIndex = activeTutIndex;
+
+          if (!step) return;
+          if (typeof step.onEnter === 'function') { step.onEnter(); }
+
+          document.getElementById('tutCardTitle').textContent = step.title;
+          document.getElementById('tutCardIcon').textContent = step.icon;
+          document.getElementById('tutCardBody').innerHTML = step.body;
+          document.getElementById('tutCardBadge').textContent = `${activeTutIndex + 1} / ${systemTutorialSteps.length}`;
+
+          const backBtn = document.getElementById('tutBtnBack');
+          const nextBtn = document.getElementById('tutBtnNext');
+          
+          backBtn.disabled = activeTutIndex === 0;
+          nextBtn.textContent = (activeTutIndex === systemTutorialSteps.length - 1) ? "Initialize Matrix" : "Next";
+
+          const highlightBox = document.getElementById('tutHighlightBox');
+          const card = document.getElementById('tutCard');
+          card.className = "tutorial-card";
+
+          if (!step.targetSelector) {
+              highlightBox.style.width = "0px"; highlightBox.style.height = "0px";
+              highlightBox.style.top = "50%"; highlightBox.style.left = "50%";
+              card.style.top = "50%"; card.style.left = "50%";
+              card.style.transform = "translate(-50%, -50%)";
+          } else {
+              setTimeout(() => {
+                  const element = document.querySelector(step.targetSelector);
+                  if (element) {
+                      const rect = element.getBoundingClientRect();
+                      const padding = 6;
+                      
+                      highlightBox.style.top = `${rect.top - padding}px`;
+                      highlightBox.style.left = `${rect.left - padding}px`;
+                      highlightBox.style.width = `${rect.width + (padding * 2)}px`;
+                      highlightBox.style.height = `${rect.height + (padding * 2)}px`;
+                      card.style.transform = "none";
+                      
+                      const cardWidth = 420;
+                      const cardHeight = card.offsetHeight > 0 ? card.offsetHeight : 210; 
+
+                      if (step.placement === "top") {
+                          card.style.top = `${Math.max(20, rect.top - cardHeight - 20)}px`;
+                          card.style.left = `${rect.left + (rect.width / 2) - (cardWidth / 2)}px`;
+                          card.classList.add("arrow-bottom");
+                      } else if (step.placement === "bottom") {
+                          card.style.top = `${rect.bottom + 20}px`;
+                          card.style.left = `${rect.left + (rect.width / 2) - (cardWidth / 2)}px`;
+                          card.classList.add("arrow-top");
+                      } else if (step.placement === "right") {
+                          const targetTop = rect.top + (rect.height / 2) - (cardHeight / 2);
+                          card.style.top = `${Math.max(20, Math.min(window.innerHeight - cardHeight - 20, targetTop))}px`;
+                          card.style.left = `${rect.right + 20}px`;
+                          card.classList.add("arrow-left");
+                      } else if (step.placement === "left") {
+                          const targetTop = rect.top + (rect.height / 2) - (cardHeight / 2);
+                          card.style.top = `${Math.max(20, Math.min(window.innerHeight - cardHeight - 20, targetTop))}px`;
+                          card.style.left = `${rect.left - cardWidth - 20}px`;
+                          card.classList.add("arrow-right");
+                      } else if (step.placement === "inside-bottom") {
+                          card.style.top = `${rect.bottom - cardHeight - 40}px`;
+                          card.style.left = `${rect.left + (rect.width / 2) - (cardWidth / 2)}px`;
+                      }
+                  } else {
+                      card.style.top = "50%"; card.style.left = "50%";
+                      card.style.transform = "translate(-50%, -50%)";
+                  }
+              }, 50); 
+          }
+      }
+
+      function stepNextTutorial() {
+          if (activeTutIndex < systemTutorialSteps.length - 1) {
+              activeTutIndex++; renderActiveTutorialStep();
+          } else { completeTutorial(); }
+      }
+
+      function stepBackTutorial() {
+          if (activeTutIndex > 0) {
+              activeTutIndex--; renderActiveTutorialStep();
+          }
+      }
+
+      function abortTutorial() {
+          if(confirm("Are you sure you want to exit the system interface breakdown tutorial?")) { completeTutorial(); }
+      }
+
+      function completeTutorial() {
+          const lastStep = systemTutorialSteps[activeTutIndex];
+          if (lastStep && typeof lastStep.onLeave === 'function') lastStep.onLeave();
+          previousTutIndex = -1; 
+          
+          localStorage.setItem(TUTORIAL_STORAGE_KEY, "true");
+          document.getElementById('tutBackdrop').style.display = 'none';
+          document.getElementById('tutHighlightBox').style.display = 'none';
+          document.getElementById('tutCard').style.display = 'none';
+          setSpeed(1); // Resume normal speed
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+          setTimeout(() => { startTutorialSystem(false); }, 600);
+      });
+
+      // --- ENGINE / SIMULATION LOGIC ---
       const canvas  = document.getElementById('gameCanvas');
       const ctx     = canvas.getContext('2d');
       const tooltip = document.getElementById('tooltip');
       const STATION_BASE_COST = 250000;
       
       let budget=50000000, mode='pan', ticketFare=2.50, simSpeed=1;
-      
-      // --- NEW BANKING SYSTEM VARIABLES ---
       let currentDebt = 0;
       const LOAN_INCREMENT = 250000;         
       const DAILY_INTEREST_RATE = 0.005; 
 
-      // --- NEW CONNECTION BONUSES ---
       const LOCATION_BONUSES = {
           "DFW Intl Airport": { claimed: false, amount: 5000000, msg: "DFW Airport Connection Grant" },
           "Downtown Dallas": { claimed: false, amount: 3500000, msg: "Dallas Core Infrastructure Grant" },
           "Downtown Fort Worth": { claimed: false, amount: 3000000, msg: "Fort Worth Core Infrastructure Grant" },
           "Universal Kids Resort": { claimed: false, amount: 2000000, msg: "Frisco Entertainment Tourism Grant" },
           "Texas Motor Speedway": { claimed: false, amount: 1500000, msg: "TMS Event Routing Subsidy" },
-          "Love Field": { claimed: false, amount: 2000000, msg: "Love Field Connection Grant" }
+          "Love Field": { claimed: false, amount: 2000000, msg: "Love Field Connection Grant" },
+          "Downtown Plano": { claimed: false, amount: 2500000, msg: "Plano Urban Transit Corridor Grant" },
+          "UT Dallas": { claimed: false, amount: 2000000, msg: "University Research Link Subsidy" },
+          "Downtown Denton": { claimed: false, amount: 3000000, msg: "Denton County Connectivity Initiative" },
+          "Fort Worth Stockyards": { claimed: false, amount: 1500000, msg: "Stockyards Tourism Heritage Rail Grant" },
+          "Uptown Dallas": { claimed: false, amount: 2500000, msg: "Uptown High-Density Transit Grant" },
+          "Stonebriar Mall": { claimed: false, amount: 1800000, msg: "Frisco Retail Congestion Mitigation Grant" }
       };
+
+      let grantsCollapsed = false;
+      let collapsedNavGroups = { 'grp-build': true, 'grp-operations': true, 'grp-economy': true, 'grp-analytics': true };
+
+      function toggleSection(groupId) {
+          if (collapsedNavGroups[groupId]) openSection(groupId);
+          else closeSection(groupId);
+      }
+
+      function openSection(groupId) {
+          const body = document.getElementById('body-' + groupId);
+          const arrow = document.getElementById('arrow-' + groupId);
+          if (body && arrow) {
+              body.style.display = 'flex';
+              arrow.style.transform = 'rotate(0deg)';
+              collapsedNavGroups[groupId] = false;
+          }
+      }
+
+      function closeSection(groupId) {
+          const body = document.getElementById('body-' + groupId);
+          const arrow = document.getElementById('arrow-' + groupId);
+          if (body && arrow) {
+              body.style.display = 'none';
+              arrow.style.transform = 'rotate(-90deg)';
+              collapsedNavGroups[groupId] = true;
+          }
+      }
+
+      function toggleGrants() {
+          const panel = document.getElementById('bonus-list');
+          const arrow = document.getElementById('grants-toggle-arrow');
+          grantsCollapsed = !grantsCollapsed;
+          
+          if (grantsCollapsed) {
+              panel.style.display = 'none';
+              arrow.style.transform = 'rotate(-90deg)';
+          } else {
+              panel.style.display = 'flex';
+              arrow.style.transform = 'rotate(0deg)';
+          }
+      }
 
       let gameTime = { min: 0, hour: 6, day: 1, month: 1, year: 2026 };      
       let camera={x:0,y:0}, zoom=0.42;
       const MIN_ZOOM=0.01, MAX_ZOOM=15.0;
-      let isPanning=false, startPan={x:0,y:0}, mouseWorldPos={x:0,y:0};
+      let isPanning=false, startPan={x:0,y:0}, mouseWorldPos={x:0,y:0}, mouseDownPos=null;
+      let selectedStation = null;
+      const STATION_UPGRADE_COSTS = [500000, 1000000, 2000000];
+
+      function colorName(hex) {
+          const known = {
+              '#38bdf8':'Blue', '#3b82f6':'Blue', '#0ea5e9':'Sky', '#2563eb':'Blue',
+              '#10b981':'Green', '#22c55e':'Green', '#84cc16':'Lime', '#16a34a':'Green',
+              '#ef4444':'Red', '#f87171':'Red', '#dc2626':'Red',
+              '#a855f7':'Purple', '#8b5cf6':'Violet', '#7c3aed':'Violet',
+              '#f97316':'Orange', '#fb923c':'Orange',
+              '#eab308':'Yellow', '#facc15':'Yellow',
+              '#ec4899':'Pink', '#f472b6':'Pink',
+              '#14b8a6':'Teal', '#06b6d4':'Cyan',
+              '#64748b':'Slate', '#78716c':'Stone', '#ffffff':'White', '#000000':'Black'
+          };
+          const key = (hex || '').toLowerCase();
+          if (known[key]) return known[key];
+          if (!/^#[0-9a-f]{6}$/.test(key)) return 'Line';
+          const r = parseInt(key.slice(1,3),16)/255, g = parseInt(key.slice(3,5),16)/255, b = parseInt(key.slice(5,7),16)/255;
+          const max = Math.max(r,g,b), min = Math.min(r,g,b), l = (max+min)/2;
+          if (max - min < 0.08) return l > 0.8 ? 'White' : (l < 0.2 ? 'Black' : 'Gray');
+          let h;
+          if (max === r) h = ((g-b)/(max-min)) % 6;
+          else if (max === g) h = (b-r)/(max-min) + 2;
+          else h = (r-g)/(max-min) + 4;
+          h = Math.round(h*60); if (h < 0) h += 360;
+          if (h < 15 || h >= 345) return 'Red';
+          if (h < 45) return 'Orange';
+          if (h < 70) return 'Yellow';
+          if (h < 170) return 'Green';
+          if (h < 200) return 'Teal';
+          if (h < 255) return 'Blue';
+          if (h < 290) return 'Purple';
+          if (h < 345) return 'Pink';
+          return 'Line';
+      }
       let neighborhoods=[], stations=[], tracks=[], commuters=[], trains=[], routes=[], depots=[];
       let activeTrackBuild=null, selectedElevationProfile='level', selectedTrackWay='single', crossoverSystemEnabled=false;
       let activeColor = '#38bdf8';
@@ -258,7 +731,6 @@
           1.20, 0.80, 0.50, 0.35, 0.25, 0.15  // 18:00 - 23:00
       ];
 
-      // --- CRITICAL FIX: Restored HUD Logic for Financial Sync ---
       function updateHUD() {
           const lblBudget = document.getElementById('lbl-budget');
           if (lblBudget) lblBudget.textContent = '$' + Math.floor(budget).toLocaleString();
@@ -277,7 +749,8 @@
               }
           }
       }
-function updateBonusPanel() {
+
+      function updateBonusPanel() {
           const container = document.getElementById('bonus-list');
           if (!container) return;
           container.innerHTML = '';
@@ -301,7 +774,7 @@ function updateBonusPanel() {
               container.innerHTML = '<div class="station-card" style="color:var(--text-muted);text-align:center;display:block;">All regional grants claimed!</div>';
           }
       }
-      // --- BANKING LOGIC ---
+
       function takeLoan() {
           currentDebt += LOAN_INCREMENT;
           budget += LOAN_INCREMENT;
@@ -362,6 +835,33 @@ function updateBonusPanel() {
           return list[list.length - 1];
       }
 
+const ambientSounds = {
+  city: { 
+    active: false, 
+    // Example direct links from Freesound.org
+    sound: new Audio('https://freesound.org/data/previews/512/512534_11177699-lq.mp3') 
+  },
+  crowd: { 
+    active: false, 
+    sound: new Audio('https://freesound.org/data/previews/483/483259_773322-lq.mp3') 
+  }
+};
+
+function toggleAudio(key) {
+  const layer = ambientSounds[key];
+  const btn = document.getElementById(`audio-${key}`);
+  
+  layer.active = !layer.active;
+  btn.classList.toggle('active');
+  
+  if (layer.active) {
+    layer.sound.loop = true;
+    layer.sound.play().catch(e => console.log("Audio play failed:", e));
+  } else {
+    layer.sound.pause();
+    layer.sound.currentTime = 0;
+  }
+}
       function drawHighwayLabels() {
           ctx.save();
           ctx.textAlign = "center";
@@ -444,6 +944,10 @@ function updateBonusPanel() {
 
       const LOCATIONS = [
           [26.7,160.8,"Downtown Dallas","Dallas","OFFICE",18000,165000,8000,45000,30000], [-240.6,8.0,"DFW Intl Airport","Dallas","AIRPORT",500,65000,0,5000,12000],
+          [-168.7,-132.2,"Music City Mall","Lewisville","SHOPPING",800,2200,0,18000,2500],
+          [81.5,-13.4,"Texas Instruments","Richardson","OFFICE",1000,12000,0,500,200],
+          [-276.7,344.2,"Tarrant County College Southeast","Arlington","UNIVERSITY",1800,700,9000,150,350],
+          [-517.8,300.6,"Tarrant County College South","Fort Worth","UNIVERSITY",1800,700,10000,150,350],
           [-25.1,74.1,"Love Field","Dallas","AIRPORT",200,18000,0,2000,5000], [11.5,-261.5,"Stonebriar Mall","Frisco","MALL",2000,4500,0,35000,12000],
           [-6.9,-276.6,"The Star","Frisco","SPORTS",1200,12000,0,15000,40000], [-8.4,-331.8,"Downtown Frisco","Frisco","DOWNTOWN",18000,22000,1500,12000,8000],
           [-42.5,-225.1,"Grandscape","The Colony","ENTERTAINMENT",800,7000,0,28000,42000], [-5.2,-233.4,"Legacy West","Plano","OFFICE",3500,60000,0,22000,12000],
@@ -486,6 +990,22 @@ function updateBonusPanel() {
           [339.4,39.8,"Sapphire Bay","Rowlett","ENTERTAINMENT",1200,3500,0,12000,25000], [69.4,370.3,"Dallas College Cedar Valley","Lancaster","UNIVERSITY",2200,800,9000,200,500],
           [-125.6,388.3,"Hillside Village","Cedar Hill","SHOPPING",800,1800,0,14000,2500], [-627.7,88.4,"Tarrant County College Northwest","Fort Worth","UNIVERSITY",1800,700,9000,150,400],
           [-558.2,48.2,"BNSF Railway HQ","Fort Worth","OFFICE",400,3200,0,300,150], [-546.7,-114.4,"Perot Field Fort Worth Alliance Airport","Fort Worth","AIRPORT",300,9000,0,1200,1800],
+          [-59.3,313.2,"Southwest Center Mall","Dallas","SHOPPING",600,1800,0,14000,2500],
+          [27.0,320.4,"University of North Texas at Dallas","Dallas","UNIVERSITY",3500,1200,9000,300,700],
+          [182.4,114.0,"Dallas College Eastfield","Mesquite","UNIVERSITY",2200,900,14000,250,600],
+          [186.6,156.0,"Mesquite Intermodal Terminal","Mesquite","INDUSTRIAL",200,3500,0,300,100],
+          [69.0,24.6,"Presbyterian Dallas","Dallas","MEDICAL",1800,9000,1200,500,1200],
+          [-425.9,-116.9,"Charles Schwab Campus","Westlake","OFFICE",500,7000,0,400,200],
+          [-409.1,-99.5,"Fidelity Investments Campus","Westlake","OFFICE",500,6500,0,400,200],
+          [-579.7,152.4,"Fort Worth Stockyards","Fort Worth","ENTERTAINMENT",1200,3000,0,12000,30000],
+          [-571.9,189.0,"Panther Island","Fort Worth","MIXED_USE",2500,4500,0,6000,8000],
+          [-596.5,204.0,"Will Rogers Memorial Center","Fort Worth","ATTRACTION",300,2200,0,5000,18000],
+          [-453.5,-131.3,"Downtown Roanoke","Roanoke","DOWNTOWN",9000,5000,300,2500,1800],
+          [39.7,274.8,"VA North Texas Medical Center","Dallas","MEDICAL",1200,4500,800,300,700],
+          [129.0,-99.5,"Galatyn Park","Richardson","OFFICE",2500,18000,0,1800,600],
+          [189.6,-413.3,"Raytheon","McKinney","INDUSTRIAL",300,6000,0,300,100],
+          [272.4,-506.4,"Downtown Melissa","Melissa","DOWNTOWN",7000,2500,200,1000,600],
+          [26.5,-445.7,"Downtown Prosper","Prosper","DOWNTOWN",9000,3500,300,1500,900],
           [24.4,129.2,"Uptown Dallas","Dallas","MIXED_USE",12000,35000,0,14000,12000], [32.2,106.4,"West Village","Dallas","MIXED_USE",3500,4500,0,10000,15000],
           [18.4,145.9,"Victory Plaza","Dallas","ENTERTAINMENT",300,2500,0,5000,35000]
       ];
@@ -545,7 +1065,6 @@ function updateBonusPanel() {
                   case "STUDENT": school = chooseDestination(home, "students", 180); break;
               }
 
-              // --- ECONOMY TWEAK: Boosted Base Transit Preference ---
               let transitPreference = 0.20; 
               if(home.city==="Dallas") transitPreference += 0.10;
               if(home.type==="DOWNTOWN") transitPreference += 0.15;
@@ -608,8 +1127,7 @@ function updateBonusPanel() {
 
       function buildTelemetryCharts() {
           const chart = document.getElementById('demand-chart');
-          if (!chart) return; // Exit if the element doesn't exist
-
+          if (!chart) return; 
           chart.innerHTML = ''; 
           [15, 20, 35, 55, 85, 95, 75, 45, 40, 50, 65, 80, 90, 60, 35, 25, 20, 15, 10, 5].forEach(v => {
               const b = document.createElement('div');
@@ -617,6 +1135,91 @@ function updateBonusPanel() {
               b.style.height = `${v}%`;
               chart.appendChild(b);
           });
+      }
+
+      function openStationInspector(s) {
+          selectedStation = s;
+          document.getElementById('station-inspector').classList.add('open');
+          refreshStationInspector();
+      }
+
+      function closeStationInspector() {
+          selectedStation = null;
+          document.getElementById('station-inspector').classList.remove('open');
+      }
+
+      function refreshStationInspector() {
+          const panel = document.getElementById('station-inspector');
+          if (!selectedStation || !stations.includes(selectedStation)) { closeStationInspector(); return; }
+          const s = selectedStation;
+
+          document.getElementById('si-name').textContent = s.name;
+          document.getElementById('si-subtitle').textContent = `Terminal #${s.id} · Platform Lv. ${s.upgradeLevel || 0}`;
+          document.getElementById('si-waiting').textContent = `${(s.waiting || 0).toLocaleString()} waiting`;
+
+          const servingTrains = trains.filter(t => t.pathNodes && t.pathNodes.some(n => n.station === s));
+          let capacityPct;
+          if (servingTrains.length) {
+              capacityPct = Math.round(servingTrains.reduce((a,t) => a + (t.riders.length / (t.capacity || 120)), 0) / servingTrains.length * 100);
+          } else {
+              capacityPct = Math.min(100, Math.round(((s.waiting || 0) / 40) * 100));
+          }
+          capacityPct = Math.max(0, Math.min(100, capacityPct));
+          document.getElementById('si-capacity').textContent = `${capacityPct}%`;
+          const capBar = document.getElementById('si-capacity-bar');
+          capBar.style.width = `${capacityPct}%`;
+          capBar.style.background = capacityPct > 85 ? '#ef4444' : (capacityPct > 60 ? '#fbbf24' : 'var(--transit-blue)');
+
+          const lineColors = [...new Set(tracks.filter(t => t.startStation === s || t.endStation === s).map(t => t.color))];
+          const linesEl = document.getElementById('si-lines');
+          linesEl.innerHTML = lineColors.length
+              ? lineColors.map(c => `<span class="si-line-chip"><span class="si-line-dot" style="background:${c}"></span>${colorName(c)}</span>`).join('')
+              : `<span style="color:var(--text-muted); font-size:11px;">None</span>`;
+
+          document.getElementById('si-revenue').textContent = `$${Math.round(s.revenueToday || 0).toLocaleString()}`;
+
+          const nearby = neighborhoods.filter(n => Math.hypot(n.x - s.x, n.y - s.y) < 250);
+          const population = nearby.reduce((a,n) => a + n.residents, 0);
+          document.getElementById('si-population').textContent = Math.round(population).toLocaleString();
+
+          const lvl = s.upgradeLevel || 0;
+          const btn = document.getElementById('si-btn-upgrade');
+          if (lvl >= STATION_UPGRADE_COSTS.length) {
+              btn.textContent = `⬆ Platform Maxed (Lv. ${lvl})`;
+              btn.classList.add('maxed'); btn.disabled = true;
+          } else {
+              const cost = STATION_UPGRADE_COSTS[lvl];
+              btn.textContent = `⬆ Upgrade Platform · $${cost.toLocaleString()}`;
+              btn.classList.remove('maxed'); btn.disabled = false;
+          }
+      }
+
+      function inspectorUpgrade() {
+          if (!selectedStation) return;
+          const s = selectedStation; const lvl = s.upgradeLevel || 0;
+          if (lvl >= STATION_UPGRADE_COSTS.length) return;
+          const cost = STATION_UPGRADE_COSTS[lvl];
+          if (budget < cost) { flashInsufficientFunds('Insufficient Funds'); return; }
+          budget -= cost; s.upgradeLevel = lvl + 1;
+          updateHUD(); refreshStationInspector();
+          showNotification(`⬆ ${s.name} platform upgraded to Lv. ${s.upgradeLevel}!`);
+      }
+
+      function inspectorRename() {
+          if (!selectedStation) return;
+          const n = prompt('Enter new terminal designation name:', selectedStation.name);
+          if (n && n.trim()) { selectedStation.name = n.trim(); updateTelemetryData(); refreshStationInspector(); }
+      }
+
+      function inspectorDelete() {
+          if (!selectedStation) return;
+          const s = selectedStation;
+          if (!confirm(`Demolish ${s.name}? You will recover 50% of the station cost.`)) return;
+          budget += Math.floor(STATION_BASE_COST * 0.5);
+          tracks = tracks.filter(t => t.startStation !== s && t.endStation !== s);
+          stations = stations.filter(st => st !== s);
+          closeStationInspector();
+          updateHUD(); manageTrainsRealtime(); updateTelemetryData(); setupLineSelectorUI();
       }
 
       function updateTelemetryData(){
@@ -688,6 +1291,7 @@ function updateBonusPanel() {
           });
           updateFleetPanel();
           updateStatsPanel();
+          refreshStationInspector();
       }
 
       function updateStatsPanel() {
@@ -1046,7 +1650,7 @@ function updateBonusPanel() {
           while (gameTime.hour >= 24) {
               gameTime.hour -= 24; gameTime.day += 1;
               if (!gameOver) { applyDailyOpEx(); applyDailyCityGrowth(); }
-              dailyRiders = 0; fareRevenueToday = 0;
+              dailyRiders = 0; fareRevenueToday = 0; stations.forEach(s => s.revenueToday = 0);
           }
           while (gameTime.day > 30) { gameTime.day -= 30; gameTime.month += 1; }
           while (gameTime.month > 12) { gameTime.month -= 12; gameTime.year += 1; }
@@ -1108,6 +1712,7 @@ function updateBonusPanel() {
 
               budget += ticketFare;
               fareRevenueToday += ticketFare;
+              origin.revenueToday = (origin.revenueToday || 0) + ticketFare;
               dailyRiders++; lifetimeRiders++;
               updateHUD();
           });
@@ -1173,7 +1778,7 @@ function updateBonusPanel() {
                           t.riders = stayRiders;
 
                           const capacity = t.capacity || 120;
-                          let space = capacity - t.riders.length; let trackedBoarded = 0;
+                          let space = capacity - t.riders.length + ((cs.upgradeLevel || 0) * 8); let trackedBoarded = 0;
                           if (cs.queue && cs.queue.length && space > 0) {
                               const remainingQueue = [];
                               cs.queue.forEach(c => {
@@ -1204,6 +1809,7 @@ function updateBonusPanel() {
 
                           if (anonymousBoarded > 0) {
                               budget += anonymousBoarded * ticketFare; fareRevenueToday += anonymousBoarded * ticketFare;
+                              cs.revenueToday = (cs.revenueToday || 0) + anonymousBoarded * ticketFare;
                           }
                           updateHUD();
                       }
@@ -1306,9 +1912,9 @@ function updateBonusPanel() {
               const zc = ZONING[n.type] || ZONING.RESIDENTIAL; const r = n.size * sm;
               ctx.fillStyle = zc.color; ctx.strokeStyle = zc.stroke; ctx.lineWidth = 0.5;
               ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-if (LOCATION_BONUSES[n.name] && !LOCATION_BONUSES[n.name].claimed) {
-                  const pulse = 1 + Math.sin(Date.now() / 300) * 0.2; // Creates a gentle pulsing effect
-                  ctx.strokeStyle = "rgba(251, 191, 36, 0.9)"; // Gold color
+              if (LOCATION_BONUSES[n.name] && !LOCATION_BONUSES[n.name].claimed) {
+                  const pulse = 1 + Math.sin(Date.now() / 300) * 0.2;
+                  ctx.strokeStyle = "rgba(251, 191, 36, 0.9)";
                   ctx.lineWidth = 1.0;
                   ctx.beginPath(); 
                   ctx.arc(n.x, n.y, (r + 2) * pulse, 0, Math.PI * 2); 
@@ -1370,63 +1976,63 @@ if (LOCATION_BONUSES[n.name] && !LOCATION_BONUSES[n.name].claimed) {
       }
 
       function onMouseDown(e) {
-    const p = getPos(e); 
+          const p = getPos(e); 
+          mouseDownPos = { x: p.screenX, y: p.screenY };
 
-    if (mode === 'pan') { 
-        isPanning = true; startPan = { x: p.screenX, y: p.screenY }; 
-    } 
-    else if (mode === 'depot') {
-        if (gameOver) return;
-        if (budget >= DEPOT_COST) {
-            budget -= DEPOT_COST; depots.push({ id: depots.length + 1, x: p.worldX, y: p.worldY });
-            updateHUD(); updateFleetPanel();
-        } else { flashInsufficientFunds('Insufficient Funds'); }
-    }
-    else if (mode === 'station') {
-        if (budget >= STATION_BASE_COST) {
-            budget -= STATION_BASE_COST; 
-            let near = null, md = Infinity;
-            neighborhoods.forEach(n => { const d = Math.hypot(n.x - p.worldX, n.y - p.worldY); if (d < md) { md = d; near = n; } });
-            
-            const label = near && md < 180 ? near.name : `Terminal ${stations.length + 1}`;
-            stations.push({ id: stations.length + 1, x: p.worldX, y: p.worldY, name: label, waiting: 0, queue: [], ridersBoarded: 0, boardings: 0 });
-            updateHUD(); updateTelemetryData();
-        }
-    } 
-    else if (mode === 'track') {
-        const CLICK_THRESHOLD = 22 / Math.sqrt(zoom);
-        const clicked = stations.find(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < CLICK_THRESHOLD);
-        if (!activeTrackBuild) { 
-            if (clicked) { activeTrackBuild = { startStation: clicked, waypoints: [] }; }
-        } else {
-            if (clicked && clicked !== activeTrackBuild.startStation) {
-                const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
-                const cost = calculateTrackCost(last, clicked, selectedElevationProfile, selectedTrackWay);
-                if (budget >= cost) { 
-                    budget -= cost; 
-                    tracks.push({ startStation: activeTrackBuild.startStation, endStation: clicked, waypoints: activeTrackBuild.waypoints, color: activeColor, elevation: selectedElevationProfile, wayConfig: selectedTrackWay, crossover: crossoverSystemEnabled }); 
-                    
-                    [activeTrackBuild.startStation, clicked].forEach(st => {
-                        const bonus = LOCATION_BONUSES[st.name];
-                        if (bonus && !bonus.claimed) {
-                            bonus.claimed = true;
-                            budget += bonus.amount;
-                            showNotification(`🎉 ${bonus.msg}: +$${(bonus.amount).toLocaleString()}!`);
-                            // --- CALL REFRESH HERE ---
-                            updateBonusPanel(); 
-                        }
-                    });
+          if (mode === 'pan') { 
+              isPanning = true; startPan = { x: p.screenX, y: p.screenY }; 
+          } 
+          else if (mode === 'depot') {
+              if (gameOver) return;
+              if (budget >= DEPOT_COST) {
+                  budget -= DEPOT_COST; depots.push({ id: depots.length + 1, x: p.worldX, y: p.worldY });
+                  updateHUD(); updateFleetPanel();
+              } else { flashInsufficientFunds('Insufficient Funds'); }
+          }
+          else if (mode === 'station') {
+              if (budget >= STATION_BASE_COST) {
+                  budget -= STATION_BASE_COST; 
+                  let near = null, md = Infinity;
+                  neighborhoods.forEach(n => { const d = Math.hypot(n.x - p.worldX, n.y - p.worldY); if (d < md) { md = d; near = n; } });
+                  
+                  const label = near && md < 180 ? near.name : `Terminal ${stations.length + 1}`;
+                  stations.push({ id: stations.length + 1, x: p.worldX, y: p.worldY, name: label, waiting: 0, queue: [], ridersBoarded: 0, boardings: 0 });
+                  updateHUD(); updateTelemetryData();
+              }
+          } 
+          else if (mode === 'track') {
+              const CLICK_THRESHOLD = 22 / Math.sqrt(zoom);
+              const clicked = stations.find(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < CLICK_THRESHOLD);
+              if (!activeTrackBuild) { 
+                  if (clicked) { activeTrackBuild = { startStation: clicked, waypoints: [] }; }
+              } else {
+                  if (clicked && clicked !== activeTrackBuild.startStation) {
+                      const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
+                      const cost = calculateTrackCost(last, clicked, selectedElevationProfile, selectedTrackWay);
+                      if (budget >= cost) { 
+                          budget -= cost; 
+                          tracks.push({ startStation: activeTrackBuild.startStation, endStation: clicked, waypoints: activeTrackBuild.waypoints, color: activeColor, elevation: selectedElevationProfile, wayConfig: selectedTrackWay, crossover: crossoverSystemEnabled }); 
+                          
+                          [activeTrackBuild.startStation, clicked].forEach(st => {
+                              const bonus = LOCATION_BONUSES[st.name];
+                              if (bonus && !bonus.claimed) {
+                                  bonus.claimed = true;
+                                  budget += bonus.amount;
+                                  showNotification(`🎉 ${bonus.msg}: +$${(bonus.amount).toLocaleString()}!`);
+                                  updateBonusPanel(); 
+                              }
+                          });
 
-                    activeTrackBuild = null; 
-                    updateHUD(); manageTrainsRealtime(); 
-                } else { alert('Insufficient structural configuration funds!'); }
-            } else if (!clicked) {
-                const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
-                const cost = calculateTrackCost(last, { x: p.worldX, y: p.worldY }, selectedElevationProfile, selectedTrackWay);
-                if (budget >= cost) { budget -= cost; activeTrackBuild.waypoints.push({ x: p.worldX, y: p.worldY }); updateHUD(); }
-            }
-        }
-    }
+                          activeTrackBuild = null; 
+                          updateHUD(); manageTrainsRealtime(); 
+                      } else { alert('Insufficient structural configuration funds!'); }
+                  } else if (!clicked) {
+                      const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
+                      const cost = calculateTrackCost(last, { x: p.worldX, y: p.worldY }, selectedElevationProfile, selectedTrackWay);
+                      if (budget >= cost) { budget -= cost; activeTrackBuild.waypoints.push({ x: p.worldX, y: p.worldY }); updateHUD(); }
+                  }
+              }
+          }
           else if (mode === 'rename') {
               const s = stations.find(st => Math.hypot(st.x - p.worldX, st.y - p.worldY) < 22);
               if (s) { const n = prompt('Enter new terminal designation name:', s.name); if (n && n.trim()) s.name = n.trim(); updateTelemetryData(); }
@@ -1522,7 +2128,20 @@ if (LOCATION_BONUSES[n.name] && !LOCATION_BONUSES[n.name].claimed) {
           if (!showingTooltip) { tooltip.style.display = "none"; }
       }
 
-      function onMouseUp(){ isPanning=false; }
+      function onMouseUp(e){
+          isPanning=false;
+          if (mode === 'pan' && mouseDownPos) {
+              const p = getPos(e);
+              const dist = Math.hypot(p.screenX - mouseDownPos.x, p.screenY - mouseDownPos.y);
+              if (dist < 6) {
+                  const CLICK_THRESHOLD = 22 / Math.sqrt(zoom);
+                  const clicked = stations.find(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < CLICK_THRESHOLD);
+                  if (clicked) { openStationInspector(clicked); }
+                  else { closeStationInspector(); }
+              }
+          }
+          mouseDownPos = null;
+      }
       
       function onWheel(e) {
           e.preventDefault();
@@ -1537,7 +2156,7 @@ if (LOCATION_BONUSES[n.name] && !LOCATION_BONUSES[n.name].claimed) {
       function init(){
           resizeCanvas(); window.addEventListener('resize',resizeCanvas);
           generateNodes(); setupLineSelectorUI(); buildTelemetryCharts(); updateFleetPanel();
-updateBonusPanel(); // <-- ADD THIS HERE
+          updateBonusPanel(); 
           camera.x = -canvas.width / (2 * zoom); camera.y = -canvas.height / (2 * zoom);
 
           setInterval(tickSimulationTime,1000/60);
