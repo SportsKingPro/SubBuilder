@@ -20,7 +20,41 @@
           --walk-green: #10b981;
       }
       body { margin:0; background-color:var(--bg-main); color:var(--text-main); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; display:flex; height:100vh; width:100vw; overflow:hidden; user-select:none; }
-      #sidebar { width:340px; background:var(--bg-panel); border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:18px; box-sizing:border-box; gap:16px; overflow-y:auto; z-index:10; }
+
+      #sidebar {
+          position:fixed; top:0; left:0; height:100vh; width:336px;
+          background:linear-gradient(180deg, rgba(18,20,28,0.78), rgba(12,13,18,0.72));
+          backdrop-filter:blur(16px) saturate(140%); -webkit-backdrop-filter:blur(16px) saturate(140%);
+          border-right:1px solid rgba(255,255,255,0.06);
+          box-shadow:6px 0 30px rgba(0,0,0,.45);
+          display:flex; flex-direction:column; padding:16px; box-sizing:border-box; gap:14px;
+          overflow-y:auto; overflow-x:hidden; z-index:40;
+          transition:transform .28s cubic-bezier(.4,0,.2,1), opacity .28s ease;
+          scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.15) transparent;
+      }
+      #sidebar::-webkit-scrollbar { width:6px; }
+      #sidebar::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.12); border-radius:3px; }
+      #sidebar::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.22); }
+      #sidebar.collapsed { transform:translateX(-100%); opacity:0; pointer-events:none; }
+
+      #sidebar-toggle {
+          position:fixed; top:calc(50% - 22px); left:336px; width:22px; height:44px;
+          background:rgba(18,20,28,0.85); backdrop-filter:blur(10px);
+          border:1px solid rgba(255,255,255,0.08); border-left:none;
+          border-radius:0 8px 8px 0; color:var(--text-muted); font-size:12px;
+          display:flex; align-items:center; justify-content:center; cursor:pointer;
+          z-index:41; transition:left .28s cubic-bezier(.4,0,.2,1), color .15s, background .15s;
+          box-shadow:2px 0 12px rgba(0,0,0,.3);
+      }
+      #sidebar-toggle:hover { color:#fff; background:rgba(26,29,41,0.95); }
+      #sidebar-toggle.collapsed { left:0; border-radius:0 8px 8px 0; }
+
+
+
+      .pinned-tools { display:flex; flex-direction:column; gap:12px; padding-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; }
+      .pinned-tools-title { font-size:10px; font-weight:700; letter-spacing:.08em; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px; display:flex; align-items:center; gap:6px; }
+      .tool-btn-grid { display:flex; flex-wrap:wrap; gap:6px; }
+      .tool-btn-grid .btn-action { flex:1 1 auto; min-width:64px; }
       .panel-header { font-size:11px; font-weight:700; letter-spacing:.05em; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; }
       .tab-group { display:flex; background:var(--bg-main); padding:3px; border-radius:6px; border:1px solid var(--border-color); }
       .tab { flex:1; text-align:center; padding:6px; font-size:11px; font-weight:600; border-radius:4px; cursor:pointer; color:var(--text-muted); }
@@ -31,33 +65,64 @@
       #sidebar-brand .brand-icon { font-size:22px; line-height:1; }
       #sidebar-brand .brand-title { font-size:15px; font-weight:800; color:#fff; letter-spacing:.01em; }
       #sidebar-brand .brand-sub { font-size:10px; color:var(--text-muted); margin-top:1px; }
-      .nav-group { border-bottom:1px solid var(--border-color); padding-bottom:14px; }
+      .nav-group { border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:14px; }
       .nav-group:last-child { border-bottom:none; padding-bottom:0; }
-      .nav-group-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:6px 2px; user-select:none; }
+      .nav-group-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:7px 8px; user-select:none; border-radius:6px; transition:background .15s; margin:0 -8px; }
+      .nav-group-header:hover { background:rgba(255,255,255,0.05); }
       .nav-group-header .label { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:#fff; }
       
       /* Accordion fixes - start closed */
       .nav-group-header .arrow { font-size:10px; color:var(--text-muted); transition:transform .2s; transform: rotate(-90deg); }
-      .nav-group-body { display:none; flex-direction:column; gap:14px; overflow:hidden; padding-top:4px; }
+      .nav-group-body { display:none; flex-direction:column; gap:14px; overflow:hidden; padding-top:6px; }
       
       .nav-subsection { display:flex; flex-direction:column; }
       .nav-subsection-title { font-size:10px; font-weight:700; letter-spacing:.05em; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; padding-left:2px; }
       .selector-row { display:flex; gap:4px; margin-top:4px; }
-      .selector-btn { flex:1; background:var(--bg-main); border:1px solid var(--border-color); color:var(--text-muted); padding:6px 4px; font-size:11px; border-radius:4px; cursor:pointer; font-weight:500; text-align:center; transition:all .2s; }
+      .selector-btn { flex:1; background:rgba(12,13,18,0.55); border:1px solid rgba(255,255,255,0.08); color:var(--text-muted); padding:6px 4px; font-size:11px; border-radius:4px; cursor:pointer; font-weight:500; text-align:center; transition:all .2s; }
+      .selector-btn:hover { border-color:rgba(255,255,255,0.2); color:#e2e8f0; }
       .selector-btn.active { background:var(--bg-accent); border-color:var(--transit-blue); color:#fff; }
       .mode-row { margin-bottom:8px; font-size:12px; }
       .mode-info { display:flex; justify-content:space-between; margin-bottom:4px; }
       .mode-bar-container { height:6px; background:var(--bg-main); border-radius:3px; overflow:hidden; }
       .mode-bar { height:100%; border-radius:3px; transition:width .3s ease; }
-      .chart-container { background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; padding:10px; height:50px; display:flex; align-items:flex-end; gap:2px; }
+      .chart-container { background:rgba(12,13,18,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:10px; height:50px; display:flex; align-items:flex-end; gap:2px; }
       .chart-bar { flex:1; background:var(--transit-blue); opacity:.7; border-radius:1px 1px 0 0; }
-      .station-card { background:var(--bg-main); border:1px solid var(--border-color); padding:8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+      .station-card { background:rgba(12,13,18,0.5); border:1px solid rgba(255,255,255,0.08); padding:8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
       #main-workspace { flex:1; display:flex; flex-direction:column; position:relative; }
       #canvas-container { flex:1; position:relative; background:#06080e; }
       canvas { display:block; width:100%; height:100%; }
-      #playback-strip { height:56px; background:var(--bg-panel); border-top:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; padding:0 16px; box-sizing:border-box; z-index:10; }
-      .strip-section { display:flex; align-items:center; gap:8px; }
-      .time-readout { font-family:monospace; font-size:12px; color:#fff; background:rgba(18,20,28,0.80); padding:5px 10px; border-radius:4px; border:1px solid var(--border-color); min-width:120px; text-align:center; }
+
+      #playback-strip {
+          position:fixed; bottom:16px; right:16px; z-index:45; width:236px; box-sizing:border-box;
+          background:linear-gradient(180deg, rgba(18,20,28,0.78), rgba(12,13,18,0.72));
+          backdrop-filter:blur(16px) saturate(140%); -webkit-backdrop-filter:blur(16px) saturate(140%);
+          border:1px solid rgba(255,255,255,0.08); border-radius:12px;
+          box-shadow:0 10px 30px rgba(0,0,0,.45);
+          display:flex; flex-direction:column; gap:8px; padding:10px;
+          transition:transform .28s cubic-bezier(.4,0,.2,1), opacity .28s ease;
+      }
+      #playback-strip.collapsed { transform:translateY(calc(100% + 16px)); opacity:0; pointer-events:none; }
+      #minimap-header { display:flex; align-items:center; justify-content:space-between; padding:0 1px; }
+      #minimap-title { font-size:10px; font-weight:700; letter-spacing:.07em; color:var(--text-muted); text-transform:uppercase; }
+      #minimap-collapse { cursor:pointer; color:var(--text-muted); font-size:11px; padding:2px 5px; border-radius:4px; }
+      #minimap-collapse:hover { color:#fff; background:rgba(255,255,255,0.08); }
+      #minimap-canvas { display:block; width:100%; height:140px; border-radius:8px; background:#050710; border:1px solid rgba(255,255,255,0.08); cursor:crosshair; }
+      #hud-info-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      #mouse-coords { font-family:monospace; color:#7dd3fc; font-size:11px; white-space:nowrap; }
+      #hud-speed-row { display:flex; align-items:center; gap:6px; }
+      #hud-speed-row .btn-action { flex:1; padding:6px 0; font-size:11px; }
+      .time-readout { font-family:monospace; font-size:12px; color:#fff; background:rgba(12,13,18,0.55); padding:5px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.08); text-align:center; flex:1; }
+
+      #playback-strip-toggle {
+          position:fixed; bottom:16px; right:16px; z-index:44; width:40px; height:40px; border-radius:10px;
+          background:rgba(18,20,28,0.85); backdrop-filter:blur(10px);
+          border:1px solid rgba(255,255,255,0.08); color:var(--text-muted); font-size:15px;
+          display:none; align-items:center; justify-content:center; cursor:pointer;
+          box-shadow:0 6px 20px rgba(0,0,0,.35); transition:color .15s, background .15s;
+      }
+      #playback-strip-toggle.visible { display:flex; }
+      #playback-strip-toggle:hover { color:#fff; background:rgba(26,29,41,0.95); }
+
       .fare-display-group { display:flex; align-items:center; gap:6px; font-size:12px; background:var(--bg-main); padding:4px 10px; border-radius:4px; border:1px solid var(--border-color); }
       .fare-btn { background:var(--bg-accent); border:1px solid var(--border-color); color:#fff; padding:0px 6px; border-radius:3px; cursor:pointer; }
       button.btn-action { background:var(--bg-accent); color:var(--text-main); border:1px solid var(--border-color); padding:6px 10px; border-radius:4px; font-size:12px; cursor:pointer; font-weight:500; }
@@ -172,12 +237,51 @@
     </style>
   </head>
   <body>
+    <div id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">◂</div>
     <div id="sidebar">
       <div id="sidebar-brand">
         <div class="brand-icon">🚇</div>
         <div>
           <div class="brand-title">DFW Metro Builder</div>
           <div class="brand-sub">Design. Build. Connect the Metroplex.</div>
+        </div>
+      </div>
+
+      <div class="pinned-tools">
+        <div class="nav-subsection">
+          <div class="pinned-tools-title"><span>🛠️</span><span>Tools</span></div>
+          <div class="tool-btn-grid">
+            <button id="btn-pan" class="btn-action active mode-btn" onclick="setMode('pan')">Pan Map</button>
+            <button id="btn-station" class="btn-action mode-btn" onclick="setMode('station')">+ Station</button>
+            <button id="btn-track" class="btn-action mode-btn" onclick="setMode('track')">+ Build Line</button>
+            <button id="btn-rename" class="btn-action mode-btn" onclick="setMode('rename')">Rename</button>
+            <button id="btn-delete" class="btn-action danger-btn mode-btn" onclick="setMode('delete')">Demolish</button>
+          </div>
+        </div>
+        <div class="nav-subsection">
+          <div class="pinned-tools-title"><span>🎨</span><span>Line Color</span></div>
+          <div class="line-selector" style="width:100%; box-sizing:border-box;">
+              <div id="lineSelectorContainer" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+              <input type="color" id="custom-line-color" class="custom-color-wheel" value="#38bdf8" title="Pick Custom Color">
+          </div>
+        </div>
+        <div class="nav-subsection">
+          <div class="pinned-tools-title"><span>💵</span><span>Fare &amp; Budget</span></div>
+          <div class="selector-row" style="flex-direction:column; gap:8px;">
+            <div class="fare-display-group" style="justify-content:space-between; width:100%; box-sizing:border-box;">
+              <span style="color: var(--text-muted)">Fare:</span>
+              <button class="fare-btn" onclick="adjustFare(-0.5)">-</button>
+              <span id="fare-display" style="color: #4ade80; font-weight: bold">$2.50</span>
+              <button class="fare-btn" onclick="adjustFare(0.5)">+</button>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+              <div>
+                <div style="color: var(--text-muted); font-size: 10px">BUDGET</div>
+                <div style="color: #38bdf8; font-weight: bold; font-family: monospace" id="lbl-budget">$50,000,000</div>
+              </div>
+              <div style="color: #f87171; font-size: 9px; font-family: monospace; white-space:nowrap; text-align:right;" id="lbl-opex">OpEx: $0/day</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -359,40 +463,23 @@
       </div>
       
       <div id="playback-strip">
-        <div id="mouse-coords" style="min-width: 180px; text-align: right; font-family: monospace; color: #7dd3fc; font-size: 12px">X: 0 Y: 0</div>
-        <div class="strip-section">
+        <div id="minimap-header">
+          <span id="minimap-title">Regional Map</span>
+          <span id="minimap-collapse" onclick="toggleHud()" title="Collapse">▾</span>
+        </div>
+        <canvas id="minimap-canvas" width="216" height="140"></canvas>
+        <div id="hud-info-row">
           <div class="time-readout" id="lbl-time">Day 1 &nbsp; 06:00:00</div>
+          <div id="mouse-coords">X:0 Y:0</div>
+        </div>
+        <div id="hud-speed-row">
           <button class="btn-action" id="btn-speed-0" onclick="setSpeed(0)" style="font-family: monospace; font-weight: bold; color: #ef4444">||</button>
           <button class="btn-action active" id="btn-speed-1" onclick="setSpeed(1)">1x</button>
           <button class="btn-action" id="btn-speed-2" onclick="setSpeed(2)">2x</button>
           <button class="btn-action" id="btn-speed-4" onclick="setSpeed(4)">4x</button>
         </div>
-        <div class="strip-section">
-          <button id="btn-pan" class="btn-action active" onclick="setMode('pan')">Pan Map</button>
-          <button id="btn-station" class="btn-action" onclick="setMode('station')">+ Station</button>
-          <button id="btn-track" class="btn-action" onclick="setMode('track')">+ Build Line</button>
-          <button id="btn-rename" class="btn-action" onclick="setMode('rename')">Rename</button>
-          <button id="btn-delete" class="btn-action danger-btn" onclick="setMode('delete')">Demolish</button>
-          
-          <div class="line-selector">
-              <div id="lineSelectorContainer" style="display:flex; gap:6px;"></div>
-              <input type="color" id="custom-line-color" class="custom-color-wheel" value="#38bdf8" title="Pick Custom Color">
-          </div>
-        </div>
-        <div class="strip-section">
-          <div class="fare-display-group">
-            <span style="color: var(--text-muted)">Fare:</span>
-            <button class="fare-btn" onclick="adjustFare(-0.5)">-</button>
-            <span id="fare-display" style="color: #4ade80; font-weight: bold">$2.50</span>
-            <button class="fare-btn" onclick="adjustFare(0.5)">+</button>
-          </div>
-          <div style="font-size: 12px; text-align: right; min-width: 140px">
-            <div style="color: var(--text-muted); font-size: 10px">BUDGET</div>
-            <div style="color: #38bdf8; font-weight: bold; font-family: monospace" id="lbl-budget">$50,000,000</div>
-            <div style="color: #f87171; font-size: 9px; font-family: monospace; white-space:nowrap;" id="lbl-opex">OpEx: $0/day</div>
-          </div>
-        </div>
       </div>
+      <div id="playback-strip-toggle" onclick="toggleHud()" title="Show map & controls">🗺️</div>
     </div>
 
     <div id="tutBackdrop" class="tutorial-backdrop" onclick="/* Prevent dismissal clicking outside */"></div>
@@ -575,11 +662,13 @@ let totalWeeklyOpEx = 0;
 
                       if (step.placement === "top") {
                           card.style.top = `${Math.max(20, rect.top - cardHeight - 20)}px`;
-                          card.style.left = `${rect.left + (rect.width / 2) - (cardWidth / 2)}px`;
+                          const targetLeft = rect.left + (rect.width / 2) - (cardWidth / 2);
+                          card.style.left = `${Math.max(20, Math.min(window.innerWidth - cardWidth - 20, targetLeft))}px`;
                           card.classList.add("arrow-bottom");
                       } else if (step.placement === "bottom") {
                           card.style.top = `${rect.bottom + 20}px`;
-                          card.style.left = `${rect.left + (rect.width / 2) - (cardWidth / 2)}px`;
+                          const targetLeft = rect.left + (rect.width / 2) - (cardWidth / 2);
+                          card.style.left = `${Math.max(20, Math.min(window.innerWidth - cardWidth - 20, targetLeft))}px`;
                           card.classList.add("arrow-top");
                       } else if (step.placement === "right") {
                           const targetTop = rect.top + (rect.height / 2) - (cardHeight / 2);
@@ -593,7 +682,8 @@ let totalWeeklyOpEx = 0;
                           card.classList.add("arrow-right");
                       } else if (step.placement === "inside-bottom") {
                           card.style.top = `${rect.bottom - cardHeight - 40}px`;
-                          card.style.left = `${rect.left + (rect.width / 2) - (cardWidth / 2)}px`;
+                          const targetLeft = rect.left + (rect.width / 2) - (cardWidth / 2);
+                          card.style.left = `${Math.max(20, Math.min(window.innerWidth - cardWidth - 20, targetLeft))}px`;
                       }
                   } else {
                       card.style.top = "50%"; card.style.left = "50%";
@@ -639,6 +729,9 @@ let totalWeeklyOpEx = 0;
       const canvas  = document.getElementById('gameCanvas');
       const ctx     = canvas.getContext('2d');
       const tooltip = document.getElementById('tooltip');
+      const minimapCanvas = document.getElementById('minimap-canvas');
+      const minimapCtx = minimapCanvas.getContext('2d');
+      let hudCollapsed = false;
       const STATION_BASE_COST = 250000;
       
       let budget=50000000, mode='pan', ticketFare=2.50, simSpeed=1;
@@ -663,6 +756,16 @@ let totalWeeklyOpEx = 0;
 
       let grantsCollapsed = false;
       let collapsedNavGroups = { 'grp-build': true, 'grp-operations': true, 'grp-economy': true, 'grp-analytics': true };
+
+      let sidebarCollapsed = false;
+      function toggleSidebar() {
+          sidebarCollapsed = !sidebarCollapsed;
+          const sidebar = document.getElementById('sidebar');
+          const toggle = document.getElementById('sidebar-toggle');
+          sidebar.classList.toggle('collapsed', sidebarCollapsed);
+          toggle.classList.toggle('collapsed', sidebarCollapsed);
+          toggle.textContent = sidebarCollapsed ? '▸' : '◂';
+      }
 
       function toggleSection(groupId) {
           if (collapsedNavGroups[groupId]) openSection(groupId);
@@ -762,6 +865,96 @@ let totalWeeklyOpEx = 0;
       let waitTimeSum = 0, waitSamples = 0, tripTimeSum = 0, tripSamples = 0;
       let overcrowdingEvents = 0;
       let lastProcessedMinute = -1;
+
+      // ---- Service Frequency / Reliability system ----
+const FREQUENCY_OPTIONS = [0, 3, 5, 10, 20]; // 0 = Variable (1 Train)
+      const FREQ_MAP_UNITS_PER_MILE = 18.6585833, FREQ_TRAIN_SPEED_MPH = 45;
+      const FLEET_SPARE_RATIO = 1.15; // 15% spare margin baked into "required trains"
+      const BASE_DELAY_CHANCE = 0.05; // base chance of a delay event per dwell stop
+      const RELIABILITY_WINDOW = 20;  // rolling sample size per route
+      let routeMeta = {};
+      function getRouteMeta(color, route = null) {
+    if (!routeMeta[color]) {
+        routeMeta[color] = {
+            frequency: 10,
+            history: [],
+            reliability: 100,
+            lastDeparture: {},
+            route: route
+        };
+    }
+
+    if (route) routeMeta[color].route = route;
+
+    return routeMeta[color];
+}
+      function routeLengthMiles(route) {
+          let d = 0;
+          for (let i = 1; i < route.geometry.length; i++) {
+              const a = route.geometry[i - 1], b = route.geometry[i];
+              d += Math.hypot(b.x - a.x, b.y - a.y);
+          }
+          return d / FREQ_MAP_UNITS_PER_MILE;
+      }
+      function routeRoundTripMinutes(route) {
+          const lengthMiles = routeLengthMiles(route);
+          const oneWayMin = (lengthMiles / FREQ_TRAIN_SPEED_MPH) * 60;
+          const stationsCount = route.geometry.filter(p => p.station).length;
+          const dwellMin = stationsCount * (20 / 60); // 20-tick base dwell ≈ 0.33 min, one-way
+          return 2 * (oneWayMin + dwellMin);
+      }
+      function requiredTrainsForFrequency(route, freq) {
+    // Variable mode = exactly one train
+    if (Number(freq) === 0) return 1;
+
+    if (!freq || freq <= 0) return 1;
+
+    const roundTrip = routeRoundTripMinutes(route);
+    return Math.max(
+        1,
+        Math.ceil((roundTrip / freq) * FLEET_SPARE_RATIO)
+    );
+}
+      function setRouteFrequency(color, minutes) {
+          getRouteMeta(color).frequency = parseInt(minutes, 10);
+          updateFleetPanel();
+      }
+
+function recordHeadwaySample(meta, dirKey, nowTicks) {
+
+    // Variable service (1 train) is always considered on schedule
+    if (meta.frequency === 0) {
+        meta.reliability = 100;
+        return "on";
+    }
+
+    const targetTicks = (meta.frequency || 10) * 60;
+
+    const last = meta.lastDeparture[dirKey];
+    meta.lastDeparture[dirKey] = nowTicks;
+
+    if (last === undefined || last === null) return null;
+
+    const headway = nowTicks - last;
+
+    let outcome;
+    if (headway < targetTicks * 0.5) outcome = "bunch";
+    else if (headway > targetTicks * 1.5) outcome = "gap";
+    else outcome = "on";
+
+    meta.history.push(outcome);
+
+    if (meta.history.length > RELIABILITY_WINDOW)
+        meta.history.shift();
+
+    const onCount = meta.history.filter(h => h === "on").length;
+    meta.reliability = meta.history.length
+        ? Math.round((onCount / meta.history.length) * 100)
+        : 100;
+
+    return outcome;
+}
+
 
       const ZONING={
           RESIDENTIAL:{color:'rgba(56,189,248,0.10)',stroke:'rgba(56,189,248,0.40)'},
@@ -1153,28 +1346,38 @@ let totalWeeklyOpEx = 0;
       }
 
       function setupLineSelectorUI() {
-          const container = document.getElementById('lineSelectorContainer');
-          container.innerHTML = '';
-          const usedColors = [...new Set(tracks.map(t => t.color))];
-          if (!usedColors.includes(activeColor)) { usedColors.push(activeColor); }
-          usedColors.forEach(color => {
-              const dot = document.createElement('div');
-              dot.className = `line-dot ${activeColor === color ? 'selected' : ''}`;
-              dot.style.backgroundColor = color;
-              dot.onclick = () => {
-                  activeColor = color;
-                  const picker = document.getElementById('custom-line-color');
-                  if (picker) picker.value = color;
-                  setupLineSelectorUI(); 
-              };
-              container.appendChild(dot);
-          });
-      }
+    const container = document.getElementById('lineSelectorContainer');
+    container.innerHTML = '';
+    
+    // Get unique established colors
+    let usedColors = [...new Set(tracks.map(t => t.color))];
+    
+    // If you've picked a new color but haven't placed it yet, add it to the list
+    if (!usedColors.includes(activeColor)) { 
+        usedColors.push(activeColor); 
+    }
 
-      document.getElementById('custom-line-color').addEventListener('input', (e) => {
-          activeColor = e.target.value;
-          document.querySelectorAll('.line-dot').forEach(d => d.classList.remove('selected'));
-      });
+    // Reverse the array so the newest additions populate on the far left
+    usedColors.reverse();
+
+    usedColors.forEach(color => {
+        const dot = document.createElement('div');
+        dot.className = `line-dot ${activeColor === color ? 'selected' : ''}`;
+        dot.style.backgroundColor = color;
+        dot.onclick = () => {
+            activeColor = color;
+            const picker = document.getElementById('custom-line-color');
+            if (picker) picker.value = color;
+            setupLineSelectorUI(); 
+        };
+        container.appendChild(dot);
+    });
+}
+
+     document.getElementById('custom-line-color').addEventListener('input', (e) => {
+    activeColor = e.target.value;
+    setupLineSelectorUI(); // Instantly refresh the UI to spawn the new dot on the left
+});
 
       function buildTelemetryCharts() {
           const chart = document.getElementById('demand-chart');
@@ -1349,6 +1552,8 @@ let totalWeeklyOpEx = 0;
           const avgOccupancy = trains.length ? (trains.reduce((a,t)=>a+(t.riders.length/(t.capacity||120)),0) / trains.length * 100) : 0;
           const avgWaitMin = waitSamples ? (waitTimeSum / waitSamples / 60) : 0;
           const avgTripMin = tripSamples ? (tripTimeSum / tripSamples / 60) : 0;
+          const relValues = routes.map(r => (r.meta || getRouteMeta(r.color)).reliability);
+          const avgReliability = relValues.length ? Math.round(relValues.reduce((a,v)=>a+v,0) / relValues.length) : 100;
           const rows = [
               ['Daily Riders', dailyRiders.toLocaleString()],
               ['Peak Concurrent Riders', peakConcurrentRiders.toLocaleString()],
@@ -1357,6 +1562,7 @@ let totalWeeklyOpEx = 0;
               ['Avg Wait Time', avgWaitMin.toFixed(1) + ' min'],
               ['Avg Trip Time', avgTripMin.toFixed(1) + ' min'],
               ['Avg Train Occupancy', avgOccupancy.toFixed(0) + '%'],
+              ['Network On-Time %', avgReliability + '%'],
               ['Crowding Events (missed)', overcrowdingEvents.toLocaleString()],
           ];
           panel.innerHTML = rows.map(([label, value]) => `
@@ -1374,7 +1580,7 @@ let totalWeeklyOpEx = 0;
 
       function setSpeed(s){
           simSpeed = s;
-          document.querySelectorAll('.strip-section button').forEach(b => {
+          document.querySelectorAll('#hud-speed-row button').forEach(b => {
               if (b.id && b.id.startsWith('btn-speed-')) b.classList.remove('active');
           });
           const target = document.getElementById(`btn-speed-${s}`);
@@ -1384,7 +1590,7 @@ let totalWeeklyOpEx = 0;
       function setMode(m){
           if (activeTrackBuild) activeTrackBuild = null;
           mode = m;
-          document.querySelectorAll('#playback-strip button').forEach(b => {
+          document.querySelectorAll('.mode-btn').forEach(b => {
               if (b.id && b.id.startsWith('btn-')) b.classList.remove('active');
           });
           const btn = document.getElementById(`btn-${m}`);
@@ -1472,7 +1678,7 @@ let totalWeeklyOpEx = 0;
                   else if (chain.some(t => t.wayConfig === 'parallel')) trackCount = 2;
                   const geometry = buildGeometryFromChain(chain);
                   if (geometry.length < 2) return;
-                  routes.push({ color, geometry, trackCount, trains: [] });
+                  routes.push({ color, geometry, trackCount, trains: [], meta: getRouteMeta(color) });
               });
           });
           reconcileFleet();
@@ -1576,6 +1782,7 @@ let totalWeeklyOpEx = 0;
       }
 
       function updateFleetPanel() {
+if (document.activeElement && document.activeElement.tagName === 'SELECT') return;
           const container = document.getElementById('fleet-list');
           if (!container) return;
           if (!routes.length) {
@@ -1587,6 +1794,19 @@ let totalWeeklyOpEx = 0;
           routes.forEach((route, idx) => {
               const hasDepot = routeHasDepot(route);
               const buyDisabled = !hasDepot || budget < spec.cost || gameOver;
+const meta = route.meta || getRouteMeta(route.color, route);
+              const required = requiredTrainsForFrequency(route, meta.frequency);
+              const have = route.trains.length;
+              const shortfall = have < required;
+              const reliability = meta.reliability;
+              const relColor = reliability >= 85 ? '#10b981' : (reliability >= 60 ? '#f59e0b' : '#ef4444');
+              const freqOptionsHtml = FREQUENCY_OPTIONS
+    .map(f => `
+        <option value="${f}" ${meta.frequency === f ? 'selected' : ''}>
+            ${f === 0 ? 'Variable (1 Train)' : `Every ${f} min`}
+        </option>
+    `)
+    .join('');
               const wrap = document.createElement('div');
               wrap.style.cssText = 'border:1px solid var(--border-color);border-radius:6px;padding:8px;margin-bottom:8px;';
               wrap.innerHTML = `
@@ -1597,7 +1817,13 @@ let totalWeeklyOpEx = 0;
                       </div>
                       <span style="font-size:10px;color:${hasDepot ? '#10b981' : '#ef4444'};">${hasDepot ? 'Depot Linked' : 'No Depot'}</span>
                   </div>
-                  <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">${route.trains.length} train(s) in service</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;">
+                      <select class="fare-btn" style="flex:1;padding:3px 4px;" onchange="setRouteFrequency('${route.color}', this.value)">${freqOptionsHtml}</select>
+                      <span style="font-size:10px;font-weight:700;color:${relColor};white-space:nowrap;">${reliability}% on-time</span>
+                  </div>
+                  <div style="font-size:11px;color:${shortfall ? '#ef4444' : 'var(--text-muted)'};margin-bottom:6px;">
+                      Needs <strong>${required}</strong> train(s) for that frequency &middot; have <strong>${have}</strong>${shortfall ? ' — understaffed, expect bunching' : ''}
+                  </div>
                   <button class="btn-action" style="width:100%;${buyDisabled ? 'opacity:0.45;cursor:not-allowed;' : ''}" ${buyDisabled ? 'disabled' : ''} onclick="buyTrain('${route.color}')">+ Buy ${spec.label} ($${spec.cost.toLocaleString()})</button>
               `;
               const trainList = document.createElement('div');
@@ -1817,11 +2043,26 @@ function calculateDailyOpEx() {
               if (t.state === "BLOCKED") t.state = "MOVING";
 
               if (t.state === "DWELLING") {
-                  t.dwell--; if (t.dwell <= 0) { t.state = "MOVING"; t.currentNodeIdx = ni; t.pct = 0; }
+                  t.dwell--;
+                  if (t.dwell <= 0) {
+                      t.state = "MOVING"; t.currentNodeIdx = ni; t.pct = 0;
+                      const meta = t.route && t.route.meta;
+                      if (meta) {
+                          const outcome = recordHeadwaySample(meta, t.dirKey || 'F', (typeof timeTicks !== 'undefined' ? timeTicks : 0));
+                          if (outcome) t.bunched = (outcome === 'bunch');
+                      }
+                  }
               } else {
                   const spd = unitsPerFrame / sd; t.pct += spd;
                   if (t.pct >= 1) {
                       t.pct = 1; t.state = "DWELLING"; t.dwell = 20; const cs = en.station;
+                      const meta = t.route && t.route.meta;
+                      if (meta) {
+                          const freq = meta.frequency || 10;
+                          const riskFactor = Math.min(3, 10 / freq);
+                          const delayChance = BASE_DELAY_CHANCE * riskFactor;
+                          if (Math.random() < delayChance) t.dwell += 15 + Math.random() * 45;
+                      }
                       if (cs) {
                           const stayRiders = [];
                           t.riders.forEach(r => {
@@ -2030,12 +2271,99 @@ function calculateDailyOpEx() {
 
           trains.forEach(t => {
               ctx.save(); ctx.translate(t.x, t.y);
-              ctx.fillStyle = t.lineColor; ctx.strokeStyle = t.state === 'BLOCKED' ? '#ef4444' : '#0c0d12';
-              ctx.lineWidth = t.state === 'BLOCKED' ? 0.6 : 0.375;
+              const flagged = t.state === 'BLOCKED' || t.bunched;
+              ctx.fillStyle = t.lineColor; ctx.strokeStyle = flagged ? '#ef4444' : '#0c0d12';
+              ctx.lineWidth = flagged ? 0.6 : 0.375;
               const w = (t.capacityType === 'heavy' ? 2.6 : 2) + (t.extraCars || 0) * 0.35;
-              ctx.fillRect(-w, -1, w * 2, 2); ctx.strokeRect(-w, -1, w * 2, 2); ctx.restore();
+              ctx.fillRect(-w, -1, w * 2, 2); ctx.strokeRect(-w, -1, w * 2, 2);
+              if (t.bunched) { ctx.beginPath(); ctx.arc(0, 0, w + 1.6, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(239,68,68,0.7)'; ctx.lineWidth = 0.35; ctx.stroke(); }
+              ctx.restore();
           });
           ctx.restore();
+          drawMinimap();
+      }
+
+      function getMinimapBounds() {
+          if (!neighborhoods.length) return { minX:-400, maxX:400, minY:-400, maxY:400 };
+          let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+          neighborhoods.forEach(n => { minX=Math.min(minX,n.x); maxX=Math.max(maxX,n.x); minY=Math.min(minY,n.y); maxY=Math.max(maxY,n.y); });
+          const padX = (maxX - minX) * 0.08 || 40, padY = (maxY - minY) * 0.08 || 40;
+          return { minX: minX - padX, maxX: maxX + padX, minY: minY - padY, maxY: maxY + padY };
+      }
+
+      function minimapTransform() {
+          const b = getMinimapBounds();
+          const w = minimapCanvas.width, h = minimapCanvas.height;
+          const worldW = b.maxX - b.minX, worldH = b.maxY - b.minY;
+          const scale = Math.min(w / worldW, h / worldH);
+          const offX = (w - worldW * scale) / 2, offY = (h - worldH * scale) / 2;
+          return {
+              toX: (wx) => (wx - b.minX) * scale + offX,
+              toY: (wy) => (wy - b.minY) * scale + offY,
+              fromX: (mx) => (mx - offX) / scale + b.minX,
+              fromY: (my) => (my - offY) / scale + b.minY,
+          };
+      }
+
+      function drawMinimap() {
+          if (hudCollapsed) return;
+          const t = minimapTransform();
+          minimapCtx.clearRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+          minimapCtx.fillStyle = '#050710';
+          minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+
+          neighborhoods.forEach(n => {
+              const zc = ZONING[n.type] || ZONING.RESIDENTIAL;
+              minimapCtx.fillStyle = zc.stroke;
+              minimapCtx.globalAlpha = 0.55;
+              minimapCtx.beginPath();
+              minimapCtx.arc(t.toX(n.x), t.toY(n.y), Math.max(1, Math.min(3, n.size * 0.18)), 0, Math.PI * 2);
+              minimapCtx.fill();
+          });
+          minimapCtx.globalAlpha = 1;
+
+          tracks.forEach(tr => {
+              const pts = [tr.startStation, ...tr.waypoints, tr.endStation];
+              minimapCtx.strokeStyle = tr.color; minimapCtx.lineWidth = 1.4; minimapCtx.globalAlpha = 0.9;
+              minimapCtx.beginPath();
+              pts.forEach((p, i) => i === 0 ? minimapCtx.moveTo(t.toX(p.x), t.toY(p.y)) : minimapCtx.lineTo(t.toX(p.x), t.toY(p.y)));
+              minimapCtx.stroke();
+          });
+          minimapCtx.globalAlpha = 1;
+
+          stations.forEach(s => {
+              minimapCtx.fillStyle = '#fff';
+              minimapCtx.beginPath();
+              minimapCtx.arc(t.toX(s.x), t.toY(s.y), 1.6, 0, Math.PI * 2);
+              minimapCtx.fill();
+          });
+
+          depots.forEach(d => {
+              minimapCtx.fillStyle = '#fbbf24';
+              minimapCtx.fillRect(t.toX(d.x) - 1.5, t.toY(d.y) - 1.5, 3, 3);
+          });
+
+          // viewport rectangle
+          const vx0 = t.toX(camera.x), vy0 = t.toY(camera.y);
+          const vx1 = t.toX(camera.x + canvas.width / zoom), vy1 = t.toY(camera.y + canvas.height / zoom);
+          minimapCtx.strokeStyle = 'rgba(255,255,255,0.85)'; minimapCtx.lineWidth = 1.2;
+          minimapCtx.strokeRect(Math.min(vx0,vx1), Math.min(vy0,vy1), Math.abs(vx1-vx0), Math.abs(vy1-vy0));
+      }
+
+      minimapCanvas.addEventListener('click', (e) => {
+          const r = minimapCanvas.getBoundingClientRect();
+          const mx = (e.clientX - r.left) * (minimapCanvas.width / r.width);
+          const my = (e.clientY - r.top) * (minimapCanvas.height / r.height);
+          const t = minimapTransform();
+          const worldX = t.fromX(mx), worldY = t.fromY(my);
+          camera.x = worldX - canvas.width / (2 * zoom);
+          camera.y = worldY - canvas.height / (2 * zoom);
+      });
+
+      function toggleHud() {
+          hudCollapsed = !hudCollapsed;
+          document.getElementById('playback-strip').classList.toggle('collapsed', hudCollapsed);
+          document.getElementById('playback-strip-toggle').classList.toggle('visible', hudCollapsed);
       }
 
       function getPos(e){
