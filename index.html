@@ -867,16 +867,27 @@ let totalWeeklyOpEx = 0;
       let lastProcessedMinute = -1;
 
       // ---- Service Frequency / Reliability system ----
-      const FREQUENCY_OPTIONS = [3, 5, 10, 20];
+const FREQUENCY_OPTIONS = [0, 3, 5, 10, 20]; // 0 = Variable (1 Train)
       const FREQ_MAP_UNITS_PER_MILE = 18.6585833, FREQ_TRAIN_SPEED_MPH = 45;
       const FLEET_SPARE_RATIO = 1.15; // 15% spare margin baked into "required trains"
       const BASE_DELAY_CHANCE = 0.05; // base chance of a delay event per dwell stop
       const RELIABILITY_WINDOW = 20;  // rolling sample size per route
       let routeMeta = {};
-      function getRouteMeta(color) {
-          if (!routeMeta[color]) routeMeta[color] = { frequency: 10, history: [], reliability: 100, lastDeparture: {} };
-          return routeMeta[color];
-      }
+      function getRouteMeta(color, route = null) {
+    if (!routeMeta[color]) {
+        routeMeta[color] = {
+            frequency: 10,
+            history: [],
+            reliability: 100,
+            lastDeparture: {},
+            route: route
+        };
+    }
+
+    if (route) routeMeta[color].route = route;
+
+    return routeMeta[color];
+}
       function routeLengthMiles(route) {
           let d = 0;
           for (let i = 1; i < route.geometry.length; i++) {
@@ -893,17 +904,31 @@ let totalWeeklyOpEx = 0;
           return 2 * (oneWayMin + dwellMin);
       }
       function requiredTrainsForFrequency(route, freq) {
-          if (!freq || freq <= 0) return 1;
-          const roundTrip = routeRoundTripMinutes(route);
-          return Math.max(1, Math.ceil((roundTrip / freq) * FLEET_SPARE_RATIO));
-      }
+    // Variable mode = exactly one train
+    if (Number(freq) === 0) return 1;
+
+    if (!freq || freq <= 0) return 1;
+
+    const roundTrip = routeRoundTripMinutes(route);
+    return Math.max(
+        1,
+        Math.ceil((roundTrip / freq) * FLEET_SPARE_RATIO)
+    );
+}
       function setRouteFrequency(color, minutes) {
           getRouteMeta(color).frequency = parseInt(minutes, 10);
           updateFleetPanel();
       }
       function recordHeadwaySample(meta, dirKey, nowTicks) {
-          const targetTicks = (meta.frequency || 10) * 60;
-          const last = meta.lastDeparture[dirKey];
+let targetMinutes;
+
+if (meta.frequency === 0) {
+    targetMinutes = routeRoundTripMinutes(meta.route);
+} else {
+    targetMinutes = meta.frequency || 10;
+}
+
+const targetTicks = targetMinutes * 60;          const last = meta.lastDeparture[dirKey];
           meta.lastDeparture[dirKey] = nowTicks;
           if (last === undefined || last === null) return null;
           const headway = nowTicks - last;
@@ -1756,13 +1781,19 @@ if (document.activeElement && document.activeElement.tagName === 'SELECT') retur
           routes.forEach((route, idx) => {
               const hasDepot = routeHasDepot(route);
               const buyDisabled = !hasDepot || budget < spec.cost || gameOver;
-              const meta = route.meta || getRouteMeta(route.color);
+const meta = route.meta || getRouteMeta(route.color, route);
               const required = requiredTrainsForFrequency(route, meta.frequency);
               const have = route.trains.length;
               const shortfall = have < required;
               const reliability = meta.reliability;
               const relColor = reliability >= 85 ? '#10b981' : (reliability >= 60 ? '#f59e0b' : '#ef4444');
-              const freqOptionsHtml = FREQUENCY_OPTIONS.map(f => `<option value="${f}" ${meta.frequency === f ? 'selected' : ''}>Every ${f} min</option>`).join('');
+              const freqOptionsHtml = FREQUENCY_OPTIONS
+    .map(f => `
+        <option value="${f}" ${meta.frequency === f ? 'selected' : ''}>
+            ${f === 0 ? 'Variable (1 Train)' : `Every ${f} min`}
+        </option>
+    `)
+    .join('');
               const wrap = document.createElement('div');
               wrap.style.cssText = 'border:1px solid var(--border-color);border-radius:6px;padding:8px;margin-bottom:8px;';
               wrap.innerHTML = `
