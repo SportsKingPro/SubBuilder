@@ -158,7 +158,7 @@
       input[type="color"].custom-color-wheel::-webkit-color-swatch { border: 2px solid transparent; border-radius: 50%; }
       input[type="color"].custom-color-wheel:focus::-webkit-color-swatch { border-color: #fff; transform: scale(1.2); }
 
-      #tooltip { pointer-events: none; position:absolute; background:rgba(7,10,18,.95); border:1px solid var(--border-color); padding:8px 12px; border-radius:4px; font-size:11px; display:none; z-index:100; box-shadow:0 10px 15px -3px rgba(0,0,0,.5); }
+      #tooltip { pointer-events: none; position:absolute; background:rgba(7,10,18,.95); border:1px solid var(--border-color); padding:8px 12px; border-radius:4px; font-size:11px; display:none; z-index:100; box-shadow:0 10px 15px -3px rgba(0,0,0,.5); max-width:260px; box-sizing:border-box; }
 
       /* Station Inspector */
       #station-inspector { position:absolute; top:16px; right:16px; width:270px; max-height:calc(100vh - 32px); overflow-y:auto; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.5); z-index:60; display:none; color:var(--text-main); scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.15) transparent; }
@@ -210,17 +210,19 @@
       .si-btn.upgrade.maxed { opacity:.5; cursor:not-allowed; color:var(--text-muted); border-color:var(--border-color); filter:none; }
       .si-btn.delete { border-color:#ef4444; color:#ef4444; }
 
-      /* ---- Reusable hover-tooltip (plain-English explainer) ---- */
+      /* ---- Reusable hover-tooltip (plain-English explainer) ----
+         NOTE: the actual tooltip bubble is rendered via JS into #dt-tooltip
+         (appended directly to <body>) instead of as a ::before/::after
+         pseudo-element. Pseudo-element tooltips were getting clipped by
+         ancestor panels with overflow:auto/hidden (e.g. #station-inspector,
+         #neighborhood-inspector) and had no logic to stay on-screen near
+         viewport edges. See the "dt-tooltip" JS block for positioning. */
       .tt-wrap { position:relative; display:inline-flex; align-items:center; }
       .tt-wrap .tt-icon { width:13px; height:13px; border-radius:50%; background:rgba(255,255,255,0.14); color:var(--text-muted); font-size:9px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; cursor:help; margin-left:4px; flex-shrink:0; font-family:Georgia,serif; line-height:1; }
       .tt-wrap:hover .tt-icon { background:var(--transit-blue); color:#04121f; }
-      .tt-wrap::before { content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); left:0; transform:none; width:200px; background:rgba(7,10,18,0.98); border:1px solid var(--border-color); color:#e2e8f0; font-size:10.5px; font-weight:400; line-height:1.42; padding:8px 10px; border-radius:7px; box-shadow:0 12px 24px rgba(0,0,0,.55); z-index:300; opacity:0; pointer-events:none; transition:opacity .12s ease; text-transform:none; letter-spacing:normal; white-space:normal; }
-      .tt-wrap:hover::before { opacity:1; }
-      .tt-wrap.tt-right::before { left:auto; right:0; }
-      .tt-wrap.tt-center::before { left:50%; transform:translateX(-50%); }
       .selector-btn[data-tip] { position:relative; }
-      .selector-btn[data-tip]::after { content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); width:180px; background:rgba(7,10,18,0.98); border:1px solid var(--border-color); color:#e2e8f0; font-size:10px; font-weight:400; line-height:1.4; padding:7px 9px; border-radius:7px; box-shadow:0 12px 24px rgba(0,0,0,.55); z-index:300; opacity:0; pointer-events:none; transition:opacity .12s ease; text-transform:none; letter-spacing:normal; white-space:normal; }
-      .selector-btn[data-tip]:hover::after { opacity:1; }
+      #dt-tooltip { position:fixed; max-width:220px; background:rgba(7,10,18,0.98); border:1px solid var(--border-color); color:#e2e8f0; font-size:10.5px; font-weight:400; line-height:1.42; padding:8px 10px; border-radius:7px; box-shadow:0 12px 24px rgba(0,0,0,.55); z-index:9999; opacity:0; pointer-events:none; transition:opacity .12s ease; text-transform:none; letter-spacing:normal; white-space:normal; display:none; }
+      #dt-tooltip.visible { display:block; opacity:1; }
 
       /* ---- Upgrade / Amenity info-card system ---- */
       .uc-card { background:rgba(12,13,18,0.55); border:1px solid var(--border-color); border-radius:8px; padding:10px 11px; margin-top:10px; }
@@ -621,6 +623,7 @@
       <div id="canvas-container">
         <canvas id="gameCanvas"></canvas>
         <div id="tooltip"></div>
+        <div id="dt-tooltip"></div>
         <div id="station-inspector">
           <div class="si-header">
             <div>
@@ -964,6 +967,65 @@ let weeklyOtherIncome = 0;
           setSpeed(1); // Resume normal speed
       }
 
+      // ---- Shared "data-tip" hover explainer (renders outside any scrolling panel) ----
+      (function () {
+          const dtTip = document.getElementById('dt-tooltip');
+          const TIP_SELECTOR = '.tt-wrap[data-tip], .selector-btn[data-tip]';
+          const MARGIN = 8;
+          let activeEl = null;
+
+          function positionDtTip(el) {
+              const rect = el.getBoundingClientRect();
+              const vw = window.innerWidth;
+              const vh = window.innerHeight;
+              const tw = dtTip.offsetWidth;
+              const th = dtTip.offsetHeight;
+
+              // Prefer centered above the element; drop below if that would
+              // go off the top of the screen (e.g. sidebar items near the top).
+              let left = rect.left + rect.width / 2 - tw / 2;
+              let top = rect.top - th - MARGIN;
+              if (top < MARGIN) top = rect.bottom + MARGIN;
+
+              // Clamp horizontally/vertically so the bubble never runs off-screen.
+              if (left < MARGIN) left = MARGIN;
+              if (left + tw > vw - MARGIN) left = vw - MARGIN - tw;
+              if (top + th > vh - MARGIN) top = vh - MARGIN - th;
+              if (top < MARGIN) top = MARGIN;
+
+              dtTip.style.left = left + 'px';
+              dtTip.style.top = top + 'px';
+          }
+
+          function showDtTip(el) {
+              const tip = el.getAttribute('data-tip');
+              if (!tip) return;
+              activeEl = el;
+              dtTip.textContent = tip;
+              dtTip.style.left = '-9999px'; dtTip.style.top = '-9999px';
+              dtTip.classList.add('visible');
+              positionDtTip(el);
+          }
+
+          function hideDtTip() {
+              activeEl = null;
+              dtTip.classList.remove('visible');
+          }
+
+          document.addEventListener('mouseover', (e) => {
+              const el = e.target.closest(TIP_SELECTOR);
+              if (el) showDtTip(el);
+          });
+          document.addEventListener('mouseout', (e) => {
+              const el = e.target.closest(TIP_SELECTOR);
+              if (el && (!e.relatedTarget || !el.contains(e.relatedTarget))) hideDtTip();
+          });
+          // Re-clamp on scroll/resize instead of leaving a stale position; hide on scroll
+          // since the anchor element may have moved within a scrolling panel.
+          document.addEventListener('scroll', hideDtTip, true);
+          window.addEventListener('resize', () => { if (activeEl) positionDtTip(activeEl); });
+      })();
+
       window.addEventListener('DOMContentLoaded', () => {
           // ALWAYS auto-open tutorial
           setTimeout(() => { startTutorialSystem(true); }, 600); 
@@ -973,6 +1035,29 @@ let weeklyOtherIncome = 0;
       const canvas  = document.getElementById('gameCanvas');
       const ctx     = canvas.getContext('2d');
       const tooltip = document.getElementById('tooltip');
+
+      // Positions the mouse-following canvas tooltip so it always stays fully
+      // within the canvas-container's bounds, flipping to the opposite side
+      // of the cursor whenever the default placement would run off-screen.
+      function placeCanvasTooltip(x, y) {
+          tooltip.style.display = 'block';
+          const margin = 10;
+          const container = document.getElementById('canvas-container');
+          const bounds = container.getBoundingClientRect();
+          const tw = tooltip.offsetWidth;
+          const th = tooltip.offsetHeight;
+
+          let left = x + margin;
+          let top = y + margin;
+
+          if (left + tw > bounds.width - margin) left = x - tw - margin;
+          if (top + th > bounds.height - margin) top = y - th - margin;
+          if (left < margin) left = margin;
+          if (top < margin) top = margin;
+
+          tooltip.style.left = left + 'px';
+          tooltip.style.top = top + 'px';
+      }
       const minimapCanvas = document.getElementById('minimap-canvas');
       const minimapCtx = minimapCanvas.getContext('2d');
       let hudCollapsed = false;
@@ -4167,22 +4252,22 @@ if (t.pct >= 1) {
           const ttx = e.clientX - rect.left; const tty = e.clientY - rect.top;
 
           if (mode === 'station') {
-              tooltip.style.display = 'block'; tooltip.style.left = (ttx + 10) + 'px'; tooltip.style.top = (tty + 10) + 'px';
               if (budget >= STATION_BASE_COST) {
                   tooltip.textContent = `Build Station: $${STATION_BASE_COST.toLocaleString()}`; tooltip.style.color = '#38bdf8'; 
               } else {
                   tooltip.textContent = `Insufficient Funds: $${STATION_BASE_COST.toLocaleString()}`; tooltip.style.color = '#ef4444'; 
               }
+              placeCanvasTooltip(ttx, tty);
               showingTooltip = true;
           }
 
           if (mode === 'depot') {
-              tooltip.style.display = 'block'; tooltip.style.left = (ttx + 10) + 'px'; tooltip.style.top = (tty + 10) + 'px';
               if (budget >= DEPOT_COST) {
                   tooltip.textContent = `Build Depot: $${DEPOT_COST.toLocaleString()}`; tooltip.style.color = '#38bdf8';
               } else {
                   tooltip.textContent = `Insufficient Funds: $${DEPOT_COST.toLocaleString()}`; tooltip.style.color = '#ef4444';
               }
+              placeCanvasTooltip(ttx, tty);
               showingTooltip = true;
           }
 
@@ -4190,16 +4275,15 @@ if (t.pct >= 1) {
               const lastNode = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
               if (lastNode) {
                   const dist = Math.hypot(p.worldX - lastNode.x, p.worldY - lastNode.y); const cost = getActiveTrackCost(dist);
-                  tooltip.style.display = 'block'; tooltip.style.left = (ttx + 10) + 'px'; tooltip.style.top = (tty + 10) + 'px';
-                  tooltip.textContent = `Est. Cost: $${Math.round(cost).toLocaleString()}`; showingTooltip = true;
+                  tooltip.textContent = `Est. Cost: $${Math.round(cost).toLocaleString()}`;
+                  placeCanvasTooltip(ttx, tty);
+                  showingTooltip = true;
               }
           }
 
           if (!showingTooltip) {
               const hov = neighborhoods.find(n => Math.hypot(n.x - p.worldX, n.y - p.worldY) < Math.max(4, n.size * (1.2 / Math.sqrt(zoom))));
               if (hov) {
-                  tooltip.style.display = "block"; tooltip.style.left = (ttx + 10) + 'px'; tooltip.style.top = (tty + 10) + 'px';
-                  
                   let bonusText = '';
                   if (LOCATION_BONUSES[hov.name] && !LOCATION_BONUSES[hov.name].claimed) {
                       bonusText = `<div style="color:#10b981; font-weight:bold; font-size:10px; margin-top:4px;">💰 +$${(LOCATION_BONUSES[hov.name].amount/1000000).toFixed(1)}M Connection Grant</div>`;
@@ -4217,6 +4301,7 @@ if (t.pct >= 1) {
                       </table>
                       ${bonusText}
                   `;
+                  placeCanvasTooltip(ttx, tty);
                   showingTooltip = true;
               }
           }
