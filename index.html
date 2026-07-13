@@ -88,6 +88,26 @@
       .chart-container { background:rgba(12,13,18,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:10px; height:50px; display:flex; align-items:flex-end; gap:2px; }
       .chart-bar { flex:1; background:var(--transit-blue); opacity:.7; border-radius:1px 1px 0 0; }
       .station-card { background:rgba(12,13,18,0.5); border:1px solid rgba(255,255,255,0.08); padding:8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+
+      /* Objectives */
+      #pinned-objectives { background:rgba(12,13,18,0.55); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px; cursor:pointer; transition:border-color .15s, background .15s; }
+      #pinned-objectives:hover { border-color:rgba(56,189,248,0.5); background:rgba(18,20,28,0.7); }
+      #pinned-objectives-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+      #pinned-objectives-count { font-size:11px; font-weight:700; color:#fff; }
+      #pinned-objectives-next { font-size:10.5px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      #pinned-objectives-bar-container { height:5px; background:var(--bg-main); border-radius:3px; overflow:hidden; margin-top:6px; }
+      #pinned-objectives-bar { height:100%; border-radius:3px; background:var(--transit-blue); transition:width .3s ease; }
+      .objective-card { background:rgba(12,13,18,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:9px 10px; margin-bottom:8px; transition:border-color .2s, opacity .2s; }
+      .objective-card.complete { border-color:rgba(16,185,129,0.5); background:rgba(16,185,129,0.07); }
+      .objective-card-head { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:4px; }
+      .objective-card-title { font-size:12px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px; }
+      .objective-card-reward { font-size:10.5px; font-weight:700; color:#4ade80; white-space:nowrap; }
+      .objective-card-desc { font-size:10.5px; color:var(--text-muted); line-height:1.4; margin-bottom:6px; }
+      .objective-progress-container { height:6px; background:var(--bg-main); border-radius:3px; overflow:hidden; }
+      .objective-progress-bar { height:100%; border-radius:3px; background:var(--transit-blue); transition:width .3s ease; }
+      .objective-card-footer { display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-muted); margin-top:3px; font-family:monospace; }
+      .objective-card.complete .objective-progress-bar { background:#10b981; }
+      .objective-card.complete .objective-card-footer { color:#10b981; }
       #main-workspace { flex:1; display:flex; flex-direction:column; position:relative; }
       #canvas-container { flex:1; position:relative; background:#06080e; }
       canvas { display:block; width:100%; height:100%; }
@@ -141,7 +161,34 @@
       #tooltip { pointer-events: none; position:absolute; background:rgba(7,10,18,.95); border:1px solid var(--border-color); padding:8px 12px; border-radius:4px; font-size:11px; display:none; z-index:100; box-shadow:0 10px 15px -3px rgba(0,0,0,.5); }
 
       /* Station Inspector */
-      #station-inspector { position:absolute; top:16px; right:16px; width:270px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.5); z-index:60; display:none; color:var(--text-main); }
+      #station-inspector { position:absolute; top:16px; right:16px; width:270px; max-height:calc(100vh - 32px); overflow-y:auto; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.5); z-index:60; display:none; color:var(--text-main); scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.15) transparent; }
+      #station-inspector::-webkit-scrollbar { width:5px; }
+      #station-inspector::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:3px; }
+      .si-amenity-grid { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+      .si-amenity-row { display:flex; align-items:center; justify-content:space-between; gap:6px; background:rgba(12,13,18,0.5); border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; font-size:11px; }
+      .si-amenity-row .si-am-name { display:flex; flex-direction:column; gap:1px; }
+      .si-amenity-row .si-am-title { color:#fff; font-weight:600; }
+      .si-amenity-row .si-am-sub { color:var(--text-muted); font-size:9.5px; font-family:monospace; }
+      .si-am-btn { background:var(--bg-accent); border:1px solid var(--transit-blue); color:var(--transit-blue); padding:5px 8px; border-radius:5px; font-size:10.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+      .si-am-btn:hover { filter:brightness(1.25); }
+      .si-am-btn.owned { border-color:#10b981; color:#10b981; cursor:default; }
+      .si-am-btn.owned:hover { filter:none; }
+      .si-am-btn.disabled { opacity:.4; cursor:not-allowed; border-color:var(--text-muted); color:var(--text-muted); }
+      .si-naming-banner { margin-top:10px; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.4); border-radius:6px; padding:8px; }
+      .si-naming-banner .si-nb-title { color:#fbbf24; font-weight:700; font-size:11.5px; margin-bottom:3px; }
+      .si-naming-banner .si-nb-desc { color:var(--text-muted); font-size:10px; line-height:1.4; margin-bottom:6px; }
+      .si-nb-btn { width:100%; background:#fbbf24; color:#1a1300; border:none; padding:7px; border-radius:5px; font-weight:700; font-size:11px; cursor:pointer; }
+      .si-nb-btn:hover { filter:brightness(1.1); }
+      .econ-toggle-row { display:flex; align-items:center; justify-content:space-between; font-size:11px; background:rgba(12,13,18,0.5); border:1px solid var(--border-color); border-radius:6px; padding:8px; margin-bottom:6px; }
+      .econ-toggle-desc { color:var(--text-muted); font-size:9.5px; line-height:1.35; margin-top:3px; }
+      .econ-switch { width:36px; height:20px; border-radius:10px; background:var(--bg-main); border:1px solid var(--border-color); position:relative; cursor:pointer; flex-shrink:0; }
+      .econ-switch.on { background:rgba(16,185,129,0.25); border-color:#10b981; }
+      .econ-switch .knob { position:absolute; top:1px; left:1px; width:16px; height:16px; border-radius:50%; background:var(--text-muted); transition:left .15s ease, background .15s ease; }
+      .econ-switch.on .knob { left:17px; background:#10b981; }
+      .econ-breakdown-row { display:flex; justify-content:space-between; font-size:10.5px; padding:3px 0; color:var(--text-muted); }
+      .econ-breakdown-row span:last-child { color:#e2e8f0; font-family:monospace; font-weight:600; }
+      .econ-breakdown-row.total { border-top:1px solid var(--border-color); margin-top:4px; padding-top:5px; color:#fff; font-weight:700; }
+      .econ-breakdown-row.total span:last-child { font-size:11px; }
       #station-inspector.open { display:block; }
       .si-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--border-color); }
       .si-title { font-size:15px; font-weight:800; color:#fff; line-height:1.2; }
@@ -162,7 +209,97 @@
       .si-btn.upgrade { border-color:#10b981; color:#10b981; }
       .si-btn.upgrade.maxed { opacity:.5; cursor:not-allowed; color:var(--text-muted); border-color:var(--border-color); filter:none; }
       .si-btn.delete { border-color:#ef4444; color:#ef4444; }
-      
+
+      /* ---- Reusable hover-tooltip (plain-English explainer) ---- */
+      .tt-wrap { position:relative; display:inline-flex; align-items:center; }
+      .tt-wrap .tt-icon { width:13px; height:13px; border-radius:50%; background:rgba(255,255,255,0.14); color:var(--text-muted); font-size:9px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; cursor:help; margin-left:4px; flex-shrink:0; font-family:Georgia,serif; line-height:1; }
+      .tt-wrap:hover .tt-icon { background:var(--transit-blue); color:#04121f; }
+      .tt-wrap::before { content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); left:0; transform:none; width:200px; background:rgba(7,10,18,0.98); border:1px solid var(--border-color); color:#e2e8f0; font-size:10.5px; font-weight:400; line-height:1.42; padding:8px 10px; border-radius:7px; box-shadow:0 12px 24px rgba(0,0,0,.55); z-index:300; opacity:0; pointer-events:none; transition:opacity .12s ease; text-transform:none; letter-spacing:normal; white-space:normal; }
+      .tt-wrap:hover::before { opacity:1; }
+      .tt-wrap.tt-right::before { left:auto; right:0; }
+      .tt-wrap.tt-center::before { left:50%; transform:translateX(-50%); }
+      .selector-btn[data-tip] { position:relative; }
+      .selector-btn[data-tip]::after { content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); width:180px; background:rgba(7,10,18,0.98); border:1px solid var(--border-color); color:#e2e8f0; font-size:10px; font-weight:400; line-height:1.4; padding:7px 9px; border-radius:7px; box-shadow:0 12px 24px rgba(0,0,0,.55); z-index:300; opacity:0; pointer-events:none; transition:opacity .12s ease; text-transform:none; letter-spacing:normal; white-space:normal; }
+      .selector-btn[data-tip]:hover::after { opacity:1; }
+
+      /* ---- Upgrade / Amenity info-card system ---- */
+      .uc-card { background:rgba(12,13,18,0.55); border:1px solid var(--border-color); border-radius:8px; padding:10px 11px; margin-top:10px; }
+      .uc-card.owned { border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.05); }
+      .uc-head { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:2px; }
+      .uc-title { font-size:12.5px; font-weight:800; color:#fff; display:flex; align-items:center; }
+      .uc-lvl { font-size:9.5px; color:var(--text-muted); font-family:monospace; white-space:nowrap; padding-top:1px; }
+      .uc-desc { font-size:10.5px; color:var(--text-muted); line-height:1.42; margin:3px 0 8px; }
+      .uc-badges { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+      .uc-badge { font-size:9.5px; font-weight:700; padding:3px 7px; border-radius:20px; display:inline-flex; align-items:center; gap:3px; white-space:nowrap; }
+      .uc-badge.b-good { background:rgba(16,185,129,0.14); color:#4ade80; border:1px solid rgba(16,185,129,0.35); }
+      .uc-badge.b-maint { background:rgba(251,191,36,0.14); color:#fbbf24; border:1px solid rgba(251,191,36,0.35); }
+      .uc-badge.b-cov { background:rgba(56,189,248,0.14); color:#38bdf8; border:1px solid rgba(56,189,248,0.35); }
+      .uc-badge.b-cost { background:rgba(239,68,68,0.14); color:#f87171; border:1px solid rgba(239,68,68,0.35); }
+      .uc-badge.b-comfort { background:rgba(168,85,247,0.14); color:#c084fc; border:1px solid rgba(168,85,247,0.35); }
+      .uc-section-label { font-size:9px; font-weight:700; letter-spacing:.05em; color:var(--text-muted); text-transform:uppercase; margin:8px 0 4px; }
+      .uc-row { display:flex; justify-content:space-between; align-items:center; font-size:10.5px; padding:2px 0; color:var(--text-muted); gap:8px; }
+      .uc-row span:last-child { color:#e2e8f0; font-family:monospace; font-weight:600; text-align:right; }
+      .uc-row.hl span:last-child { color:#4ade80; }
+      .uc-bar-container { height:4px; background:var(--bg-main); border-radius:2px; overflow:hidden; margin:4px 0 2px; }
+      .uc-bar { height:100%; border-radius:2px; transition:width .3s ease; }
+      .uc-rec { margin-top:8px; padding:7px 8px; border-radius:6px; font-size:10.5px; line-height:1.42; }
+      .uc-rec.high { background:rgba(16,185,129,0.09); border:1px solid rgba(16,185,129,0.35); color:#a7f3d0; }
+      .uc-rec.med { background:rgba(56,189,248,0.09); border:1px solid rgba(56,189,248,0.35); color:#bae6fd; }
+      .uc-rec.low { background:rgba(148,163,184,0.08); border:1px solid var(--border-color); color:var(--text-muted); }
+      .uc-rec b { display:block; margin-bottom:2px; color:#fff; font-size:10.5px; }
+      .uc-btn2 { width:100%; margin-top:9px; background:var(--bg-accent); border:1px solid #10b981; color:#10b981; padding:8px; border-radius:6px; font-size:11.5px; font-weight:700; cursor:pointer; text-align:center; box-sizing:border-box; }
+      .uc-btn2:hover { filter:brightness(1.2); }
+      .uc-btn2.maxed, .uc-btn2.disabled, .uc-btn2.owned-btn { opacity:.55; cursor:not-allowed; border-color:var(--border-color); color:var(--text-muted); filter:none; }
+      .uc-btn2 .uc-btn-sub { display:block; font-size:9.5px; font-weight:600; opacity:.85; margin-top:2px; font-family:monospace; }
+      .uc-hint { font-size:10px; color:var(--text-muted); font-style:italic; margin:-4px 0 8px; line-height:1.4; }
+      .uc-flavor { font-size:10px; color:#8b95a8; font-style:italic; line-height:1.4; margin:6px 0 8px; padding-left:8px; border-left:2px solid var(--border-color); }
+      .uc-compare { font-size:10px; color:#7dd3fc; line-height:1.4; margin:6px 0 2px; }
+      .uc-ba-row { display:flex; justify-content:space-between; align-items:center; font-size:10.5px; padding:4px 0; color:var(--text-muted); gap:8px; }
+      .uc-ba-vals { font-family:monospace; font-weight:700; color:#e2e8f0; display:flex; align-items:center; gap:5px; }
+      .uc-ba-vals .arrow { color:var(--text-muted); font-weight:400; }
+      .uc-ba-vals .after-good { color:#4ade80; }
+      .uc-ba-vals .after-bad { color:#f87171; }
+      .uc-urgency-row { display:flex; flex-wrap:wrap; gap:5px; margin:4px 0 8px; }
+      .uc-urgency { font-size:9.5px; font-weight:800; padding:3px 8px; border-radius:20px; display:inline-flex; align-items:center; gap:3px; white-space:nowrap; }
+      .uc-urgency.u-rec { background:rgba(16,185,129,0.16); color:#4ade80; border:1px solid rgba(16,185,129,0.4); }
+      .uc-urgency.u-near { background:rgba(251,191,36,0.16); color:#fbbf24; border:1px solid rgba(251,191,36,0.4); }
+      .uc-urgency.u-none { background:rgba(148,163,184,0.1); color:var(--text-muted); border:1px solid var(--border-color); }
+      .uc-urgency.u-roi { background:rgba(56,189,248,0.16); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); }
+      .uc-affects-label { font-size:9px; font-weight:700; letter-spacing:.05em; color:var(--text-muted); text-transform:uppercase; margin:8px 0 5px; }
+      .uc-affects-row { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+      .uc-eff { font-size:9.5px; font-weight:700; padding:3px 7px; border-radius:20px; display:inline-flex; align-items:center; gap:3px; white-space:nowrap; }
+      .uc-eff.e-cap { background:rgba(56,189,248,0.14); color:#38bdf8; border:1px solid rgba(56,189,248,0.35); }
+      .uc-eff.e-comfort { background:rgba(168,85,247,0.14); color:#c084fc; border:1px solid rgba(168,85,247,0.35); }
+      .uc-eff.e-rev-pos { background:rgba(16,185,129,0.14); color:#4ade80; border:1px solid rgba(16,185,129,0.35); }
+      .uc-eff.e-rev-neg { background:rgba(239,68,68,0.14); color:#f87171; border:1px solid rgba(239,68,68,0.35); }
+      .uc-eff.e-maint { background:rgba(251,191,36,0.14); color:#fbbf24; border:1px solid rgba(251,191,36,0.35); }
+
+      /* Neighborhood / AI Commuters Inspector */
+      #neighborhood-inspector { position:absolute; top:16px; right:16px; width:320px; max-height:calc(100vh - 32px); overflow-y:auto; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.5); z-index:60; display:none; color:var(--text-main); scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.15) transparent; }
+      #neighborhood-inspector.open { display:block; }
+      #neighborhood-inspector::-webkit-scrollbar { width:5px; }
+      #neighborhood-inspector::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:3px; }
+      #ni-subtitle-row { display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-muted); margin-top:6px; padding-bottom:10px; border-bottom:1px solid var(--border-color); }
+      .commuter-card { background:rgba(12,13,18,0.55); border:1px solid var(--border-color); border-radius:8px; padding:11px; margin-top:12px; }
+      .cc-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+      .cc-avatar { width:26px; height:26px; border-radius:50%; background:var(--bg-accent); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+      .cc-name { font-size:12.5px; font-weight:700; color:#fff; }
+      .cc-sub { font-size:10px; color:var(--text-muted); margin-top:1px; }
+      .cc-fact-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; font-size:11px; margin-bottom:9px; }
+      .cc-fact-label { color:var(--text-muted); }
+      .cc-fact-value { color:#fff; font-weight:600; text-align:right; font-family:monospace; }
+      .cc-mode-table { width:100%; border-collapse:collapse; font-size:10.5px; }
+      .cc-mode-table th { text-align:right; color:var(--text-muted); font-weight:600; padding:3px 4px; font-size:9.5px; text-transform:uppercase; letter-spacing:.03em; }
+      .cc-mode-table th:first-child, .cc-mode-table td:first-child { text-align:left; }
+      .cc-mode-table td { text-align:right; padding:4px; font-family:monospace; color:#e2e8f0; border-top:1px solid rgba(255,255,255,0.06); }
+      .cc-mode-table tr.chosen td { color:#fff; font-weight:700; }
+      .cc-mode-table tr.chosen td:first-child { color:var(--transit-blue); }
+      .cc-mode-table tr.unavailable td { color:var(--text-muted); font-style:italic; }
+      .cc-mode-icon { margin-right:5px; }
+      .cc-verdict { margin-top:8px; font-size:11px; padding:7px 8px; border-radius:6px; background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.35); color:#e2e8f0; }
+      .cc-verdict b { color:var(--transit-blue); }
+      #ni-empty { font-size:11.5px; color:var(--text-muted); text-align:center; padding:18px 6px; }
+
       /* Notification Animation */
       @keyframes slideDown { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
       .notification { position:absolute; top:20px; left:50%; transform:translateX(-50%); background:rgba(16, 185, 129, 0.95); border:1px solid #047857; color:#fff; padding:12px 24px; border-radius:8px; font-weight:bold; font-size:14px; z-index:1000; pointer-events:none; animation: slideDown 0.3s ease-out; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
@@ -283,6 +420,29 @@
             </div>
           </div>
         </div>
+        <div class="nav-subsection">
+          <div id="pinned-objectives" onclick="openSection('grp-objectives'); document.getElementById('grp-objectives').scrollIntoView({behavior:'smooth', block:'start'});">
+            <div id="pinned-objectives-top">
+              <span class="pinned-tools-title" style="margin-bottom:0;"><span>🎯</span><span>Objectives</span></span>
+              <span id="pinned-objectives-count">0 / 0</span>
+            </div>
+            <div id="pinned-objectives-next">Loading objectives…</div>
+            <div id="pinned-objectives-bar-container"><div id="pinned-objectives-bar" style="width:0%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-group" id="grp-objectives">
+        <div class="nav-group-header" onclick="toggleSection('grp-objectives')">
+          <div class="label"><span class="emoji">🎯</span><span>Objectives</span></div>
+          <span class="arrow" id="arrow-grp-objectives">▼</span>
+        </div>
+        <div class="nav-group-body" id="body-grp-objectives">
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Regional Goals</div>
+            <div id="objectives-list"></div>
+          </div>
+        </div>
       </div>
 
       <div class="nav-group" id="grp-build">
@@ -294,17 +454,19 @@
           <div class="nav-subsection">
             <div class="nav-subsection-title">Track Elevation</div>
             <div class="selector-row">
-              <div id="prof-level" class="selector-btn active" onclick="setElevationProfile('level')">Level<br /><span style="color: #10b981; font-size: 9px">1.0x Cost</span></div>
-              <div id="prof-above" class="selector-btn" onclick="setElevationProfile('above')">Above Ground<br /><span style="color: #fbbf24; font-size: 9px">2.5x Cost</span></div>
-              <div id="prof-under" class="selector-btn" onclick="setElevationProfile('under')">Underground<br /><span style="color: #ef4444; font-size: 9px">6.0x Cost</span></div>
+              <div id="prof-level" class="selector-btn active" data-tip="Cheapest option. Runs at street level — best when there's room to build without disrupting roads or terrain." onclick="setElevationProfile('level')">Level<br /><span style="color: #10b981; font-size: 9px">1.0x Cost</span></div>
+              <div id="prof-above" class="selector-btn" data-tip="Elevated viaduct. Avoids street-level obstacles at 2.5x the base construction cost." onclick="setElevationProfile('above')">Above Ground<br /><span style="color: #fbbf24; font-size: 9px">2.5x Cost</span></div>
+              <div id="prof-under" class="selector-btn" data-tip="Tunneled subway. Most expensive at 6x base cost, but avoids all surface conflicts — useful in dense downtown corridors." onclick="setElevationProfile('under')">Underground<br /><span style="color: #ef4444; font-size: 9px">6.0x Cost</span></div>
             </div>
           </div>
           <div class="nav-subsection">
-            <div class="nav-subsection-title">Track Capacity</div>
+            <div class="nav-subsection-title">Track Capacity
+              <span class="tt-wrap" data-tip="More parallel tracks let trains run in both directions independently without sharing a single line, reducing bunching and delays on busy corridors — at a higher construction cost."><span class="tt-icon">i</span></span>
+            </div>
             <div class="selector-row">
-              <div id="way-single" class="selector-btn active" onclick="setTrackWay('single')">Single Line</div>
-              <div id="way-parallel" class="selector-btn" onclick="setTrackWay('parallel')">Parallel Twin</div>
-              <div id="way-quad" class="selector-btn" onclick="setTrackWay('quad')">Quad Trunk</div>
+              <div id="way-single" class="selector-btn active" data-tip="Cheapest option (1x cost multiplier). One shared track — trains share the line, so it's best for low-traffic branches." onclick="setTrackWay('single')">Single Line</div>
+              <div id="way-parallel" class="selector-btn" data-tip="2x cost multiplier. Two independent tracks let opposing trains run without waiting on each other — recommended for most two-way lines." onclick="setTrackWay('parallel')">Parallel Twin</div>
+              <div id="way-quad" class="selector-btn" data-tip="3.5x cost multiplier — the most expensive option. Four tracks for the highest-traffic corridors." onclick="setTrackWay('quad')">Quad Trunk</div>
             </div>
           </div>
           <div class="nav-subsection">
@@ -323,13 +485,15 @@
         </div>
         <div class="nav-group-body" id="body-grp-operations">
           <div class="nav-subsection">
-            <div class="nav-subsection-title">Fleet &amp; Depots</div>
+            <div class="nav-subsection-title">Fleet &amp; Depots
+              <span class="tt-wrap" data-tip="Depots store and service trains. Any line you want to buy trains for must pass within a depot's service radius, or the purchase will be blocked."><span class="tt-icon">i</span></span>
+            </div>
             <div class="selector-row">
-              <div id="btn-depot" class="selector-btn" onclick="setMode('depot')">+ Build Depot<br /><span style="color: #fbbf24; font-size: 9px">$2,000,000</span></div>
+              <div id="btn-depot" class="selector-btn" data-tip="Required before you can buy trains on a line. Adds ~$3,500/day in staffing, cleaning and security upkeep." onclick="setMode('depot')">+ Build Depot<br /><span style="color: #fbbf24; font-size: 9px">$2,000,000</span></div>
             </div>
             <div class="selector-row" style="margin-top: 6px">
-              <div id="class-light" class="selector-btn active" onclick="setTrainClass('light')">Light Rail<br /><span style="color: #38bdf8; font-size: 9px">$1.5M &middot; 80 cap</span></div>
-              <div id="class-heavy" class="selector-btn" onclick="setTrainClass('heavy')">Heavy Rail<br /><span style="color: #a855f7; font-size: 9px">$3.5M &middot; 160 cap</span></div>
+              <div id="class-light" class="selector-btn active" data-tip="Cheaper to buy and run. Lower per-train capacity — a good fit for lower-demand neighborhood lines." onclick="setTrainClass('light')">Light Rail<br /><span style="color: #38bdf8; font-size: 9px">$1.5M &middot; 80 cap</span></div>
+              <div id="class-heavy" class="selector-btn" data-tip="Higher purchase price and daily cost, but double the passenger capacity — better suited to high-demand regional corridors." onclick="setTrainClass('heavy')">Heavy Rail<br /><span style="color: #a855f7; font-size: 9px">$3.5M &middot; 160 cap</span></div>
             </div>
             <div id="fleet-list" style="margin-top: 8px"></div>
           </div>
@@ -365,6 +529,31 @@
               <div id="bonus-list" style="display: flex; flex-direction: column; gap: 4px; transition: max-height 0.25s ease-out; overflow: hidden; margin-top:6px;">
               </div>
             </div>
+          </div>
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Policy
+              <span class="tt-wrap" data-tip="Levies a small ongoing tax on residents and jobs within each station's catchment area. Revenue scales with how much population/employment your network already serves — it doesn't cost anything to enable."><span class="tt-icon">i</span></span>
+            </div>
+            <div class="econ-toggle-row" onclick="toggleTODTax()" style="cursor:pointer;">
+              <div style="flex:1;">
+                <div style="color:#fff; font-weight:600;">TOD Value-Capture Tax</div>
+                <div class="econ-toggle-desc">Levy a small tax on residents &amp; jobs near your stations for ongoing revenue.</div>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                  <span class="uc-badge b-good">🟢 Revenue</span>
+                  <span class="uc-badge b-cov">🔵 Coverage-based</span>
+                </div>
+                <div id="tod-tax-preview" style="font-size:10px; color:var(--text-muted); margin-top:5px; font-family:monospace;"></div>
+              </div>
+              <div class="econ-switch" id="tod-switch"><div class="knob"></div></div>
+            </div>
+          </div>
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Today's Income Breakdown</div>
+            <div id="econ-income-breakdown"></div>
+          </div>
+          <div class="nav-subsection">
+            <div class="nav-subsection-title">Today's Expense Breakdown</div>
+            <div id="econ-expense-breakdown"></div>
           </div>
         </div>
       </div>
@@ -451,14 +640,35 @@
             <div class="si-lines" id="si-lines"><span style="color:var(--text-muted); font-size:11px;">None</span></div>
           </div>
 
-          <div class="si-row"><span class="si-label">💰 Revenue Today</span><span class="si-value" id="si-revenue" style="color:#4ade80;">$0</span></div>
-          <div class="si-row"><span class="si-label">🏘️ Nearby Population</span><span class="si-value" id="si-population">0</span></div>
+          <div class="si-row"><span class="si-label">💰 Fare Revenue Today</span><span class="si-value" id="si-revenue" style="color:#4ade80;">$0</span></div>
+          <div class="si-row"><span class="si-label">💵 Amenity Income Today</span><span class="si-value" id="si-amenity-revenue" style="color:#4ade80;">$0</span></div>
+          <div class="si-row"><span class="si-label">🏘️ Catchment Population<span class="tt-wrap" data-tip="Catchment area = the ~250-unit radius around a station. Residents, jobs, and visitors inside this radius are what count toward this station's ridership and revenue."><span class="tt-icon">i</span></span></span><span class="si-value" id="si-population">0</span></div>
+
+          <div id="si-platform-card"></div>
+
+          <div class="uc-section-label" style="margin-top:12px;">Station Amenities</div>
+          <div class="si-amenity-grid" id="si-amenity-list"></div>
+          <div id="si-naming-banner"></div>
 
           <div class="si-actions">
-            <button class="si-btn upgrade" id="si-btn-upgrade" onclick="inspectorUpgrade()">⬆ Upgrade Platform</button>
             <button class="si-btn" onclick="inspectorRename()">✏️ Rename</button>
             <button class="si-btn delete" onclick="inspectorDelete()">🗑 Delete</button>
           </div>
+        </div>
+
+        <div id="neighborhood-inspector">
+          <div class="si-header">
+            <div>
+              <div class="si-title" id="ni-name">Neighborhood</div>
+              <div class="si-subtitle" id="ni-subtitle">City · Type</div>
+            </div>
+            <div class="si-close" onclick="closeNeighborhoodInspector()">✕</div>
+          </div>
+          <div id="ni-subtitle-row">
+            <span>🤖 AI Commuters</span>
+            <span id="ni-refresh-note">live from current network</span>
+          </div>
+          <div id="ni-commuter-list"></div>
         </div>
       </div>
       
@@ -513,6 +723,7 @@
     <span class="tutorial-progress-pill" id="do-day-badge">Week 1</span> </div>
   <div class="tutorial-card-body">
     <div class="si-row"><span class="si-label">🎫 Weekly Riders</span><span class="si-value" id="do-riders">0</span></div> <div class="si-row"><span class="si-label">💰 Fare Revenue</span><span class="si-value" id="do-revenue" style="color:#4ade80;">$0</span></div>
+    <div class="si-row"><span class="si-label">💵 Other Income</span><span class="si-value" id="do-other-income" style="color:#4ade80;">$0</span></div>
     <div class="si-row"><span class="si-label">⚠️ Crowding Events</span><span class="si-value" id="do-overcrowding" style="color:#ef4444;">0</span></div>
     <div class="si-row"><span class="si-label">📉 OpEx & Interest</span><span class="si-value" id="do-opex" style="color:#f87171;">$0</span></div>
     <div class="si-row" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
@@ -531,7 +742,8 @@ let weeklyRiders = 0;
 let weeklyRevenue = 0;
 let weeklyOvercrowding = 0;
 let totalWeeklyOpEx = 0;
-  function showDailyOverview(day, riders, revenue, overcrowd, currentBudget, opex) {
+let weeklyOtherIncome = 0;
+  function showDailyOverview(day, riders, revenue, overcrowd, currentBudget, opex, otherIncome) {
     previousSimSpeed = simSpeed > 0 ? simSpeed : 1; 
     setSpeed(0); 
 
@@ -542,6 +754,8 @@ let totalWeeklyOpEx = 0;
     document.getElementById('do-day-badge').textContent = `Week ${week} Summary`;
     document.getElementById('do-riders').textContent = riders.toLocaleString();
     document.getElementById('do-revenue').textContent = `$${Math.round(revenue).toLocaleString()}`;
+    const otherIncomeEl = document.getElementById('do-other-income');
+    if (otherIncomeEl) otherIncomeEl.textContent = `$${Math.round(otherIncome || 0).toLocaleString()}`;
     document.getElementById('do-overcrowding').textContent = overcrowd.toLocaleString();
     document.getElementById('do-opex').textContent = `-$${Math.round(opex).toLocaleString()}`;
     document.getElementById('do-budget').textContent = `$${Math.floor(currentBudget).toLocaleString()}`;
@@ -591,6 +805,36 @@ let totalWeeklyOpEx = 0;
               body: `Use this panel to adjust your track elevation configurations (Level, Above Ground, Underground) and track cross-sections. This is where you configure engineering blueprints.`,
               onEnter: () => { openSection('grp-build'); },
               onLeave: () => { closeSection('grp-build'); }
+          },
+          {
+              title: "Why Riders Don't Just Show Up",
+              icon: "🧠",
+              targetSelector: "#canvas-container",
+              placement: "inside-bottom",
+              body: `Here's the part most Directors miss: <b>tracks alone don't create ridership.</b> Every simulated commuter privately scores <b>Drive</b>, <b>Walk</b>, and <b>Transit</b> on total time-plus-cost, then quietly picks whichever wins &mdash; there's no loyalty to rail.<br><br>Driving starts as the default winner (~32mph, no waiting). To beat it, your transit trip has to be genuinely competitive once you add walking to the station, waiting for a train, and any transfers.`
+          },
+          {
+              title: "Coverage: Both Ends or It Doesn't Count",
+              icon: "📍",
+              targetSelector: "#grp-build",
+              placement: "right",
+              body: `A commuter only considers transit if a station sits within easy reach of <b>both</b> their home <i>and</i> their destination &mdash; a lone station near an empty field does nothing.<br><br>If either end is uncovered, that rider is auto-scored as Drive or Walk only. Build lines that actually connect dense neighborhoods to job centers, not just pretty shapes on the map.`
+          },
+          {
+              title: "Frequency Kills Wait Time",
+              icon: "⏱️",
+              targetSelector: "#grp-operations",
+              placement: "right",
+              body: `Even a well-placed line loses riders if trains run infrequently &mdash; long headways mean long average waits, and that wait time is scored just as harshly as time stuck in traffic.<br><br>Set tighter frequencies here and make sure you own enough trains to actually run that schedule; an understaffed line will bunch and quietly bleed ridership back to driving.`,
+              onEnter: () => { openSection('grp-operations'); },
+              onLeave: () => { closeSection('grp-operations'); }
+          },
+          {
+              title: "Fares vs. Parking",
+              icon: "💳",
+              targetSelector: "#grp-economy",
+              placement: "right",
+              body: `Transit isn't judged on time alone &mdash; cost matters too. Your fare is compared against the cost of driving <i>plus parking</i> at the destination. Steep downtown or airport parking makes transit look great by comparison; cheap free parking near a mall makes it a much harder sell.<br><br>Click any neighborhood on the map to see exactly how its residents are scoring Drive vs. Walk vs. Transit &mdash; it's the fastest way to diagnose a line that isn't pulling riders.`
           },
           {
               title: "Telemetry & Budget Matrix",
@@ -754,8 +998,619 @@ let totalWeeklyOpEx = 0;
           "Stonebriar Mall": { claimed: false, amount: 1800000, msg: "Frisco Retail Congestion Mitigation Grant" }
       };
 
+      // ---- Real Objectives system (regional goals, not just sandbox) ----
+      let bestDailyRiders = 0;
+      let currentTransitShare = 0;
+      let objectivesInitialized = false;
+
+      // Approximate DFW-area county for each city represented in the neighborhood data.
+      // (Simplified 1:1 mapping for gameplay purposes; several real cities straddle county lines.)
+      const CITY_COUNTY_MAP = {
+          "Dallas": "Dallas County", "Irving": "Dallas County", "Garland": "Dallas County",
+          "Mesquite": "Dallas County", "Carrollton": "Dallas County", "Farmers Branch": "Dallas County",
+          "Cedar Hill": "Dallas County", "Addison": "Dallas County", "Lancaster": "Dallas County",
+          "Richardson": "Dallas County", "Rowlett": "Dallas County",
+          "Fort Worth": "Tarrant County", "Arlington": "Tarrant County", "Hurst": "Tarrant County",
+          "Bedford": "Tarrant County", "Southlake": "Tarrant County", "Westlake": "Tarrant County",
+          "Grapevine": "Tarrant County", "Grand Prairie": "Tarrant County", "Mansfield": "Tarrant County",
+          "Plano": "Collin County", "Frisco": "Collin County", "McKinney": "Collin County",
+          "Allen": "Collin County", "Melissa": "Collin County", "Prosper": "Collin County",
+          "Denton": "Denton County", "Lewisville": "Denton County", "The Colony": "Denton County",
+          "Roanoke": "Denton County",
+          "Rockwall": "Rockwall County"
+      };
+      const ALL_DFW_COUNTIES = ["Dallas County", "Tarrant County", "Collin County", "Denton County", "Rockwall County"];
+      const OBJECTIVE_CATCHMENT_RADIUS = 250; // matches station catchment radius used elsewhere
+
+      function getConnectedCounties() {
+          const covered = new Set();
+          stations.forEach(s => {
+              const hasTrack = tracks.some(t => t.startStation === s || t.endStation === s);
+              if (!hasTrack) return;
+              neighborhoods.forEach(n => {
+                  if (Math.hypot(n.x - s.x, n.y - s.y) < OBJECTIVE_CATCHMENT_RADIUS) {
+                      const county = CITY_COUNTY_MAP[n.city];
+                      if (county) covered.add(county);
+                  }
+              });
+          });
+          return covered;
+      }
+
+      const OBJECTIVES = [
+          {
+              id: 'obj_first_riders', icon: '🎫', title: 'First Passengers',
+              desc: 'Carry 1,000 lifetime riders across your network.',
+              reward: 250000, target: 1000,
+              getCurrent: () => lifetimeRiders,
+              format: v => Math.floor(v).toLocaleString()
+          },
+          {
+              id: 'obj_10k_day', icon: '🚉', title: 'Rush Hour Ready',
+              desc: 'Carry 10,000 riders in a single day.',
+              reward: 1000000, target: 10000,
+              getCurrent: () => bestDailyRiders,
+              format: v => Math.floor(v).toLocaleString()
+          },
+          {
+              id: 'obj_50k_day', icon: '🚈', title: 'Metroplex Mover',
+              desc: 'Carry 50,000 riders in a single day.',
+              reward: 4000000, target: 50000,
+              getCurrent: () => bestDailyRiders,
+              format: v => Math.floor(v).toLocaleString()
+          },
+          {
+              id: 'obj_100k_day', icon: '🏆', title: '100K Club',
+              desc: 'Reach 100,000 riders per day — a true regional-scale network.',
+              reward: 10000000, target: 100000,
+              getCurrent: () => bestDailyRiders,
+              format: v => Math.floor(v).toLocaleString()
+          },
+          {
+              id: 'obj_airport', icon: '✈️', title: 'Wings Up',
+              desc: 'Connect DFW International Airport to your rail network. Build a station named "DFW Intl Airport" and link it with track.',
+              reward: 0, target: 1,
+              getCurrent: () => (LOCATION_BONUSES["DFW Intl Airport"] && LOCATION_BONUSES["DFW Intl Airport"].claimed) ? 1 : 0,
+              format: v => v >= 1 ? 'Connected' : 'Not connected',
+              footer: (current) => current >= 1 ? 'Connected' : 'Not yet connected'
+          },
+          {
+              id: 'obj_counties', icon: '🗺️', title: 'County Connector',
+              desc: 'Reach every county in the Metroplex: Dallas, Tarrant, Collin, Denton & Rockwall.',
+              reward: 6000000, target: ALL_DFW_COUNTIES.length,
+              getCurrent: () => getConnectedCounties().size,
+              format: v => Math.floor(v).toString(),
+              footer: (current, target) => `${current} / ${target} counties`
+          },
+          {
+              id: 'obj_mode_share', icon: '📈', title: 'Mode Shift',
+              desc: "Push transit's share of regional trips to 15%, the practical ceiling of a well-built network.",
+              reward: 5000000, target: 15,
+              getCurrent: () => currentTransitShare,
+              format: v => v.toFixed(1) + '%'
+          },
+{
+    id: 'obj_fleet25',
+    icon: '🚆',
+    title: 'Growing Fleet',
+    desc: 'Operate 25 trains.',
+    reward: 3000000,
+    target: 25,
+    getCurrent: () => trains.length,
+    format: v => Math.floor(v),
+},
+
+{
+    id: 'obj_fleet50',
+    icon: '🚈',
+    title: 'Regional Operator',
+    desc: 'Operate 50 trains.',
+    reward: 8000000,
+    target: 50,
+    getCurrent: () => trains.length,
+    format: v => Math.floor(v),
+},
+
+{
+    id: 'obj_station50',
+    icon: '🚉',
+    title: 'Network Expansion',
+    desc: 'Build 50 stations.',
+    reward: 5000000,
+    target: 50,
+    getCurrent: () => stations.length,
+    format: v => Math.floor(v),
+},
+
+{
+    id: 'obj_station100',
+    icon: '🏙️',
+    title: 'Metro Network',
+    desc: 'Build 100 stations.',
+    reward: 12000000,
+    target: 100,
+    getCurrent: () => stations.length,
+    format: v => Math.floor(v),
+},
+
+{
+    id: 'obj_track250',
+    icon: '🛤️',
+    title: 'Track Builder',
+    desc: 'Construct 250 track segments.',
+    reward: 7000000,
+    target: 250,
+    getCurrent: () => tracks.length,
+    format: v => Math.floor(v),
+},
+
+{
+    id: 'obj_budget100',
+    icon: '💰',
+    title: 'Cash Reserve',
+    desc: 'Maintain $100 million.',
+    reward: 5000000,
+    target: 100000000,
+    getCurrent: () => budget,
+    format: v => "$" + Math.round(v/1000000) + "M"
+},
+
+{
+    id: 'obj_budget500',
+    icon: '🏦',
+    title: 'Transit Empire',
+    desc: 'Reach $500 million.',
+    reward: 25000000,
+    target: 500000000,
+    getCurrent: () => budget,
+    format: v => "$" + Math.round(v/1000000) + "M"
+},
+
+{
+    id: 'obj_daily25000',
+    icon: '👥',
+    title: 'Rush Hour',
+    desc: 'Carry 25,000 riders in one day.',
+    reward: 3000000,
+    target: 25000,
+    getCurrent: () => bestDailyRiders,
+    format: v => Math.floor(v)
+},
+
+{
+    id: 'obj_daily50000',
+    icon: '🚇',
+    title: 'Metro Success',
+    desc: 'Carry 50,000 riders in one day.',
+    reward: 8000000,
+    target: 50000,
+    getCurrent: () => bestDailyRiders,
+    format: v => Math.floor(v)
+},
+
+{
+    id: 'obj_revenue',
+    icon: '💵',
+    title: 'Farebox Recovery',
+    desc: 'Earn $500,000 in one day.',
+    reward: 5000000,
+    target: 500000,
+    getCurrent: () => fareRevenueToday,
+    format: v => "$" + Math.round(v).toLocaleString()
+},
+
+{
+    id: 'obj_year2030',
+    icon: '📅',
+    title: 'Five Year Plan',
+    desc: 'Operate through the year 2030.',
+    reward: 10000000,
+    target: 5,
+    getCurrent: () => gameTime.year - 2025,
+    format: v => `${Math.floor(v)} / 5 years`
+},
+
+{
+    id: 'obj_share25',
+    icon: '📈',
+    title: 'Transit City',
+    desc: 'Reach a 25% transit mode share.',
+    reward: 15000000,
+    target: 25,
+    getCurrent: () => currentTransitShare,
+    format: v => v.toFixed(1) + "%"
+},
+
+{
+    id: 'obj_share40',
+    icon: '🌎',
+    title: 'World-Class Transit',
+    desc: 'Reach a 40% transit mode share.',
+    reward: 30000000,
+    target: 40,
+    getCurrent: () => currentTransitShare,
+    format: v => v.toFixed(1) + "%"
+},
+
+
+{
+    id:'obj_depot3',
+    icon:'🏗️',
+    title:'Fleet Expansion',
+    desc:'Build 3 depots.',
+    reward:2000000,
+    target:3,
+    getCurrent:()=>depots.length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_depot6',
+    icon:'🚧',
+    title:'Operations Division',
+    desc:'Build 6 depots.',
+    reward:7000000,
+    target:6,
+    getCurrent:()=>depots.length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_upgrades20',
+    icon:'⬆️',
+    title:'Modernization',
+    desc:'Upgrade 20 stations.',
+    reward:5000000,
+    target:20,
+    getCurrent:()=>stations.filter(s=>s.level>1).length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_upgrades50',
+    icon:'🏙️',
+    title:'Premium Network',
+    desc:'Upgrade 50 stations.',
+    reward:12000000,
+    target:50,
+    getCurrent:()=>stations.filter(s=>s.level>1).length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_light25',
+    icon:'🚋',
+    title:'Light Rail Specialist',
+    desc:'Own 25 light rail vehicles.',
+    reward:4000000,
+    target:25,
+    getCurrent:()=>trains.filter(t=>t.trainClass==='light').length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_heavy25',
+    icon:'🚇',
+    title:'Metro Builder',
+    desc:'Own 25 heavy rail trains.',
+    reward:8000000,
+    target:25,
+    getCurrent:()=>trains.filter(t=>t.trainClass==='heavy').length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_budget250m',
+    icon:'💎',
+    title:'Financial Giant',
+    desc:'Accumulate $250 million.',
+    reward:15000000,
+    target:250000000,
+    getCurrent:()=>budget,
+    format:v=>"$"+Math.round(v/1000000)+"M"
+},
+
+{
+    id:'obj_budget1b',
+    icon:'🏦',
+    title:'Transit Tycoon',
+    desc:'Accumulate $1 billion.',
+    reward:50000000,
+    target:1000000000,
+    getCurrent:()=>budget,
+    format:v=>"$"+Math.round(v/1000000)+"M"
+},
+
+{
+    id:'obj_riders100k',
+    icon:'👥',
+    title:'Major Metro',
+    desc:'Reach 100,000 daily riders.',
+    reward:25000000,
+    target:100000,
+    getCurrent:()=>bestDailyRiders,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_riders250k',
+    icon:'🚉',
+    title:'Mega Network',
+    desc:'Reach 250,000 daily riders.',
+    reward:60000000,
+    target:250000,
+    getCurrent:()=>bestDailyRiders,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_share50',
+    icon:'🌎',
+    title:'Transit Dominance',
+    desc:'Reach 50% transit mode share.',
+    reward:50000000,
+    target:50,
+    getCurrent:()=>currentTransitShare,
+    format:v=>v.toFixed(1)+"%"
+},
+
+{
+    id:'obj_share60',
+    icon:'🚆',
+    title:'Car-Free City',
+    desc:'Reach 60% transit mode share.',
+    reward:100000000,
+    target:60,
+    getCurrent:()=>currentTransitShare,
+    format:v=>v.toFixed(1)+"%"
+},
+
+{
+    id:'obj_year2040',
+    icon:'📆',
+    title:'Long-Term Planning',
+    desc:'Operate for 15 years.',
+    reward:25000000,
+    target:15,
+    getCurrent:()=>gameTime.year - 2025,
+    format:v=>`${Math.floor(v)} / 15 years`
+},
+
+{
+    id:'obj_year2050',
+    icon:'🏛️',
+    title:'Transit Legacy',
+    desc:'Operate for 25 years.',
+    reward:75000000,
+    target:25,
+    getCurrent:()=>gameTime.year - 2025,
+    format:v=>`${Math.floor(v)} / 25 years`
+},
+
+
+{
+    id:'obj_station150',
+    icon:'🚉',
+    title:'Urban Coverage',
+    desc:'Build 150 stations.',
+    reward:25000000,
+    target:150,
+    getCurrent:()=>stations.length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_station250',
+    icon:'🏙️',
+    title:'Regional Coverage',
+    desc:'Build 250 stations.',
+    reward:60000000,
+    target:250,
+    getCurrent:()=>stations.length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_track500',
+    icon:'🛤️',
+    title:'Rail Empire',
+    desc:'Construct 500 track segments.',
+    reward:25000000,
+    target:500,
+    getCurrent:()=>tracks.length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_track1000',
+    icon:'🚄',
+    title:'National Network',
+    desc:'Construct 1,000 track segments.',
+    reward:80000000,
+    target:1000,
+    getCurrent:()=>tracks.length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_train75',
+    icon:'🚆',
+    title:'Growing Fleet',
+    desc:'Operate 75 trains.',
+    reward:12000000,
+    target:75,
+    getCurrent:()=>trains.length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_train100',
+    icon:'🚅',
+    title:'Mass Transit',
+    desc:'Operate 100 trains.',
+    reward:30000000,
+    target:100,
+    getCurrent:()=>trains.length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_train200',
+    icon:'🚄',
+    title:'Rail Giant',
+    desc:'Operate 200 trains.',
+    reward:100000000,
+    target:200,
+    getCurrent:()=>trains.length,
+    format:v=>Math.floor(v)
+},
+
+{
+    id:'obj_revenue1m',
+    icon:'💵',
+    title:'Profitable Operations',
+    desc:'Earn $1 million in fare revenue in one day.',
+    reward:12000000,
+    target:1000000,
+    getCurrent:()=>fareRevenueToday,
+    format:v=>"$"+Math.round(v).toLocaleString()
+},
+
+{
+    id:'obj_revenue5m',
+    icon:'💰',
+    title:'Cash Machine',
+    desc:'Earn $5 million in fare revenue in one day.',
+    reward:50000000,
+    target:5000000,
+    getCurrent:()=>fareRevenueToday,
+    format:v=>"$"+Math.round(v).toLocaleString()
+},
+
+{
+    id:'obj_transit30yrs',
+    icon:'🎖️',
+    title:'Veteran Operator',
+    desc:'Operate for 30 years.',
+    reward:50000000,
+    target:30,
+    getCurrent:()=>gameTime.year - 2025,
+    format:v=>`${Math.floor(v)} / 30 years`
+},
+
+{
+    id:'obj_transit50yrs',
+    icon:'🏅',
+    title:'Transit Legend',
+    desc:'Operate for 50 years.',
+    reward:100000000,
+    target:50,
+    getCurrent:()=>gameTime.year - 2025,
+    format:v=>`${Math.floor(v)} / 50 years`
+},
+      ];
+      let completedObjectives = {};
+
+      function evaluateObjectives() {
+          let anyNewlyCompleted = false;
+          OBJECTIVES.forEach(obj => {
+              if (completedObjectives[obj.id]) return;
+              const current = obj.getCurrent();
+              if (current >= obj.target) {
+                  completedObjectives[obj.id] = true;
+                  anyNewlyCompleted = true;
+                  if (obj.reward > 0) {
+                      budget += obj.reward;
+                      showNotification(`🎯 Objective Complete — ${obj.title}: +$${obj.reward.toLocaleString()}!`);
+                  } else {
+                      showNotification(`🎯 Objective Complete — ${obj.title}!`);
+                  }
+              }
+          });
+          renderObjectives();
+          if (anyNewlyCompleted) updateHUD();
+      }
+
+      function renderObjectives() {
+          const list = document.getElementById('objectives-list');
+          const pinnedCount = document.getElementById('pinned-objectives-count');
+          const pinnedNext = document.getElementById('pinned-objectives-next');
+          const pinnedBar = document.getElementById('pinned-objectives-bar');
+          if (!list) return;
+
+          const completedCount = OBJECTIVES.filter(o => completedObjectives[o.id]).length;
+          if (pinnedCount) pinnedCount.textContent = `${completedCount} / ${OBJECTIVES.length}`;
+          if (pinnedBar) pinnedBar.style.width = `${(completedCount / OBJECTIVES.length) * 100}%`;
+          if (pinnedNext) {
+              const nextObj = OBJECTIVES.find(o => !completedObjectives[o.id]);
+              pinnedNext.textContent = nextObj ? `Next: ${nextObj.icon} ${nextObj.title}` : 'All regional goals complete! 🎉';
+          }
+
+list.innerHTML = '';
+
+const sortedObjectives = [...OBJECTIVES].sort((a, b) => {
+
+    const aDone = !!completedObjectives[a.id];
+    const bDone = !!completedObjectives[b.id];
+
+    // completed objectives always last
+    if (aDone !== bDone)
+        return aDone ? 1 : -1;
+
+    const aPct = Math.min(a.getCurrent(), a.target) / a.target;
+    const bPct = Math.min(b.getCurrent(), b.target) / b.target;
+
+    // highest progress first
+const aRemaining = a.target - Math.min(a.getCurrent(), a.target);
+const bRemaining = b.target - Math.min(b.getCurrent(), b.target);
+
+if (Math.abs(aPct - bPct) < 0.05) {
+    return aRemaining - bRemaining;
+}
+
+return bPct - aPct;});
+
+sortedObjectives.forEach(obj => {
+
+    const current = Math.min(obj.getCurrent(), obj.target);
+    const done = !!completedObjectives[obj.id];
+    const pct = Math.max(0, Math.min(100, current / obj.target * 100));
+
+    const div = document.createElement('div');
+    div.className = 'objective-card' + (done ? ' complete' : '');
+
+    div.innerHTML = `
+        <div class="objective-card-head">
+            <div class="objective-card-title">
+                <span>${obj.icon}</span>
+                <span>${obj.title}</span>
+                ${done ? '<span style="color:#10b981;">✓</span>' : ''}
+            </div>
+
+            ${obj.reward > 0
+                ? `<div class="objective-card-reward">+$${(obj.reward/1000000).toFixed(2).replace(/\.?0+$/,'')}M</div>`
+                : ''}
+        </div>
+
+        <div class="objective-card-desc">${obj.desc}</div>
+
+        <div class="objective-progress-container">
+            <div class="objective-progress-bar" style="width:${pct}%"></div>
+        </div>
+
+        <div class="objective-card-footer">
+            <span>${obj.footer ? obj.footer(current,obj.target) : obj.format(current)+' / '+obj.format(obj.target)}</span>
+            <span>${done ? 'COMPLETE' : Math.floor(pct)+'%'}</span>
+        </div>
+    `;
+
+    list.appendChild(div);
+
+          });
+      }
+
       let grantsCollapsed = false;
-      let collapsedNavGroups = { 'grp-build': true, 'grp-operations': true, 'grp-economy': true, 'grp-analytics': true };
+      let collapsedNavGroups = { 'grp-build': true, 'grp-operations': true, 'grp-economy': true, 'grp-analytics': true, 'grp-objectives': true };
 
       let sidebarCollapsed = false;
       function toggleSidebar() {
@@ -850,10 +1705,27 @@ let totalWeeklyOpEx = 0;
       let activeTrackBuild=null, selectedElevationProfile='level', selectedTrackWay='single', crossoverSystemEnabled=false;
       let activeColor = '#38bdf8';
 
-      const TRAIN_SPECS = {
-          light: { label: 'Light Rail', cost: 1500000, capacity: 80, dailyCost: 3000 },
-          heavy: { label: 'Heavy Rail', cost: 3500000, capacity: 160, dailyCost: 6000 }
-      };
+const TRAIN_SPECS = {
+    light: {
+        label: "Light Rail",
+        cost: 1500000,
+        capacity: 80,
+        dailyCost: 3000,
+        maxSpeed: 45,
+        acceleration: 1.8,
+        braking: 2.5
+    },
+
+    heavy: {
+        label: "Heavy Rail",
+        cost: 3500000,
+        capacity: 160,
+        dailyCost: 6000,
+        maxSpeed: 70,
+        acceleration: 1.2,
+        braking: 2.0
+    }
+};
       const EXTRA_CAR_COST = 500000, EXTRA_CAR_CAPACITY = 40, EXTRA_CAR_DAILY_COST = 1200, MAX_EXTRA_CARS = 3;
       const DEPOT_COST = 2000000, DEPOT_DAILY_COST = 8000, DEPOT_SERVICE_RADIUS = 320;
       let selectedTrainClass = 'light', trainIdCounter = 1;
@@ -865,6 +1737,36 @@ let totalWeeklyOpEx = 0;
       let waitTimeSum = 0, waitSamples = 0, tripTimeSum = 0, tripSamples = 0;
       let overcrowdingEvents = 0;
       let lastProcessedMinute = -1;
+
+      // ---- BETTER ECONOMY MODULE: amenities, subsidies, TOD tax, sponsorships, events ----
+      const STATION_CATCHMENT_RADIUS = 250;
+      const AMENITY_SPECS = {
+          retail:  { key: 'retail',  label: 'Station Retail',   icon: '🛍️', cost: 400000, dailyUpkeep: 250 },
+          parking: { key: 'parking', label: 'Park & Ride Lot',  icon: '🅿️', cost: 600000, dailyUpkeep: 180 },
+          ads:     { key: 'ads',     label: 'Ad Panels',        icon: '📢', cost: 150000, dailyUpkeep: 60  }
+      };
+      const NAMING_RIGHTS_RIDER_THRESHOLD = 5000; // lifetime riders boarded at a station before a sponsor comes calling
+      const NAMING_RIGHTS_UPFRONT = 2000000;
+      const NAMING_RIGHTS_DAILY = 150;
+      const SPONSOR_NAMES = [
+          "American Airlines", "Toyota", "AT&T", "Texas Health Resources", "Southwest Airlines",
+          "Kimberly-Clark", "Frito-Lay", "GameStop", "Signature Aviation", "Match Group"
+      ];
+      let todTaxEnabled = false;
+      const TOD_TAX_RESIDENT_RATE = 0.015;   // $ per resident/day, within a station's catchment
+      const TOD_TAX_JOB_RATE = 0.02;         // $ per job/day
+      const TOD_TAX_STATION_CAP = 6000;      // cap per station per day so it can't spiral
+      const GOV_SUBSIDY_COVERAGE = 0.6;      // subsidy covers up to 60% of the farebox/opex gap
+      const GOV_SUBSIDY_DAILY_CAP = 60000;   // total subsidy cap per day
+      const GOV_SUBSIDY_MIN_RIDERS = 200;    // minimum daily riders to qualify (no free money for empty networks)
+      const EVENT_TYPES = ['SPORTS', 'ENTERTAINMENT', 'ATTRACTION'];
+      const EVENT_CHANCE_PER_DAY = 0.18;
+      let activeCityEvent = null; // { name, expiresDay }
+
+      // Today's breakdown, refreshed once per sim-day for display purposes
+      let todaysIncomeBreakdown = { fare: 0, retail: 0, parking: 0, ads: 0, naming: 0, todTax: 0, subsidy: 0, event: 0 };
+      let todaysExpenseBreakdown = { electricity: 0, maintenance: 0, cleaning: 0, staffing: 0, security: 0, trackRenewal: 0, amenityUpkeep: 0, interest: 0 };
+      let otherIncomeToday = 0;
 
       // ---- Service Frequency / Reliability system ----
 const FREQUENCY_OPTIONS = [0, 3, 5, 10, 20]; // 0 = Variable (1 Train)
@@ -918,6 +1820,7 @@ const FREQUENCY_OPTIONS = [0, 3, 5, 10, 20]; // 0 = Variable (1 Train)
       function setRouteFrequency(color, minutes) {
           getRouteMeta(color).frequency = parseInt(minutes, 10);
           updateFleetPanel();
+          refreshNeighborhoodInspector();
       }
 
 function recordHeadwaySample(meta, dirKey, nowTicks) {
@@ -1207,7 +2110,7 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
           [-321.2,229.9,"UT Arlington","Arlington","UNIVERSITY",9000,2200,41000,1200,2500], [-290.6,200.5,"Stadium District","Arlington","ENTERTAINMENT",200,3500,0,9000,35000],
           [-272.5,194.1,"Six Flags","Arlington","ENTERTAINMENT",150,2500,0,8000,30000], [254.8,-367.7,"McKinney National Airport","McKinney","AIRPORT",100,1200,0,150,300],
           [-2.6,-83.0,"Addison Circle","Addison","DOWNTOWN",8000,9000,300,5000,3000], [-111.2,74.8,"University of Dallas","Irving","UNIVERSITY",2500,900,3800,250,600],
-          [-135.5,-116.2,"Downtown Irving","Irving","DOWNTOWN",9000,12000,300,3500,1800], [11.2,-36,"Galleria Dallas","Dallas","SHOPPING",800,5000,0,45000,12000],
+          [-135.5,116.2,"Downtown Irving","Irving","DOWNTOWN",9000,12000,300,3500,1800], [11.2,-36,"Galleria Dallas","Dallas","SHOPPING",800,5000,0,45000,12000],
           [-85.1,-65.0,"Downtown Carrollton","Carrollton","DOWNTOWN",10000,8000,500,3500,1800], [-49.7,293.8,"Dallas Executive Airport","Dallas","AIRPORT",50,350,0,50,150],
           [-22.1,114.9,"UT Southwestern","Dallas","MEDICAL",2500,27000,4200,500,1200], [-680.6,169.0,"Carswell Field","Fort Worth","AIRPORT",0,250,0,0,50],
           [-602.0,254.4,"TCU","Fort Worth","UNIVERSITY",5500,2600,12000,600,2000], [-596.9,239.7,"Fort Worth Zoo","Fort Worth","ATTRACTION",250,500,0,1200,9000],
@@ -1251,6 +2154,142 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
           [272.4,-506.4,"Downtown Melissa","Melissa","DOWNTOWN",7000,2500,200,1000,600],
           [26.5,-445.7,"Downtown Prosper","Prosper","DOWNTOWN",9000,3500,300,1500,900],
           [24.4,129.2,"Uptown Dallas","Dallas","MIXED_USE",12000,35000,0,14000,12000], [32.2,106.4,"West Village","Dallas","MIXED_USE",3500,4500,0,10000,15000],
+[-162.7,38.6,"Dallas College North Lake","Irving","UNIVERSITY",2500,900,14000,300,700],
+
+[51.1,152.7,"Deep Ellum","Dallas","ENTERTAINMENT",3500,12000,0,18000,45000],
+
+[4.3,148.2,"Design District","Dallas","OFFICE",1800,15000,0,5000,6000],
+
+[13.6,126.6,"Harwood District","Dallas","OFFICE",1200,22000,0,3500,2500],
+
+[0.4,199.5,"Bishop Arts District","Dallas","ENTERTAINMENT",2500,4500,0,14000,22000],
+
+[-192.4,205.6,"Downtown Grand Prairie","Grand Prairie","DOWNTOWN",12000,7000,400,2500,1800],
+
+[-178.5,154.2,"Lone Star Park","Grand Prairie","ENTERTAINMENT",150,1200,0,7000,22000],
+
+[-34.9,252.1,"Kiest Park","Dallas","PARK",300,200,0,3500,12000],
+
+[-530.7,-92.0,"Bass Pro Shops","Grapevine","SHOPPING",200,900,0,22000,7000],
+
+[-594.3,428.8,"Downtown Crowley","Crowley","DOWNTOWN",7000,2500,200,1000,700],
+
+[-553.2,477.1,"Downtown Burleson","Burleson","DOWNTOWN",9000,3500,300,1200,800],
+
+[-537.6,442.9,"Spinks Airport","Fort Worth","AIRPORT",100,900,0,100,200],
+
+[-445.8,334.9,"Downtown Kennedale","Kennedale","DOWNTOWN",7000,2200,200,900,600],
+
+[-301.6,309.7,"Arlington Municipal Airport","Arlington","AIRPORT",100,700,0,100,200],
+
+[-147.7,409.9,"Downtown Cedar Hill","Cedar Hill","DOWNTOWN",10000,4000,300,1500,1000],
+
+[74.9,404.8,"Downtown Lancaster","Lancaster","DOWNTOWN",9000,4500,300,1200,800],
+
+[116.0,333.1,"Downtown Hutchins","Hutchins","DOWNTOWN",4500,2200,150,700,500],
+
+[151.7,414.4,"Downtown Wilmer","Wilmer","DOWNTOWN",4500,2200,150,700,500],
+
+[308.9,341.5,"Downtown Seagoville","Seagoville","DOWNTOWN",7000,3000,200,900,700],
+
+[395.5,204.7,"Downtown Forney","Forney","DOWNTOWN",11000,5000,300,1800,1200],
+
+[407.2,366.1,"Downtown Crandall","Crandall","DOWNTOWN",6000,2200,150,700,500],
+
+[350.3,-373.4,"Downtown Princeton","Princeton","DOWNTOWN",8000,3200,200,1000,700],
+
+[162.2,-197.3,"Collin College Spring Creek","Plano","UNIVERSITY",2200,900,11000,200,500],
+
+[278.6,-158.0,"Collin College Wylie","Wylie","UNIVERSITY",1800,700,9000,150,350],
+
+[486.5,-347.9,"Collin College Farmersville","Farmersville","UNIVERSITY",1200,500,4500,100,250],
+
+[518.0,-350.3,"Downtown Farmersville","Farmersville","DOWNTOWN",5000,1800,150,600,400],
+
+[491.6,-50.3,"Downtown Fate","Fate","DOWNTOWN",6000,2200,200,700,500],
+
+[542.3,-101.3,"Downtown Royse City","Royse City","DOWNTOWN",8000,3000,250,900,700],
+
+[255.5,-101.3,"Downtown Sachse","Sachse","DOWNTOWN",9000,3500,250,1200,800],
+
+[-556.2,283.9,"La Gran Plaza","Fort Worth","SHOPPING",600,2200,0,18000,6000],
+
+[-295.2,-368.5,"Medical City Denton","Denton","MEDICAL",1800,6000,900,300,700],
+
+[-252.9,-330.8,"NCTC Corinth","Corinth","UNIVERSITY",1800,700,7000,150,300],
+
+[34.9,288.4,"Cedars","Dallas","MIXED_USE",3500,8000,0,5000,8000],
+
+[38.5,97.8,"Knox-Henderson","Dallas","ENTERTAINMENT",4500,5000,0,12000,22000],
+
+[69.7,104.4,"Lower Greenville","Dallas","ENTERTAINMENT",4500,4500,0,14000,24000],
+
+[18.4,109.2,"Oak Lawn","Dallas","MIXED_USE",9000,12000,0,9000,9000],
+
+[41.5,164.7,"Dallas Farmers Market","Dallas","SHOPPING",1200,2000,0,10000,14000],
+
+[20.2,54.3,"Preston Center","Dallas","OFFICE",1800,12000,0,3500,2500],
+
+[21.1,89.0,"Highland Park Village","Dallas","SHOPPING",800,2500,0,18000,6000],
+
+[-8.8,-65.6,"Quorum Center","Addison","OFFICE",1200,18000,0,1800,1000],
+
+[118.6,-114.3,"Medical City Dallas","Dallas","MEDICAL",2200,12000,1800,600,1200],
+
+[-71.0,8.1,"Asian Trade District","Dallas","SHOPPING",1500,3500,0,9000,7000],
+
+[-20.6,-238.4,"Toyota North America HQ","Plano","OFFICE",500,9000,0,400,200],
+
+[9.4,-227.9,"The Park at Legacy","Plano","OFFICE",2500,18000,0,2500,1200],
+
+[133.3,-388.4,"Adriatica Village","McKinney","MIXED_USE",2200,2200,0,6000,8000],
+
+[115.6,-307.4,"Craig Ranch","McKinney","MIXED_USE",5000,6500,0,3500,3000],
+
+[211.0,-339.8,"Medical City McKinney","McKinney","MEDICAL",1500,5500,700,300,700],
+
+[80.2,-34.8,"Texas Instruments","Richardson","OFFICE",1000,12000,0,500,200],
+
+[181.3,-125.3,"Collins Aerospace","Richardson","OFFICE",500,4500,0,300,100],
+
+[117.4,-86.7,"Telecom Corridor","Richardson","OFFICE",2500,30000,0,2000,800],
+
+[219.1,183.9,"Mesquite Arena","Mesquite","ENTERTAINMENT",200,1200,0,4000,12000],
+
+[290.8,0.3,"Downtown Rowlett","Rowlett","DOWNTOWN",9000,4500,300,1800,1200],
+
+[-273.8,98.4,"American Airlines Headquarters","Fort Worth","OFFICE",500,7000,0,300,150],
+
+[-141.5,33.6,"Verizon Headquarters","Irving","OFFICE",500,8500,0,300,150],
+
+[-134.6,3.4,"ExxonMobil / Citibank Campus","Irving","OFFICE",2500,22000,0,1200,600],
+
+[-176.9,-39.5,"Cypress Waters","Dallas","MIXED_USE",3500,14000,0,5000,4000],
+
+[-311.5,290.1,"Arlington Highlands","Arlington","SHOPPING",1200,3500,0,18000,7000],
+
+[-266.9,123.0,"River Legacy Park","Arlington","PARK",300,400,0,5000,18000],
+
+[-577.6,219.3,"Near Southside","Fort Worth","MIXED_USE",5000,9000,0,7000,10000],
+
+[-633.7,255.6,"Clearfork","Fort Worth","MIXED_USE",2500,9000,0,14000,10000],
+
+[-543.1,-12.9,"Alliance Town Center","Fort Worth","SHOPPING",1500,5000,0,22000,6000],
+
+[-612.4,102.6,"Lockheed Martin","Fort Worth","INDUSTRIAL",500,17000,0,200,100],
+
+[-377.5,-430.7,"Rayzor Ranch","Denton","SHOPPING",1000,2500,0,18000,5000],
+
+[-313.3,-387.8,"Golden Triangle Mall","Denton","SHOPPING",1000,2200,0,20000,6000],
+
+[-416.5,-398.6,"Denton Enterprise Airport","Denton","AIRPORT",100,1200,0,100,200],
+
+[-270.2,-177.5,"Flower Mound Town Center","Flower Mound","SHOPPING",1000,2500,0,15000,4000],
+
+[-271.1,-119.7,"Lakeside Business District","Flower Mound","OFFICE",1800,9000,0,2500,1200],
+
+
+
           [18.4,145.9,"Victory Plaza","Dallas","ENTERTAINMENT",300,2500,0,5000,35000]
       ];
 
@@ -1392,6 +2431,7 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
       }
 
       function openStationInspector(s) {
+          closeNeighborhoodInspector();
           selectedStation = s;
           document.getElementById('station-inspector').classList.add('open');
           refreshStationInspector();
@@ -1402,13 +2442,213 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
           document.getElementById('station-inspector').classList.remove('open');
       }
 
+      let selectedNeighborhood = null;
+
+      function openNeighborhoodInspector(n) {
+          closeStationInspector();
+          selectedNeighborhood = n;
+          document.getElementById('neighborhood-inspector').classList.add('open');
+          refreshNeighborhoodInspector();
+      }
+
+      function closeNeighborhoodInspector() {
+          selectedNeighborhood = null;
+          document.getElementById('neighborhood-inspector').classList.remove('open');
+      }
+
+      function refreshNeighborhoodInspector() {
+          const panel = document.getElementById('neighborhood-inspector');
+          if (!selectedNeighborhood || !neighborhoods.includes(selectedNeighborhood)) { closeNeighborhoodInspector(); return; }
+          const n = selectedNeighborhood;
+          document.getElementById('ni-name').textContent = n.name;
+          document.getElementById('ni-subtitle').textContent = `${n.city} · ${n.type.replace('_',' ')}`;
+
+          const picks = ccPickExampleCommuters(n);
+          const list = document.getElementById('ni-commuter-list');
+          list.innerHTML = picks.length
+              ? picks.map(ccRenderCommuterCard).join('')
+              : `<div id="ni-empty">No commuters with regular destinations currently modeled from this neighborhood.</div>`;
+      }
+
+      // ---- Upgrade / Amenity info-card renderers ----
+      function stationCapacityPercentile(s, capacityPct) {
+          if (stations.length < 2) return null;
+          const others = stations.filter(o => o !== s).map(o => {
+              const st = trains.filter(t => t.pathNodes && t.pathNodes.some(n => n.station === o));
+              if (st.length) return Math.round(st.reduce((a,t) => a + (t.riders.length / (t.capacity || 120)), 0) / st.length * 100);
+              return Math.min(100, Math.round(((o.waiting || 0) / 40) * 100));
+          });
+          const busierOrEqual = others.filter(v => v <= capacityPct).length;
+          return Math.round((busierOrEqual / others.length) * 100);
+      }
+
+      function renderPlatformCard(s, capacityPct) {
+          const lvl = s.upgradeLevel || 0;
+          const maxed = lvl >= STATION_UPGRADE_COSTS.length;
+          const currentBonus = lvl * 8;
+          const nextBonus = (lvl + 1) * 8;
+          const percentile = stationCapacityPercentile(s, capacityPct);
+
+          let urgencyHtml = '', recClass = 'low', recHtml, hint;
+          if (maxed) {
+              urgencyHtml = `<span class="uc-urgency u-rec">✔ Maxed Out</span>`;
+              recClass = 'high';
+              recHtml = `<b>✔ Fully Expanded</b>Platform is at max level (Lv. ${lvl}) — no further boarding-throughput upgrades available here.`;
+              hint = 'No further platform upgrades available at this station.';
+          } else if (capacityPct >= 80) {
+              urgencyHtml = `<span class="uc-urgency u-near">⚠ Near Capacity</span><span class="uc-urgency u-rec">⭐ Recommended</span>`;
+              recClass = 'high';
+              recHtml = `<b>⭐⭐⭐ Highly Recommended</b>This station is regularly near or over crowded capacity (${capacityPct}%). More boarding throughput per stop will cut dwell time and overcrowding.`;
+              hint = 'Best for busy stations — useful once trains are frequently full.';
+          } else if (capacityPct >= 50) {
+              urgencyHtml = `<span class="uc-urgency u-near">⚠ Filling Up</span>`;
+              recClass = 'med';
+              recHtml = `<b>⭐⭐ Worth Considering</b>Capacity utilization is moderate (${capacityPct}%). This will help once ridership climbs further.`;
+              hint = 'Useful once this station\'s trains start running consistently full.';
+          } else {
+              urgencyHtml = `<span class="uc-urgency u-none">❌ Not Needed Yet</span>`;
+              recClass = 'low';
+              recHtml = `<b>⚠ Low Priority</b>Capacity utilization is only ${capacityPct}% right now — this station isn't crowded enough yet to justify the spend. Current demand is too low to justify this upgrade.`;
+              hint = 'Not worth it yet — this station has plenty of spare capacity.';
+          }
+
+          const btnHtml = maxed
+              ? `<button class="uc-btn2 maxed" disabled>⬆ Platform Maxed (Lv. ${lvl})</button>`
+              : `<button class="uc-btn2" onclick="inspectorUpgrade()">⬆ Expand Platform<span class="uc-btn-sub">$${STATION_UPGRADE_COSTS[lvl].toLocaleString()} · +${nextBonus - currentBonus} riders/stop</span></button>`;
+
+          const compareHtml = (percentile !== null && !maxed)
+              ? `<div class="uc-compare">This station is busier than ${percentile}% of your network. ${percentile >= 70 ? 'This upgrade is likely to be worthwhile.' : 'This upgrade may pay off more once ridership grows.'}</div>`
+              : '';
+
+          return `
+              <div class="uc-card">
+                  <div class="uc-head">
+                      <div class="uc-title">🚉 Platform Extension
+                          <span class="tt-wrap" data-tip="Widening the platform lets more riders board or alight during each train's stop, so trains spend less time waiting at busy stations.">
+                              <span class="tt-icon">i</span>
+                          </span>
+                      </div>
+                      <div class="uc-lvl">Lv. ${lvl} / ${STATION_UPGRADE_COSTS.length}</div>
+                  </div>
+                  <div class="uc-desc">Increases the number of passengers this station can board or alight per train stop.</div>
+                  <div class="uc-hint">${hint}</div>
+                  <div class="uc-urgency-row">${urgencyHtml}</div>
+
+                  <div class="uc-affects-label">Affects</div>
+                  <div class="uc-affects-row">
+                      <span class="uc-eff e-cap">🚆 Capacity</span>
+                      <span class="uc-eff e-comfort">😊 Comfort</span>
+                  </div>
+
+                  <div class="uc-flavor">Longer platforms let more riders board or alight at once, easing bottlenecks during peak periods.</div>
+
+                  <div class="uc-ba-row"><span>Boarding bonus</span><span class="uc-ba-vals">${maxed ? `<span class="after-good">+${currentBonus}</span> riders/stop (maxed)` : `${currentBonus} <span class="arrow">→</span> <span class="after-good">${nextBonus}</span> riders/stop`}</span></div>
+                  <div class="uc-ba-row"><span>Daily maintenance</span><span class="uc-ba-vals">$0 <span class="arrow">→</span> $0</span></div>
+                  <div class="uc-row"><span>Capacity used right now</span><span>${capacityPct}%</span></div>
+                  <div class="uc-bar-container"><div class="uc-bar" style="width:${capacityPct}%; background:${capacityPct > 85 ? '#ef4444' : (capacityPct > 60 ? '#fbbf24' : '#38bdf8')};"></div></div>
+                  ${maxed ? '' : `<div class="uc-row"><span>Construction cost</span><span>$${STATION_UPGRADE_COSTS[lvl].toLocaleString()}</span></div>`}
+                  ${compareHtml}
+                  <div class="uc-rec ${recClass}">${recHtml}</div>
+                  ${btnHtml}
+              </div>
+          `;
+      }
+
+      function renderAmenityCard(spec, s) {
+          const owned = !!s.amenities[spec.key];
+          const nearby = neighborhoods.filter(n => Math.hypot(n.x - s.x, n.y - s.y) < STATION_CATCHMENT_RADIUS);
+          const nearbyRetail = nearby.reduce((sum,n) => sum + n.retailVisitors, 0);
+          const nearbyResidents = nearby.reduce((sum,n) => sum + n.residents, 0);
+          const fareToday = s.revenueToday || 0;
+
+          let projectedRevenue = 0, desc = '', tip = '', hint = '', flavor = '';
+          if (spec.key === 'retail') {
+              projectedRevenue = Math.min(4000, nearbyRetail * 0.01) + fareToday * 0.40;
+              desc = 'Increases revenue from passengers and shoppers waiting at this station.';
+              tip = 'Earns a share of today\'s fare revenue plus a cut of nearby retail foot traffic — most profitable at busy, high-fare stations.';
+              hint = 'Best for busy, high-fare stations with nearby retail activity.';
+              flavor = 'A coffee cart or newsstand gives waiting passengers something to spend on.';
+          } else if (spec.key === 'parking') {
+              projectedRevenue = Math.min(3500, nearbyResidents * 0.02);
+              desc = 'Generates ongoing revenue from paid parking near the station.';
+              tip = 'Revenue is based on the residential population within this station\'s catchment area (the ~250-unit radius counted toward this station), capped at $3,500/day.';
+              hint = 'Best for stations near dense residential neighborhoods.';
+              flavor = 'Convenient parking turns nearby residents into a steady source of income.';
+          } else if (spec.key === 'ads') {
+              projectedRevenue = fareToday * 0.25 + 60;
+              desc = 'Sells advertising space across platforms and concourses.';
+              tip = 'Earns a flat base amount plus a share of today\'s fare revenue — better at higher-traffic stations.';
+              hint = 'Best for high-ridership stations, since revenue scales with fare income.';
+              flavor = 'Ad panels quietly monetize the crowd already passing through.';
+          }
+
+          const net = projectedRevenue - spec.dailyUpkeep;
+          const paybackDays = net > 0 ? Math.ceil(spec.cost / net) : null;
+
+          let urgencyHtml, recClass, recHtml;
+          if (owned) {
+              recClass = net >= 0 ? 'high' : 'low';
+              urgencyHtml = net >= 0 ? `<span class="uc-urgency u-rec">✔ Built</span>` : `<span class="uc-urgency u-none">⚠ Running at a Loss</span>`;
+              recHtml = net >= 0
+                  ? `<b>✔ Built &amp; Profitable</b>Netting ~$${Math.round(net).toLocaleString()}/day after upkeep.`
+                  : `<b>⚠ Running at a Loss</b>Currently costing ~$${Math.round(Math.abs(net)).toLocaleString()}/day more in upkeep than it earns.`;
+          } else if (paybackDays !== null && paybackDays <= 180) {
+              recClass = 'high';
+              urgencyHtml = `<span class="uc-urgency u-rec">⭐ Recommended</span><span class="uc-urgency u-roi">💰 High ROI</span>`;
+              recHtml = `<b>⭐⭐⭐ Highly Recommended</b>Projected to pay for itself in ≈${paybackDays} days at current ridership.`;
+          } else if (paybackDays !== null && paybackDays <= 400) {
+              recClass = 'med';
+              urgencyHtml = `<span class="uc-urgency u-near">⭐ Worth Considering</span>`;
+              recHtml = `<b>⭐⭐ Worth Considering</b>Projected payback of ≈${paybackDays} days — a reasonable long-term investment.`;
+          } else {
+              recClass = 'low';
+              urgencyHtml = `<span class="uc-urgency u-none">❌ Not Needed</span>`;
+              recHtml = `<b>⚠ Low Priority</b>Current demand here is too low to justify this upgrade yet.`;
+          }
+
+          const btnHtml = owned
+              ? `<button class="uc-btn2 owned-btn" disabled>✔ Built</button>`
+              : `<button class="uc-btn2" onclick="buildAmenity('${spec.key}')" ${budget < spec.cost ? 'disabled' : ''}>${spec.icon} Build ${spec.label}<span class="uc-btn-sub">$${spec.cost.toLocaleString()} · ${net >= 0 ? '+' : ''}$${Math.round(net).toLocaleString()}/day net</span></button>`;
+
+          return `
+              <div class="uc-card ${owned ? 'owned' : ''}">
+                  <div class="uc-head">
+                      <div class="uc-title">${spec.icon} ${spec.label}
+                          <span class="tt-wrap" data-tip="${tip}"><span class="tt-icon">i</span></span>
+                      </div>
+                  </div>
+                  <div class="uc-desc">${desc}</div>
+                  <div class="uc-hint">${hint}</div>
+                  <div class="uc-urgency-row">${urgencyHtml}</div>
+
+                  <div class="uc-affects-label">Affects</div>
+                  <div class="uc-affects-row">
+                      <span class="uc-eff ${net >= 0 ? 'e-rev-pos' : 'e-rev-neg'}">💵 Revenue</span>
+                      <span class="uc-eff e-maint">🛠 Maintenance</span>
+                  </div>
+
+                  <div class="uc-flavor">${flavor}</div>
+
+                  <div class="uc-ba-row"><span>Daily income</span><span class="uc-ba-vals">${owned ? `<span class="after-good">$${Math.round(projectedRevenue).toLocaleString()}</span> (active)` : `$0 <span class="arrow">→</span> <span class="after-good">$${Math.round(projectedRevenue).toLocaleString()}</span>`}</span></div>
+                  <div class="uc-ba-row"><span>Daily maintenance</span><span class="uc-ba-vals">${owned ? `<span class="after-bad">$${spec.dailyUpkeep.toLocaleString()}</span> (active)` : `$0 <span class="arrow">→</span> <span class="after-bad">$${spec.dailyUpkeep.toLocaleString()}</span>`}</span></div>
+                  <div class="uc-row hl"><span>Expected net change</span><span style="color:${net >= 0 ? '#4ade80' : '#f87171'}">${net >= 0 ? '+' : ''}$${Math.round(net).toLocaleString()}/day</span></div>
+                  ${owned ? '' : `<div class="uc-row"><span>Construction cost</span><span>$${spec.cost.toLocaleString()}</span></div>`}
+                  ${owned ? '' : `<div class="uc-row"><span>ROI (payback)</span><span>${paybackDays !== null ? '≈' + paybackDays + ' days' : 'Not currently profitable'}</span></div>`}
+                  <div class="uc-rec ${recClass}">${recHtml}</div>
+                  ${btnHtml}
+              </div>
+          `;
+      }
+
       function refreshStationInspector() {
           const panel = document.getElementById('station-inspector');
           if (!selectedStation || !stations.includes(selectedStation)) { closeStationInspector(); return; }
           const s = selectedStation;
 
           document.getElementById('si-name').textContent = s.name;
-          document.getElementById('si-subtitle').textContent = `Terminal #${s.id} · Platform Lv. ${s.upgradeLevel || 0}`;
+          document.getElementById('si-subtitle').textContent = s.namingRights
+              ? `Presented by ${s.sponsorName} · Platform Lv. ${s.upgradeLevel || 0}`
+              : `Terminal #${s.id} · Platform Lv. ${s.upgradeLevel || 0}`;
           document.getElementById('si-waiting').textContent = `${(s.waiting || 0).toLocaleString()} waiting`;
 
           const servingTrains = trains.filter(t => t.pathNodes && t.pathNodes.some(n => n.station === s));
@@ -1431,20 +2671,31 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
               : `<span style="color:var(--text-muted); font-size:11px;">None</span>`;
 
           document.getElementById('si-revenue').textContent = `$${Math.round(s.revenueToday || 0).toLocaleString()}`;
+          const amenRevEl = document.getElementById('si-amenity-revenue');
+          if (amenRevEl) amenRevEl.textContent = `$${Math.round(s.amenityRevenueToday || 0).toLocaleString()}`;
 
           const nearby = neighborhoods.filter(n => Math.hypot(n.x - s.x, n.y - s.y) < 250);
           const population = nearby.reduce((a,n) => a + n.residents, 0);
           document.getElementById('si-population').textContent = Math.round(population).toLocaleString();
 
-          const lvl = s.upgradeLevel || 0;
-          const btn = document.getElementById('si-btn-upgrade');
-          if (lvl >= STATION_UPGRADE_COSTS.length) {
-              btn.textContent = `⬆ Platform Maxed (Lv. ${lvl})`;
-              btn.classList.add('maxed'); btn.disabled = true;
-          } else {
-              const cost = STATION_UPGRADE_COSTS[lvl];
-              btn.textContent = `⬆ Upgrade Platform · $${cost.toLocaleString()}`;
-              btn.classList.remove('maxed'); btn.disabled = false;
+          const platformCardEl = document.getElementById('si-platform-card');
+          if (platformCardEl) platformCardEl.innerHTML = renderPlatformCard(s, capacityPct);
+
+          const amenList = document.getElementById('si-amenity-list');
+          if (amenList) {
+              s.amenities = s.amenities || { retail: false, parking: false, ads: false };
+              amenList.innerHTML = Object.values(AMENITY_SPECS).map(spec => renderAmenityCard(spec, s)).join('');
+          }
+
+          const namingEl = document.getElementById('si-naming-banner');
+          if (namingEl) {
+              if (s.namingRights) {
+                  namingEl.innerHTML = `<div class="si-naming-banner"><div class="si-nb-title">🏷️ Sponsored by ${s.sponsorName}</div><div class="si-nb-desc">Earning +$${NAMING_RIGHTS_DAILY.toLocaleString()}/day in naming-rights income.</div></div>`;
+              } else if (s.namingRightsOffered) {
+                  namingEl.innerHTML = `<div class="si-naming-banner"><div class="si-nb-title">🏷️ ${s.sponsorName} wants naming rights</div><div class="si-nb-desc">Sign the deal for +$${NAMING_RIGHTS_UPFRONT.toLocaleString()} upfront, plus $${NAMING_RIGHTS_DAILY}/day ongoing.</div><button class="si-nb-btn" onclick="acceptNamingRights()">Sign Deal</button></div>`;
+              } else {
+                  namingEl.innerHTML = '';
+              }
           }
       }
 
@@ -1473,7 +2724,7 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
           tracks = tracks.filter(t => t.startStation !== s && t.endStation !== s);
           stations = stations.filter(st => st !== s);
           closeStationInspector();
-          updateHUD(); manageTrainsRealtime(); updateTelemetryData(); setupLineSelectorUI();
+          updateHUD(); manageTrainsRealtime(); updateTelemetryData(); setupLineSelectorUI(); refreshNeighborhoodInspector();
       }
 
       function updateTelemetryData(){
@@ -1490,6 +2741,7 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
           const ridershipScore = Math.log10(transitUsers + 10) * 0.8;
           const successRate = (totalBoarded + totalGaveUp) > 0 ? totalBoarded / (totalBoarded + totalGaveUp) : 1;
           let transitShare = Math.min(15.0, (BASE_TRANSIT + infrastructureScore + ridershipScore) * successRate);
+          currentTransitShare = transitShare;
           const walkShare = WALK_SHARE; const driveShare = 100 - transitShare - walkShare;
 
           document.getElementById('txt-share-transit').textContent=`${transitShare.toFixed(1)}%`;
@@ -1544,6 +2796,7 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
           updateFleetPanel();
           updateStatsPanel();
           refreshStationInspector();
+          evaluateObjectives();
       }
 
       function updateStatsPanel() {
@@ -1558,6 +2811,7 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
               ['Daily Riders', dailyRiders.toLocaleString()],
               ['Peak Concurrent Riders', peakConcurrentRiders.toLocaleString()],
               ['Fare Revenue Today', '$' + Math.round(fareRevenueToday).toLocaleString()],
+              ['Other Income Today', '$' + Math.round(otherIncomeToday).toLocaleString()],
               ['Lifetime Riders', lifetimeRiders.toLocaleString()],
               ['Avg Wait Time', avgWaitMin.toFixed(1) + ' min'],
               ['Avg Trip Time', avgTripMin.toFixed(1) + ' min'],
@@ -1576,16 +2830,27 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
       function adjustFare(a){
           ticketFare = Math.max(1, Math.min(10, ticketFare + a));
           document.getElementById('fare-display').textContent = '$' + ticketFare.toFixed(2);
+          refreshNeighborhoodInspector();
       }
 
-      function setSpeed(s){
-          simSpeed = s;
-          document.querySelectorAll('#hud-speed-row button').forEach(b => {
-              if (b.id && b.id.startsWith('btn-speed-')) b.classList.remove('active');
-          });
-          const target = document.getElementById(`btn-speed-${s}`);
-          if(target) target.classList.add('active');
-      }
+      const SPEED_MULTIPLIERS = {
+    0: 0,
+    1: 0.45,   // was effectively 1.0
+    2: 1.0,
+    4: 2.0,
+    8: 4.0
+};
+
+function setSpeed(s){
+    simSpeed = s;
+    simTimeScale = SPEED_MULTIPLIERS[s] ?? s;
+
+    document.querySelectorAll('#hud-speed-row button')
+        .forEach(b => b.classList.remove('active'));
+
+    const target = document.getElementById(`btn-speed-${s}`);
+    if(target) target.classList.add('active');
+}
 
       function setMode(m){
           if (activeTrackBuild) activeTrackBuild = null;
@@ -1611,7 +2876,169 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
       }
 
       function findNearestStation(x,y,mx){ let n=null,md=mx; stations.forEach(s=>{const d=Math.hypot(s.x-x,s.y-y);if(d<md){md=d;n=s;}}); return n; }
-      
+
+      // ===================== AI COMMUTERS: mode-choice engine =====================
+      const CC_DRIVE_SPEED_MPH = 32;         // average arterial + highway blend across the metroplex
+      const CC_DRIVE_COST_PER_MILE = 0.58;   // fuel + wear, one-way
+      const CC_WALK_SPEED_MPH = 3;
+      const CC_WALK_MAX_MILES = 2.2;         // beyond this walking stops being a realistic option
+      const CC_STATION_CATCHMENT_UNITS = 600; // how far a rider will travel to reach a station
+      const CC_VALUE_OF_TIME_PER_MIN = 0.42;  // $/min used to blend cost and time into one score
+      const CC_PARKING_BY_TYPE = {
+          DOWNTOWN: 16, OFFICE: 9, AIRPORT: 22, MEDICAL: 10, MIXED_USE: 8,
+          SHOPPING: 4, MALL: 4, ENTERTAINMENT: 5, SPORTS: 6, UNIVERSITY: 5,
+          HOTEL: 12, INDUSTRIAL: 3, PARK: 2, ATTRACTION: 4, WATERPARK: 6
+      };
+
+      function ccParkingCost(dest) { return CC_PARKING_BY_TYPE[dest.type] ?? 5; }
+
+      function ccMinutesToClock(mins) {
+          let m = Math.round(mins) % (24 * 60); if (m < 0) m += 24 * 60;
+          let h = Math.floor(m / 60); const mm = m % 60;
+          const ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12; if (h === 0) h = 12;
+          return `${h}:${mm.toString().padStart(2, '0')} ${ampm}`;
+      }
+
+      function ccTransitLeg(originStation, destStation) {
+          const path = calculateNetworkRoute(originStation, destStation);
+          if (!path || path.length < 2) return null;
+          const colors = [];
+          let miles = 0;
+          for (let i = 0; i < path.length - 1; i++) {
+              const a = path[i], b = path[i + 1];
+              const trk = tracks.find(t => (t.startStation === a && t.endStation === b) || (t.startStation === b && t.endStation === a));
+              colors.push(trk ? trk.color : null);
+              miles += Math.hypot(a.x - b.x, a.y - b.y) / FREQ_MAP_UNITS_PER_MILE;
+          }
+          const transfers = Math.max(0, new Set(colors).size - 1);
+          const inVehicleMin = (miles / FREQ_TRAIN_SPEED_MPH) * 60 + path.length * 0.5;
+          const freqs = [...new Set(colors)].filter(Boolean).map(c => (getRouteMeta(c).frequency || 10));
+          const worstFreq = freqs.length ? Math.max(...freqs) : 10;
+          const waitMin = (worstFreq / 2) * (transfers + 1);
+          return { transfers, inVehicleMin, waitMin, frequency: worstFreq };
+      }
+
+      function computeCommuterModeChoice(c) {
+          const home = c.home;
+          const dest = c.work || c.school || c.favoriteRetail || c.favoriteLeisure;
+          if (!home || !dest) return null;
+          const distMiles = Math.hypot(home.x - dest.x, home.y - dest.y) / FREQ_MAP_UNITS_PER_MILE;
+
+          const drive = {
+              time: (distMiles / CC_DRIVE_SPEED_MPH) * 60 + Math.min(18, distMiles * 0.55),
+              cost: distMiles * CC_DRIVE_COST_PER_MILE,
+              transfers: 0,
+              parking: ccParkingCost(dest),
+              frequency: null,
+              available: true
+          };
+
+          const walk = {
+              time: (distMiles / CC_WALK_SPEED_MPH) * 60,
+              cost: 0, transfers: 0, parking: 0, frequency: null,
+              available: distMiles <= CC_WALK_MAX_MILES
+          };
+
+          let transit = { available: false };
+          const originStation = findNearestStation(home.x, home.y, CC_STATION_CATCHMENT_UNITS);
+          const destStation = findNearestStation(dest.x, dest.y, CC_STATION_CATCHMENT_UNITS);
+          if (originStation && destStation && originStation !== destStation) {
+              const leg = ccTransitLeg(originStation, destStation);
+              if (leg) {
+                  const accessWalk = Math.hypot(home.x - originStation.x, home.y - originStation.y) / FREQ_MAP_UNITS_PER_MILE / CC_WALK_SPEED_MPH * 60;
+                  const egressWalk = Math.hypot(dest.x - destStation.x, dest.y - destStation.y) / FREQ_MAP_UNITS_PER_MILE / CC_WALK_SPEED_MPH * 60;
+                  transit = {
+                      time: accessWalk + egressWalk + leg.inVehicleMin + leg.waitMin,
+                      cost: ticketFare, transfers: leg.transfers, parking: 0,
+                      frequency: leg.frequency, available: true
+                  };
+              }
+          }
+
+          const modes = { drive, walk, transit };
+          const pref = c.transitPreference ?? 0.2;
+          let best = null, bestScore = Infinity;
+          ['drive', 'walk', 'transit'].forEach(key => {
+              const m = modes[key];
+              if (!m.available) return;
+              let score = m.time + (m.cost + m.parking) / CC_VALUE_OF_TIME_PER_MIN;
+              if (key === 'transit') score *= (1.35 - pref);
+              if (key === 'walk') score *= 0.9;
+              m.score = score;
+              if (score < bestScore) { bestScore = score; best = key; }
+          });
+
+          return { distMiles, modes, chosen: best };
+      }
+
+      function ccPickExampleCommuters(n) {
+          const pool = commuters.filter(c => c.home === n && (c.work || c.school || c.favoriteRetail || c.favoriteLeisure));
+          if (!pool.length) return [];
+          const seen = new Set(); const picks = [];
+          for (const c of pool) {
+              if (picks.length >= 3) break;
+              if (seen.has(c.personType)) continue;
+              seen.add(c.personType); picks.push(c);
+          }
+          for (const c of pool) {
+              if (picks.length >= 3) break;
+              if (!picks.includes(c)) picks.push(c);
+          }
+          return picks.slice(0, 3);
+      }
+
+      const CC_TYPE_ICON = { OFFICE: '💼', SERVICE: '🧰', RETAIL_WORKER: '🛍️', STUDENT: '🎓', REMOTE: '💻', RETIREE: '🌿', SHOPPER: '🛒', LEISURE: '🎭' };
+      const CC_MODE_ICON = { drive: '🚗', transit: '🚈', walk: '🚶' };
+      const CC_MODE_LABEL = { drive: 'Drive', transit: 'Transit', walk: 'Walk' };
+
+      function ccRenderCommuterCard(c) {
+          const mc = computeCommuterModeChoice(c);
+          const dest = c.work || c.school || c.favoriteRetail || c.favoriteLeisure;
+          const destLabel = c.work ? dest.name : (c.school ? dest.name + ' (School)' : dest.name);
+          if (!mc) {
+              return `<div class="commuter-card"><div class="cc-sub">No regular destination modeled for this resident.</div></div>`;
+          }
+          const rows = ['drive', 'transit', 'walk'].map(key => {
+              const m = mc.modes[key];
+              if (!m.available) {
+                  return `<tr class="unavailable"><td>${CC_MODE_ICON[key]} ${CC_MODE_LABEL[key]}</td><td colspan="5">Not viable</td></tr>`;
+              }
+              const isChosen = mc.chosen === key;
+              return `<tr class="${isChosen ? 'chosen' : ''}">
+                  <td>${CC_MODE_ICON[key]} ${CC_MODE_LABEL[key]}</td>
+                  <td>${Math.round(m.time)}m</td>
+                  <td>$${m.cost.toFixed(2)}</td>
+                  <td>${m.transfers}</td>
+                  <td>${m.parking ? '$' + m.parking.toFixed(0) : '—'}</td>
+                  <td>${m.frequency ? m.frequency + 'm' : '—'}</td>
+              </tr>`;
+          }).join('');
+
+          const chosenLabel = mc.chosen ? CC_MODE_LABEL[mc.chosen] : 'No viable option';
+          return `
+              <div class="commuter-card">
+                  <div class="cc-head">
+                      <div class="cc-avatar">${CC_TYPE_ICON[c.personType] || '🧍'}</div>
+                      <div>
+                          <div class="cc-name">${c.home.city} Resident</div>
+                          <div class="cc-sub">${c.personType.replace('_',' ').toLowerCase().replace(/\b\w/g, l=>l.toUpperCase())}</div>
+                      </div>
+                  </div>
+                  <div class="cc-fact-grid">
+                      <div class="cc-fact-label">Home</div><div class="cc-fact-value">${c.home.name}</div>
+                      <div class="cc-fact-label">Work / Dest.</div><div class="cc-fact-value">${destLabel}</div>
+                      <div class="cc-fact-label">Leaves</div><div class="cc-fact-value">${ccMinutesToClock(c.departMorning)}</div>
+                      <div class="cc-fact-label">Returns</div><div class="cc-fact-value">${ccMinutesToClock(c.departEvening)}</div>
+                  </div>
+                  <table class="cc-mode-table">
+                      <tr><th>Mode</th><th>Time</th><th>Cost</th><th>Xfers</th><th>Park</th><th>Freq</th></tr>
+                      ${rows}
+                  </table>
+                  <div class="cc-verdict">Chooses <b>${chosenLabel}</b> — ${Math.round(mc.distMiles*10)/10} mi trip, ${Math.round((c.transitPreference ?? 0.2)*100)}% transit-leaning.</div>
+              </div>
+          `;
+      }
+
       function calculateNetworkRoute(start,end){
           const q=[[start]],vis=new Set([start.id]);
           while(q.length){
@@ -1751,7 +3178,8 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
               currentNodeIdx: nearestIdx, pct: 0, dir: 1,
               x: pathNodes[nearestIdx].x, y: pathNodes[nearestIdx].y,
               riders: [], state: 'MOVING', dwell: 0,
-              reverse, dirKey: reverse ? 'R' : 'F',
+              reverse, dirKey: reverse ? 'R' : 'F',     speed:0,
+    targetSpeed:0,
               capacityType: selectedTrainClass, baseCapacity: spec.capacity, extraCars: 0,
               capacity: spec.capacity, cost: spec.cost
           };
@@ -1818,6 +3246,7 @@ const meta = route.meta || getRouteMeta(route.color, route);
                       <span style="font-size:10px;color:${hasDepot ? '#10b981' : '#ef4444'};">${hasDepot ? 'Depot Linked' : 'No Depot'}</span>
                   </div>
                   <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;">
+                      <span class="tt-wrap" data-tip="Headway = the time gap between trains on this line. Shorter headways (more frequent service) mean shorter average waits for passengers, but require more trains to maintain." style="flex-shrink:0;"><span class="tt-icon">i</span></span>
                       <select class="fare-btn" style="flex:1;padding:3px 4px;" onchange="setRouteFrequency('${route.color}', this.value)">${freqOptionsHtml}</select>
                       <span style="font-size:10px;font-weight:700;color:${relColor};white-space:nowrap;">${reliability}% on-time</span>
                   </div>
@@ -1844,20 +3273,60 @@ const meta = route.meta || getRouteMeta(route.color, route);
           });
       }
 
-function calculateDailyOpEx() {
-          const trackCost = tracks.length * 250; 
-          const stationCost = stations.length * 1200; 
-          const depotCost = depots.length * 3500;     
-          let trainCost = 0;
+function calculateDailyExpenseBreakdown() {
+          // Track-related costs: power for traction/signals, running maintenance, and a renewal reserve.
+          const trackElectricity = tracks.length * 30;
+          const trackMaintenance = tracks.length * 150;
+          const trackRenewal = tracks.length * 70;
+
+          // Station-related costs: cleaning crews, staffing, and security patrols.
+          const stationCleaning = stations.length * 300;
+          const stationStaffing = stations.length * 600;
+          const stationSecurity = stations.length * 300;
+
+          // Depot costs: mostly staffing (mechanics/yard crews), some cleaning, and security.
+          const depotStaffing = depots.length * 2500;
+          const depotCleaning = depots.length * 300;
+          const depotSecurity = depots.length * 700;
+
+          // Train costs: electricity (traction power) and onboard staffing (crews).
+          let trainElectricity = 0, trainStaffing = 0;
           trains.forEach(t => {
-              trainCost += ((TRAIN_SPECS[t.capacityType]?.dailyCost || TRAIN_SPECS.light.dailyCost) * 0.5) + t.extraCars * EXTRA_CAR_DAILY_COST * 0.5;
+              const base = ((TRAIN_SPECS[t.capacityType]?.dailyCost || TRAIN_SPECS.light.dailyCost) * 0.5) + t.extraCars * EXTRA_CAR_DAILY_COST * 0.5;
+              trainElectricity += base * 0.6;
+              trainStaffing += base * 0.4;
           });
-          return trackCost + stationCost + depotCost + trainCost;
+
+          // Amenity upkeep: only incurred for amenities the player has actually built.
+          let amenityUpkeep = 0;
+          stations.forEach(s => {
+              const a = s.amenities;
+              if (!a) return;
+              Object.keys(AMENITY_SPECS).forEach(key => { if (a[key]) amenityUpkeep += AMENITY_SPECS[key].dailyUpkeep; });
+          });
+
+          return {
+              electricity: trackElectricity + trainElectricity,
+              maintenance: trackMaintenance,
+              cleaning: stationCleaning + depotCleaning,
+              staffing: stationStaffing + depotStaffing + trainStaffing,
+              security: stationSecurity + depotSecurity,
+              trackRenewal: trackRenewal,
+              amenityUpkeep: amenityUpkeep
+          };
+      }
+
+      function calculateDailyOpEx() {
+          const b = calculateDailyExpenseBreakdown();
+          return b.electricity + b.maintenance + b.cleaning + b.staffing + b.security + b.trackRenewal + b.amenityUpkeep;
       }
 
       function applyDailyOpEx() {
-          const opex = calculateDailyOpEx();
+          const breakdown = calculateDailyExpenseBreakdown();
+          const opex = breakdown.electricity + breakdown.maintenance + breakdown.cleaning + breakdown.staffing + breakdown.security + breakdown.trackRenewal + breakdown.amenityUpkeep;
           const interest = currentDebt * DAILY_INTEREST_RATE; 
+          breakdown.interest = interest;
+          todaysExpenseBreakdown = breakdown;
           lastOpExAmount = opex + interest; 
           budget -= lastOpExAmount;
           
@@ -1871,9 +3340,191 @@ function calculateDailyOpEx() {
           }
           
           bankruptcyStrikes = budget < 0 ? bankruptcyStrikes + 1 : 0;
-          if (bankruptcyStrikes >= 3) triggerBankruptcy();
+          if (bankruptcyStrikes === 2) showNotification(`⚠️ Budget in the red 2 days running — cut costs or raise revenue before day 5 or the Transit Authority goes under.`);
+          if (bankruptcyStrikes >= 5) triggerBankruptcy();
           updateHUD();
-      }      function triggerBankruptcy() {
+      }
+
+      // ---- Station amenity revenue, naming rights, TOD tax, subsidies, events ----
+      function calculateStationAmenityRevenue(s) {
+          const a = s.amenities;
+          if (!a) return 0;
+          const nearby = neighborhoods.filter(n => Math.hypot(n.x - s.x, n.y - s.y) < STATION_CATCHMENT_RADIUS);
+          const nearbyRetail = nearby.reduce((sum,n) => sum + n.retailVisitors, 0);
+          const nearbyResidents = nearby.reduce((sum,n) => sum + n.residents, 0);
+          const fareToday = s.revenueToday || 0;
+          let revenue = 0;
+          if (a.retail)  revenue += Math.min(4000, nearbyRetail * 0.01) + fareToday * 0.40;
+          if (a.parking) revenue += Math.min(3500, nearbyResidents * 0.02);
+          if (a.ads)     revenue += fareToday * 0.25 + 60;
+          if (s.namingRights) revenue += NAMING_RIGHTS_DAILY;
+          return revenue;
+      }
+
+      function buildAmenity(key) {
+          if (!selectedStation) return;
+          const spec = AMENITY_SPECS[key];
+          if (!spec) return;
+          const s = selectedStation;
+          s.amenities = s.amenities || { retail: false, parking: false, ads: false };
+          if (s.amenities[key]) return;
+          if (budget < spec.cost) { flashInsufficientFunds('Insufficient Funds'); return; }
+          budget -= spec.cost;
+          s.amenities[key] = true;
+          showNotification(`${spec.icon} ${spec.label} built at ${s.name}!`);
+          updateHUD(); refreshStationInspector();
+      }
+
+      function acceptNamingRights() {
+          if (!selectedStation) return;
+          const s = selectedStation;
+          if (!s.namingRightsOffered || s.namingRights) return;
+          s.namingRights = true;
+          budget += NAMING_RIGHTS_UPFRONT;
+          showNotification(`🏷️ ${s.sponsorName} signed a naming-rights deal at ${s.name}: +$${NAMING_RIGHTS_UPFRONT.toLocaleString()}!`);
+          updateHUD(); refreshStationInspector();
+      }
+
+      function checkNamingRightsOpportunities() {
+          stations.forEach(s => {
+              if (s.namingRightsOffered || s.namingRights) return;
+              if ((s.ridersBoarded || 0) >= NAMING_RIGHTS_RIDER_THRESHOLD) {
+                  s.namingRightsOffered = true;
+                  s.sponsorName = SPONSOR_NAMES[Math.floor(Math.random() * SPONSOR_NAMES.length)];
+                  showNotification(`🏷️ ${s.sponsorName} wants to buy naming rights at ${s.name}!`);
+              }
+          });
+      }
+
+      function toggleTODTax() {
+          todTaxEnabled = !todTaxEnabled;
+          const sw = document.getElementById('tod-switch');
+          if (sw) sw.classList.toggle('on', todTaxEnabled);
+          showNotification(todTaxEnabled ? '🏙️ TOD Value-Capture Tax enabled.' : '🏙️ TOD Value-Capture Tax disabled.');
+      }
+
+      function calculateTODTaxRevenue() {
+          if (!todTaxEnabled) return 0;
+          let total = 0;
+          stations.forEach(s => {
+              const nearby = neighborhoods.filter(n => Math.hypot(n.x - s.x, n.y - s.y) < STATION_CATCHMENT_RADIUS);
+              const residents = nearby.reduce((sum,n) => sum + n.residents, 0);
+              const jobs = nearby.reduce((sum,n) => sum + n.jobs, 0);
+              const stationTax = Math.min(TOD_TAX_STATION_CAP, residents * TOD_TAX_RESIDENT_RATE + jobs * TOD_TAX_JOB_RATE);
+              total += stationTax;
+          });
+          return total;
+      }
+
+      function calculateGovSubsidy(opexToday, fareToday, ridersToday) {
+          if (ridersToday < GOV_SUBSIDY_MIN_RIDERS) return 0;
+          const gap = Math.max(0, opexToday - fareToday);
+          return Math.min(GOV_SUBSIDY_DAILY_CAP, gap * GOV_SUBSIDY_COVERAGE);
+      }
+
+      function maybeTriggerCityEvent() {
+          if (Math.random() >= EVENT_CHANCE_PER_DAY) return 0;
+          const candidates = neighborhoods.filter(n => EVENT_TYPES.includes(n.type));
+          if (!candidates.length) return 0;
+          const venue = candidates[Math.floor(Math.random() * candidates.length)];
+          const connectedStations = stations.filter(s => {
+              const near = Math.hypot(s.x - venue.x, s.y - venue.y) < STATION_CATCHMENT_RADIUS;
+              if (!near) return false;
+              return tracks.some(t => t.startStation === s || t.endStation === s);
+          });
+          if (!connectedStations.length) return 0; // no payoff unless you actually built rail there
+          const bonus = connectedStations.length * (800 + Math.random() * 1700);
+          showNotification(`🎉 Event Day at ${venue.name}! Rail ridership surge nets +$${Math.round(bonus).toLocaleString()}.`);
+          return bonus;
+      }
+
+      function applyDailyStationEconomy() {
+          let retailTotal = 0, parkingTotal = 0, adsTotal = 0, namingTotal = 0;
+          stations.forEach(s => {
+              const a = s.amenities;
+              const stationRevenue = calculateStationAmenityRevenue(s);
+              s.amenityRevenueToday = stationRevenue;
+              if (a) {
+                  const nearby = neighborhoods.filter(n => Math.hypot(n.x - s.x, n.y - s.y) < STATION_CATCHMENT_RADIUS);
+                  const nearbyRetail = nearby.reduce((sum,n) => sum + n.retailVisitors, 0);
+                  const nearbyResidents = nearby.reduce((sum,n) => sum + n.residents, 0);
+                  const fareToday = s.revenueToday || 0;
+                  if (a.retail) retailTotal += Math.min(4000, nearbyRetail * 0.01) + fareToday * 0.40;
+                  if (a.parking) parkingTotal += Math.min(3500, nearbyResidents * 0.02);
+                  if (a.ads) adsTotal += fareToday * 0.25 + 60;
+              }
+              if (s.namingRights) namingTotal += NAMING_RIGHTS_DAILY;
+          });
+
+          const todTax = calculateTODTaxRevenue();
+          const subsidy = calculateGovSubsidy(lastOpExAmount, fareRevenueToday, dailyRiders);
+          const eventIncome = maybeTriggerCityEvent();
+
+          const total = retailTotal + parkingTotal + adsTotal + namingTotal + todTax + subsidy + eventIncome;
+          budget += total;
+          otherIncomeToday = total;
+          todaysIncomeBreakdown = { fare: fareRevenueToday, retail: retailTotal, parking: parkingTotal, ads: adsTotal, naming: namingTotal, todTax: todTax, subsidy: subsidy, event: eventIncome };
+
+          checkNamingRightsOpportunities();
+          updateHUD();
+          renderEconomyPanel();
+      }
+
+      function estimateTODTaxPotential() {
+          // Same formula as calculateTODTaxRevenue(), ignoring the on/off switch, for UI preview purposes.
+          let total = 0;
+          stations.forEach(s => {
+              const nearby = neighborhoods.filter(n => Math.hypot(n.x - s.x, n.y - s.y) < STATION_CATCHMENT_RADIUS);
+              const residents = nearby.reduce((sum,n) => sum + n.residents, 0);
+              const jobs = nearby.reduce((sum,n) => sum + n.jobs, 0);
+              total += Math.min(TOD_TAX_STATION_CAP, residents * TOD_TAX_RESIDENT_RATE + jobs * TOD_TAX_JOB_RATE);
+          });
+          return total;
+      }
+
+      function renderEconomyPanel() {
+          const todPreviewEl = document.getElementById('tod-tax-preview');
+          if (todPreviewEl) {
+              const potential = estimateTODTaxPotential();
+              todPreviewEl.textContent = todTaxEnabled
+                  ? `Currently earning ≈$${Math.round(potential).toLocaleString()}/day`
+                  : `Would earn ≈$${Math.round(potential).toLocaleString()}/day if enabled`;
+          }
+          const incomeEl = document.getElementById('econ-income-breakdown');
+          if (incomeEl) {
+              const rows = [
+                  ['🎫 Fare Revenue', todaysIncomeBreakdown.fare],
+                  ['🛍️ Station Retail', todaysIncomeBreakdown.retail],
+                  ['🅿️ Parking', todaysIncomeBreakdown.parking],
+                  ['📢 Advertising', todaysIncomeBreakdown.ads],
+                  ['🏷️ Naming Rights', todaysIncomeBreakdown.naming],
+                  ['🏙️ TOD Tax', todaysIncomeBreakdown.todTax],
+                  ['🏛️ Gov Subsidy', todaysIncomeBreakdown.subsidy],
+                  ['🎉 Event Income', todaysIncomeBreakdown.event]
+              ];
+              const total = rows.reduce((a,r) => a + r[1], 0);
+              incomeEl.innerHTML = rows.map(r => `<div class="econ-breakdown-row"><span>${r[0]}</span><span>$${Math.round(r[1]).toLocaleString()}</span></div>`).join('')
+                  + `<div class="econ-breakdown-row total"><span>Total</span><span>$${Math.round(total).toLocaleString()}</span></div>`;
+          }
+          const expenseEl = document.getElementById('econ-expense-breakdown');
+          if (expenseEl) {
+              const rows = [
+                  ['⚡ Electricity', todaysExpenseBreakdown.electricity],
+                  ['🔧 Maintenance', todaysExpenseBreakdown.maintenance],
+                  ['🧹 Cleaning', todaysExpenseBreakdown.cleaning],
+                  ['👷 Staffing', todaysExpenseBreakdown.staffing],
+                  ['🛡️ Security', todaysExpenseBreakdown.security],
+                  ['🛤️ Track Renewal', todaysExpenseBreakdown.trackRenewal],
+                  ['🏬 Amenity Upkeep', todaysExpenseBreakdown.amenityUpkeep],
+                  ['📉 Interest', todaysExpenseBreakdown.interest]
+              ];
+              const total = rows.reduce((a,r) => a + r[1], 0);
+              expenseEl.innerHTML = rows.map(r => `<div class="econ-breakdown-row"><span>${r[0]}</span><span>$${Math.round(r[1]).toLocaleString()}</span></div>`).join('')
+                  + `<div class="econ-breakdown-row total"><span>Total</span><span>$${Math.round(total).toLocaleString()}</span></div>`;
+          }
+      }
+
+      function triggerBankruptcy() {
           if (gameOver) return;
           gameOver = true; simSpeed = 0;
           const overlay = document.createElement('div');
@@ -1909,14 +3560,21 @@ function calculateDailyOpEx() {
 
       function tickSimulationTime() {
           if (simSpeed === 0) return;
-          gameTime.min += simSpeed; 
-          while (gameTime.min >= 60) { gameTime.min -= 60; gameTime.hour += 1; }
+const TIME_SCALE = {
+    0: 0,
+    1: 0.10,
+    2: 0.25,
+    4: 0.5,
+};
+
+gameTime.min += TIME_SCALE[simSpeed] ?? simSpeed;          while (gameTime.min >= 60) { gameTime.min -= 60; gameTime.hour += 1; }
           while (gameTime.hour >= 24) {
     gameTime.hour -= 24; 
     gameTime.day += 1;
 
     if (!gameOver) { 
         applyDailyOpEx(); 
+        applyDailyStationEconomy();
         applyDailyCityGrowth(); 
         
         // Add daily totals to weekly accumulators
@@ -1924,22 +3582,26 @@ function calculateDailyOpEx() {
         weeklyRevenue += fareRevenueToday;
         weeklyOvercrowding += overcrowdingEvents;
         totalWeeklyOpEx += lastOpExAmount;
+        weeklyOtherIncome += otherIncomeToday;
     }
     
     // Check if it's the end of the week (7th day)
     if (gameTime.day % 7 === 0) {
-        showDailyOverview(gameTime.day, weeklyRiders, weeklyRevenue, weeklyOvercrowding, budget, totalWeeklyOpEx);
+        showDailyOverview(gameTime.day, weeklyRiders, weeklyRevenue, weeklyOvercrowding, budget, totalWeeklyOpEx, weeklyOtherIncome);
         
         // RESET WEEKLY ACCUMULATORS
         weeklyRiders = 0; 
         weeklyRevenue = 0; 
         weeklyOvercrowding = 0; 
         totalWeeklyOpEx = 0;
+        weeklyOtherIncome = 0;
     }
     
     // Existing daily reset
+    if (dailyRiders > bestDailyRiders) bestDailyRiders = dailyRiders;
     dailyRiders = 0; fareRevenueToday = 0; stations.forEach(s => s.revenueToday = 0);
     overcrowdingEvents = 0;
+    evaluateObjectives();
 }
           while (gameTime.day > 30) { gameTime.day -= 30; gameTime.month += 1; }
           while (gameTime.month > 12) { gameTime.month -= 12; gameTime.year += 1; }
@@ -1977,8 +3639,8 @@ function calculateDailyOpEx() {
               } else return;
 
               if (Math.random() > c.transitPreference) return;
-              const origin = findNearestStation(c.home.x, c.home.y, 380); 
-              const destination = findNearestStation(destinationNode.x, destinationNode.y, 380);
+              const origin = findNearestStation(c.home.x, c.home.y, CC_STATION_CATCHMENT_UNITS); 
+              const destination = findNearestStation(destinationNode.x, destinationNode.y, CC_STATION_CATCHMENT_UNITS);
               
               if (!origin || !destination || origin === destination) return;
               const route = calculateNetworkRoute(origin, destination); 
@@ -2053,8 +3715,43 @@ function calculateDailyOpEx() {
                       }
                   }
               } else {
-                  const spd = unitsPerFrame / sd; t.pct += spd;
-                  if (t.pct >= 1) {
+const spec = TRAIN_SPECS[t.trainClass || "light"];
+
+// initialize once
+if (t.speed === undefined) t.speed = 0;
+if (t.targetSpeed === undefined) t.targetSpeed = 0;
+
+// percentage remaining to next node
+const remaining = 1 - t.pct;
+
+// brake before reaching station
+if (remaining < 0.20)
+    t.targetSpeed = 0;
+else
+    t.targetSpeed = spec.maxSpeed;
+
+// accelerate
+if (t.speed < t.targetSpeed) {
+    t.speed = Math.min(
+        t.targetSpeed,
+        t.speed + spec.acceleration * 0.05
+    );
+}
+
+// brake
+else if (t.speed > t.targetSpeed) {
+    t.speed = Math.max(
+        t.targetSpeed,
+        t.speed - spec.braking * 0.05
+    );
+}
+
+// convert speed to route progress
+const spd = (t.speed / spec.maxSpeed) * (unitsPerFrame / sd);
+
+t.pct += spd;
+
+if (t.pct >= 1) {
                       t.pct = 1; t.state = "DWELLING"; t.dwell = 20; const cs = en.station;
                       const meta = t.route && t.route.meta;
                       if (meta) {
@@ -2091,10 +3788,13 @@ function calculateDailyOpEx() {
                                   if (servesNext && space > 0) {
                                       waitTimeSum += Math.max(0, timeTicks - c.waitStart); waitSamples++;
                                       t.riders.push({ status: "EN_ROUTE", commuterRef: c }); space--; trackedBoarded++;
+                                      // A good ride builds loyalty: happy riders lean a little more transit next time.
+                                      c.missedBoardings = 0;
+                                      c.transitPreference = Math.min(0.92, (c.transitPreference || 0.2) + 0.015);
                                   } else {
                                       if (servesNext && space <= 0) {
                                           c.missedBoardings = (c.missedBoardings || 0) + 1; overcrowdingEvents++;
-                                          if (c.missedBoardings >= 2) c.transitPreference = Math.max(0.02, c.transitPreference * 0.85);
+                                          if (c.missedBoardings >= 3) c.transitPreference = Math.max(0.08, c.transitPreference * 0.95);
                                       }
                                       remainingQueue.push(c);
                                   }
@@ -2392,7 +4092,7 @@ function calculateDailyOpEx() {
                   neighborhoods.forEach(n => { const d = Math.hypot(n.x - p.worldX, n.y - p.worldY); if (d < md) { md = d; near = n; } });
                   
                   const label = near && md < 180 ? near.name : `Terminal ${stations.length + 1}`;
-                  stations.push({ id: stations.length + 1, x: p.worldX, y: p.worldY, name: label, waiting: 0, queue: [], ridersBoarded: 0, boardings: 0 });
+                  stations.push({ id: stations.length + 1, x: p.worldX, y: p.worldY, name: label, waiting: 0, queue: [], ridersBoarded: 0, boardings: 0, amenities: { retail: false, parking: false, ads: false }, namingRights: false, namingRightsOffered: false, sponsorName: null, amenityRevenueToday: 0 });
                   updateHUD(); updateTelemetryData();
               }
           } 
@@ -2420,7 +4120,7 @@ function calculateDailyOpEx() {
                           });
 
                           activeTrackBuild = null; 
-                          updateHUD(); manageTrainsRealtime(); 
+                          updateHUD(); manageTrainsRealtime(); refreshNeighborhoodInspector();
                       } else { alert('Insufficient structural configuration funds!'); }
                   } else if (!clicked) {
                       const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
@@ -2446,7 +4146,7 @@ function calculateDailyOpEx() {
                   budget += Math.floor(STATION_BASE_COST * 0.5);
                   tracks = tracks.filter(t => t.startStation !== s && t.endStation !== s); 
                   stations.splice(idx, 1); 
-                  updateHUD(); manageTrainsRealtime(); updateTelemetryData(); setupLineSelectorUI(); 
+                  updateHUD(); manageTrainsRealtime(); updateTelemetryData(); setupLineSelectorUI(); refreshNeighborhoodInspector();
               }
           }
       }
@@ -2533,7 +4233,12 @@ function calculateDailyOpEx() {
                   const CLICK_THRESHOLD = 22 / Math.sqrt(zoom);
                   const clicked = stations.find(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < CLICK_THRESHOLD);
                   if (clicked) { openStationInspector(clicked); }
-                  else { closeStationInspector(); }
+                  else {
+                      const NEIGH_THRESHOLD = n => Math.max(4, n.size * (1.2 / Math.sqrt(zoom)));
+                      const hovNeigh = neighborhoods.find(n => Math.hypot(n.x - p.worldX, n.y - p.worldY) < NEIGH_THRESHOLD(n));
+                      if (hovNeigh) { openNeighborhoodInspector(hovNeigh); }
+                      else { closeStationInspector(); closeNeighborhoodInspector(); }
+                  }
               }
           }
           mouseDownPos = null;
@@ -2552,7 +4257,7 @@ function calculateDailyOpEx() {
       function init(){
           resizeCanvas(); window.addEventListener('resize',resizeCanvas);
           generateNodes(); setupLineSelectorUI(); buildTelemetryCharts(); updateFleetPanel();
-          updateBonusPanel(); 
+          updateBonusPanel(); renderObjectives(); renderEconomyPanel();
           camera.x = -canvas.width / (2 * zoom); camera.y = -canvas.height / (2 * zoom);
 
           setInterval(tickSimulationTime,1000/60);
