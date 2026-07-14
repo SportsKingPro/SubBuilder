@@ -373,9 +373,350 @@
       .tut-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
       .tut-nav-btn.primary-action { background: var(--transit-blue); color: #0c0d12; border-color: var(--transit-blue); }
       .tut-nav-btn.primary-action:hover { filter: brightness(1.15); box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+
+      /* ============================================================
+         MAIN MENU / MAP SELECTION SCREENS
+         ============================================================ */
+      #gameRoot {
+          display:flex; height:100vh; width:100vw; overflow:hidden;
+          opacity:1; transition:opacity .5s ease;
+      }
+      #gameRoot.hidden-root { display:none; }
+
+      .app-screen {
+          position:fixed; inset:0; z-index:5000;
+          display:flex; flex-direction:column; align-items:center; justify-content:center;
+          background:
+              radial-gradient(circle at 20% 20%, rgba(56,189,248,0.10), transparent 45%),
+              radial-gradient(circle at 80% 75%, rgba(16,185,129,0.08), transparent 45%),
+              linear-gradient(180deg, #0a0b0f 0%, #0c0d12 60%, #0a0b0f 100%);
+          color:var(--text-main); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+          opacity:1; transition:opacity .45s ease, visibility .45s ease;
+          overflow-y:auto; padding:40px 20px; box-sizing:border-box;
+      }
+      .app-screen.screen-hidden { opacity:0; visibility:hidden; pointer-events:none; position:absolute; }
+      .app-screen.fading-out { opacity:0; }
+
+      /* subtle animated grid backdrop for a "transit map" feel */
+      .app-screen::before {
+          content:""; position:absolute; inset:0; pointer-events:none; opacity:.35;
+          background-image:
+              linear-gradient(rgba(56,189,248,0.07) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(56,189,248,0.07) 1px, transparent 1px);
+          background-size:42px 42px;
+          -webkit-mask-image:radial-gradient(circle at 50% 35%, rgba(0,0,0,.9), transparent 75%);
+                  mask-image:radial-gradient(circle at 50% 35%, rgba(0,0,0,.9), transparent 75%);
+      }
+
+      /* ---- Main Menu ---- */
+      #mainMenuScreen .menu-brand-icon {
+          font-size:52px; margin-bottom:6px; filter:drop-shadow(0 4px 18px rgba(56,189,248,.35));
+      }
+      #mainMenuScreen .menu-title {
+          font-size:clamp(32px, 6vw, 56px); font-weight:700; letter-spacing:.5px; text-align:center;
+          background:linear-gradient(90deg, #e2e8f0, #7dd3fc 55%, #38bdf8);
+          -webkit-background-clip:text; background-clip:text; color:transparent;
+          margin:0; z-index:1;
+      }
+      #mainMenuScreen .menu-subtitle {
+          color:var(--text-muted); font-size:15px; margin-top:10px; margin-bottom:44px; text-align:center; z-index:1;
+          letter-spacing:.2px;
+      }
+      .menu-btn-stack { display:flex; flex-direction:column; gap:14px; width:min(360px, 88vw); z-index:1; }
+      .menu-btn {
+          appearance:none; border:1px solid rgba(255,255,255,0.09);
+          background:linear-gradient(180deg, rgba(26,29,41,0.85), rgba(18,20,28,0.85));
+          backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%);
+          color:var(--text-main); font-size:15px; font-weight:600; letter-spacing:.3px;
+          padding:16px 22px; border-radius:12px; cursor:pointer; text-align:center;
+          box-shadow:0 6px 20px rgba(0,0,0,.35);
+          transition:transform .18s cubic-bezier(.4,0,.2,1), border-color .18s, box-shadow .18s, background .18s;
+      }
+      .menu-btn:hover:not(:disabled) {
+          transform:translateY(-3px); border-color:rgba(56,189,248,0.55);
+          box-shadow:0 12px 28px rgba(56,189,248,0.18), 0 6px 20px rgba(0,0,0,.35);
+          background:linear-gradient(180deg, rgba(31,35,49,0.9), rgba(20,23,32,0.9));
+      }
+      .menu-btn:active:not(:disabled) { transform:translateY(-1px) scale(.99); }
+      .menu-btn.menu-btn-primary {
+          border-color:rgba(56,189,248,0.45);
+          background:linear-gradient(180deg, rgba(56,189,248,0.22), rgba(15,23,42,0.85));
+      }
+      .menu-btn.menu-btn-primary:hover { border-color:#38bdf8; box-shadow:0 12px 30px rgba(56,189,248,.28); }
+      .menu-btn:disabled { opacity:.4; cursor:not-allowed; color:var(--text-muted); }
+      .menu-btn-note {
+          font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase;
+          color:var(--text-muted); float:right; background:rgba(255,255,255,0.06);
+          padding:2px 8px; border-radius:20px; margin-left:10px;
+      }
+      .menu-version-tag {
+          position:absolute; bottom:18px; right:22px; font-size:11px; color:var(--text-muted); opacity:.6; z-index:1;
+      }
+
+      /* ---- Map Selection ---- */
+      #mapSelectScreen { justify-content:flex-start; padding-top:56px; }
+      .map-select-header { text-align:center; margin-bottom:34px; z-index:1; }
+      .map-select-header h1 {
+          font-size:clamp(24px, 4vw, 34px); margin:0 0 8px 0; font-weight:700; color:#f1f5f9; letter-spacing:.3px;
+      }
+      .map-select-header p { margin:0; color:var(--text-muted); font-size:14px; }
+      .map-back-btn {
+          position:absolute; top:26px; left:26px; z-index:2;
+          background:rgba(18,20,28,0.75); border:1px solid rgba(255,255,255,0.09); color:var(--text-main);
+          padding:9px 16px; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer;
+          backdrop-filter:blur(10px); transition:background .15s, border-color .15s, transform .15s;
+      }
+      .map-back-btn:hover { background:rgba(26,29,41,0.9); border-color:rgba(56,189,248,0.4); transform:translateX(-2px); }
+
+      .map-grid {
+          display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 300px));
+          gap:22px; width:min(1000px, 92vw); z-index:1; padding-bottom:40px; justify-content:center;
+      }
+      .map-card {
+          position:relative; border-radius:16px; overflow:hidden;
+          background:linear-gradient(180deg, rgba(26,29,41,0.82), rgba(15,17,24,0.88));
+          border:1px solid rgba(255,255,255,0.08);
+          box-shadow:0 10px 28px rgba(0,0,0,.4);
+          backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%);
+          transition:transform .22s cubic-bezier(.4,0,.2,1), border-color .22s, box-shadow .22s;
+          display:flex; flex-direction:column;
+      }
+      .map-card.map-available { cursor:pointer; }
+      .map-card.map-available:hover {
+          transform:translateY(-6px); border-color:rgba(56,189,248,0.5);
+          box-shadow:0 20px 40px rgba(56,189,248,.16), 0 10px 28px rgba(0,0,0,.4);
+      }
+      .map-card.map-locked { opacity:.55; filter:grayscale(.4); }
+      .map-card-preview {
+          height:130px; display:flex; align-items:center; justify-content:center; font-size:44px;
+          background:
+              radial-gradient(circle at 30% 20%, rgba(56,189,248,0.25), transparent 60%),
+              linear-gradient(135deg, #1a1d29, #12141c);
+          border-bottom:1px solid rgba(255,255,255,0.06); position:relative;
+      }
+      .map-card-locked-badge {
+          position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+          gap:4px; background:rgba(10,11,15,0.55); color:#e2e8f0; font-size:11px; font-weight:700;
+          letter-spacing:.6px; text-transform:uppercase;
+      }
+      .map-card-locked-badge .lock-icon { font-size:22px; opacity:.85; }
+      .map-card-body { padding:16px 18px 18px 18px; display:flex; flex-direction:column; gap:8px; flex:1; }
+      .map-card-name { font-size:18px; font-weight:700; color:#f1f5f9; }
+      .map-card-region { font-size:12px; color:var(--text-muted); margin-top:-6px; }
+      .map-card-stats { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12px; color:var(--text-main); margin-top:4px; }
+      .map-card-stats span b { color:#94a3b8; font-weight:600; }
+      .map-card-status {
+          font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+          padding:3px 9px; border-radius:20px; display:inline-block; width:fit-content;
+      }
+      .map-card-status.status-available { background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); }
+      .map-card-status.status-locked { background:rgba(100,116,139,0.15); color:#94a3b8; border:1px solid rgba(100,116,139,0.25); }
+      .map-start-btn {
+          margin-top:auto; border:none; border-radius:9px; padding:11px; font-size:14px; font-weight:700;
+          letter-spacing:.3px; cursor:pointer; color:#03150d;
+          background:linear-gradient(180deg, #34d399, #10b981);
+          box-shadow:0 6px 16px rgba(16,185,129,.28);
+          transition:transform .15s, box-shadow .15s, filter .15s;
+      }
+      .map-start-btn:hover { transform:translateY(-2px); filter:brightness(1.06); box-shadow:0 10px 22px rgba(16,185,129,.35); }
+      .map-start-btn:active { transform:translateY(0); }
+
+      /* ============================================================
+         SAVE / LOAD SYSTEM UI
+         ============================================================ */
+      #save-load-backdrop {
+          position:fixed; inset:0; background:rgba(5,7,12,0.72); backdrop-filter:blur(3px);
+          z-index:6000; display:none; align-items:center; justify-content:center;
+      }
+      #save-load-modal {
+          width:min(760px, 92vw); max-height:86vh; overflow-y:auto;
+          background:linear-gradient(180deg, #12141c, #0c0e14); border:1px solid rgba(255,255,255,0.08);
+          border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,0.55); padding:22px 24px 26px 24px;
+      }
+      .sl-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+      .sl-title { font-size:18px; font-weight:800; color:#f1f5f9; display:flex; align-items:center; gap:8px; }
+      .sl-close-btn {
+          background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#cbd5e1;
+          width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:15px; line-height:1;
+      }
+      .sl-close-btn:hover { background:rgba(255,255,255,0.12); }
+      .sl-subtitle { font-size:12px; color:var(--text-muted); margin-bottom:16px; }
+      .sl-slots { display:flex; flex-direction:column; gap:10px; }
+      .sl-slot {
+          border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px;
+          background:rgba(255,255,255,0.03); display:flex; align-items:center; gap:14px;
+          transition:border-color .15s, background .15s;
+      }
+      .sl-slot:hover { border-color:rgba(56,189,248,0.35); background:rgba(255,255,255,0.045); }
+      .sl-slot.sl-autosave { border-color:rgba(251,191,36,0.28); background:rgba(251,191,36,0.05); }
+      .sl-slot-icon { font-size:26px; width:38px; text-align:center; flex-shrink:0; }
+      .sl-slot-body { flex:1; min-width:0; }
+      .sl-slot-name { font-size:14px; font-weight:700; color:#f1f5f9; display:flex; align-items:center; gap:8px; }
+      .sl-badge {
+          font-size:9px; font-weight:700; letter-spacing:.4px; text-transform:uppercase;
+          padding:2px 7px; border-radius:20px; background:rgba(251,191,36,0.18); color:#fbbf24;
+          border:1px solid rgba(251,191,36,0.3);
+      }
+      .sl-slot-empty-label { font-size:13px; color:var(--text-muted); font-style:italic; }
+      .sl-slot-stats {
+          display:flex; flex-wrap:wrap; gap:4px 14px; font-size:11px; color:var(--text-muted);
+          margin-top:4px;
+      }
+      .sl-slot-stats b { color:#94a3b8; font-weight:600; }
+      .sl-slot-actions { display:flex; gap:6px; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end; max-width:210px; }
+      .sl-btn {
+          border:none; border-radius:7px; padding:6px 10px; font-size:11px; font-weight:700;
+          cursor:pointer; letter-spacing:.2px; transition:filter .12s, transform .12s;
+      }
+      .sl-btn:hover { filter:brightness(1.12); transform:translateY(-1px); }
+      .sl-btn:active { transform:translateY(0); }
+      .sl-btn-load { background:linear-gradient(180deg, #38bdf8, #0ea5e9); color:#031521; }
+      .sl-btn-save { background:linear-gradient(180deg, #34d399, #10b981); color:#03150d; }
+      .sl-btn-rename { background:rgba(255,255,255,0.09); color:#e2e8f0; }
+      .sl-btn-delete { background:rgba(239,68,68,0.16); color:#f87171; border:1px solid rgba(239,68,68,0.25); }
+      .sl-btn-export { background:rgba(255,255,255,0.09); color:#e2e8f0; }
+      .sl-btn:disabled { opacity:.4; cursor:not-allowed; filter:none; transform:none; }
+      .sl-footer { display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px; flex-wrap:wrap; }
+      .sl-import-btn {
+          background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1;
+          border-radius:8px; padding:8px 14px; font-size:12px; font-weight:600; cursor:pointer;
+      }
+      .sl-import-btn:hover { background:rgba(255,255,255,0.11); }
+      .sl-status-msg { font-size:11.5px; color:#94a3b8; min-height:16px; }
+      .sl-status-msg.sl-status-error { color:#f87171; }
+      .sl-status-msg.sl-status-success { color:#34d399; }
+
+      /* Confirmation dialog */
+      #sl-confirm-backdrop {
+          position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:6100; display:none;
+          align-items:center; justify-content:center;
+      }
+      #sl-confirm-box {
+          width:min(380px, 88vw); background:#151821; border:1px solid rgba(255,255,255,0.1);
+          border-radius:12px; padding:20px; box-shadow:0 12px 40px rgba(0,0,0,0.5);
+      }
+      #sl-confirm-msg { font-size:13.5px; color:#e2e8f0; line-height:1.5; margin-bottom:16px; }
+      #sl-confirm-actions { display:flex; justify-content:flex-end; gap:8px; }
+      .sl-confirm-cancel { background:rgba(255,255,255,0.08); color:#cbd5e1; }
+      .sl-confirm-ok { background:linear-gradient(180deg, #ef4444, #dc2626); color:#fff; }
+
+      /* In-game menu trigger + pause overlay */
+      #ingame-menu-btn {
+          position:fixed; top:14px; right:16px; z-index:900;
+          width:38px; height:38px; border-radius:9px; cursor:pointer;
+          background:rgba(15,17,23,0.72); border:1px solid rgba(255,255,255,0.1); color:#e2e8f0;
+          display:flex; align-items:center; justify-content:center; font-size:17px;
+          backdrop-filter:blur(4px);
+      }
+      #ingame-menu-btn:hover { background:rgba(30,33,43,0.85); border-color:rgba(56,189,248,0.4); }
+      #pause-menu-backdrop {
+          position:fixed; inset:0; background:rgba(5,7,12,0.72); backdrop-filter:blur(3px);
+          z-index:5950; display:none; align-items:center; justify-content:center;
+      }
+      #pause-menu-box {
+          width:min(300px, 88vw); background:linear-gradient(180deg, #12141c, #0c0e14);
+          border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:20px;
+          box-shadow:0 20px 60px rgba(0,0,0,0.55); display:flex; flex-direction:column; gap:8px;
+      }
+      #pause-menu-box h3 { color:#f1f5f9; font-size:15px; margin-bottom:6px; text-align:center; }
+      .pm-btn {
+          background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#e2e8f0;
+          border-radius:8px; padding:11px; font-size:13px; font-weight:600; cursor:pointer; text-align:center;
+      }
+      .pm-btn:hover { background:rgba(255,255,255,0.11); }
+      .pm-btn-primary { background:linear-gradient(180deg, #38bdf8, #0ea5e9); color:#031521; border:none; }
+      .pm-btn-danger { background:rgba(239,68,68,0.14); color:#f87171; border:1px solid rgba(239,68,68,0.25); }
+
+      /* Small toast for save/load feedback in-game */
+      #sl-toast {
+          position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px);
+          background:#151821; border:1px solid rgba(255,255,255,0.12); color:#e2e8f0;
+          padding:10px 18px; border-radius:9px; font-size:12.5px; z-index:6200;
+          opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;
+          box-shadow:0 10px 30px rgba(0,0,0,0.4);
+      }
+      #sl-toast.sl-toast-visible { opacity:1; transform:translateX(-50%) translateY(0); }
+      #sl-toast.sl-toast-error { border-color:rgba(239,68,68,0.4); color:#fca5a5; }
     </style>
   </head>
   <body>
+    <!-- ============================================================
+         MAIN MENU
+         ============================================================ -->
+    <div id="mainMenuScreen" class="app-screen">
+      <div class="menu-brand-icon">🚇</div>
+      <h1 class="menu-title">Metro Transit Simulator</h1>
+      <p class="menu-subtitle">Design, build, and operate a regional rail network.</p>
+      <div class="menu-btn-stack">
+        <button class="menu-btn menu-btn-primary" onclick="showMapSelector()">New Game</button>
+        <button class="menu-btn" id="continue-btn" onclick="continueGame()" disabled title="No save data yet">Continue</button>
+        <button class="menu-btn" onclick="openSaveLoadMenu('menu')">Load / Manage Saves</button>
+        <button class="menu-btn" onclick="alert('Settings are coming in a future update.')">Settings</button>
+        <button class="menu-btn" onclick="alert('Metro Transit Simulator\n\nBuilt with a modular multi-city engine.\nMore metros coming soon.')">Credits</button>
+      </div>
+      <div class="menu-version-tag">v1.0 &middot; DFW Launch Edition</div>
+    </div>
+
+    <!-- ============================================================
+         SAVE / LOAD MENU  (shared by main menu + in-game pause menu)
+         ============================================================ -->
+    <div id="save-load-backdrop">
+      <div id="save-load-modal">
+        <div class="sl-header">
+          <div class="sl-title">💾 <span id="sl-modal-title">Save &amp; Load</span></div>
+          <button class="sl-close-btn" onclick="closeSaveLoadMenu()">✕</button>
+        </div>
+        <div class="sl-subtitle" id="sl-modal-subtitle">5 manual slots, plus a dedicated autosave slot the game keeps up to date on its own.</div>
+        <div class="sl-slots" id="sl-slots-container"></div>
+        <div class="sl-footer">
+          <div class="sl-status-msg" id="sl-status-msg"></div>
+          <div style="display:flex; gap:8px;">
+            <button class="sl-import-btn" onclick="document.getElementById('sl-import-input').click()">⬆ Import Save File</button>
+            <input type="file" id="sl-import-input" accept="application/json,.json" style="display:none" onchange="SaveManager.importSave(this.files[0]); this.value='';">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation dialog for destructive save actions -->
+    <div id="sl-confirm-backdrop">
+      <div id="sl-confirm-box">
+        <div id="sl-confirm-msg">Are you sure?</div>
+        <div id="sl-confirm-actions">
+          <button class="sl-btn sl-confirm-cancel" onclick="_slConfirmCancel()">Cancel</button>
+          <button class="sl-btn sl-confirm-ok" id="sl-confirm-ok-btn">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lightweight toast for save/load feedback -->
+    <div id="sl-toast"></div>
+
+    <!-- ============================================================
+         MAP SELECTION
+         ============================================================ -->
+    <div id="mapSelectScreen" class="app-screen screen-hidden">
+      <div class="map-back-btn" onclick="showMainMenu()">&larr; Back</div>
+      <div class="map-select-header">
+        <h1>Select a Metro Area</h1>
+        <p>Choose where you'll design and operate your regional rail network.</p>
+      </div>
+      <div class="map-grid" id="mapGrid"></div>
+    </div>
+
+    <!-- ============================================================
+         GAME ROOT (existing simulator UI — hidden until a map starts)
+         ============================================================ -->
+    <div id="gameRoot" class="hidden-root">
+    <div id="ingame-menu-btn" onclick="openPauseMenu()" title="Menu / Save / Load">☰</div>
+    <div id="pause-menu-backdrop">
+      <div id="pause-menu-box">
+        <h3>Game Menu</h3>
+        <button class="pm-btn pm-btn-primary" onclick="closePauseMenu(); openSaveLoadMenu('ingame');">💾 Save / Load</button>
+        <button class="pm-btn" onclick="closePauseMenu();">▶ Resume</button>
+        <button class="pm-btn pm-btn-danger" onclick="exitToMainMenu()">⏻ Exit to Main Menu</button>
+      </div>
+    </div>
     <div id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">◂</div>
     <div id="sidebar">
       <div id="sidebar-brand">
@@ -501,7 +842,22 @@
           </div>
         </div>
       </div>
-
+<div class="nav-group" id="grp-network">
+  <div class="nav-group-header" onclick="toggleSection('grp-network')">
+    <div class="label"><span class="emoji">🚇</span><span>Lines & Network</span></div>
+    <span class="arrow" id="arrow-grp-network">▼</span>
+  </div>
+  <div class="nav-group-body" id="body-grp-network">
+    <div class="net-controls">
+      <input type="text" id="net-search-input" class="net-search" placeholder="Search stations..." onkeyup="NetworkPanelUI.handleSearch(event)">
+      <button class="net-btn" onclick="NetworkPanelUI.expandAll()">Expand All</button>
+      <button class="net-btn" onclick="NetworkPanelUI.collapseAll()">Collapse All</button>
+    </div>
+    <div id="net-lines-container">
+      <!-- Line Cards are injected here dynamically -->
+    </div>
+  </div>
+</div>
       <div class="nav-group" id="grp-economy">
         <div class="nav-group-header" onclick="toggleSection('grp-economy')">
           <div class="label"><span class="emoji">💰</span><span>Economy</span></div>
@@ -539,14 +895,50 @@
             <div class="econ-toggle-row" onclick="toggleTODTax()" style="cursor:pointer;">
               <div style="flex:1;">
                 <div style="color:#fff; font-weight:600;">TOD Value-Capture Tax</div>
-                <div class="econ-toggle-desc">Levy a small tax on residents &amp; jobs near your stations for ongoing revenue.</div>
+                <div class="econ-toggle-desc">Levy a tax on residents &amp; jobs near stations. Generates great revenue, but higher living costs displace transit-dependent riders.</div>
                 <div style="display:flex; gap:5px; margin-top:5px;">
                   <span class="uc-badge b-good">🟢 Revenue</span>
-                  <span class="uc-badge b-cov">🔵 Coverage-based</span>
+                  <span class="uc-badge b-cost">🔴 Ridership</span>
                 </div>
                 <div id="tod-tax-preview" style="font-size:10px; color:var(--text-muted); margin-top:5px; font-family:monospace;"></div>
               </div>
               <div class="econ-switch" id="tod-switch"><div class="knob"></div></div>
+            </div>
+<div class="econ-toggle-row" onclick="toggleFareFree()" style="cursor:pointer;">
+              <div style="flex:1;">
+                <div style="color:#fff; font-weight:600;">Fare-Free Transit Program</div>
+                <div class="econ-toggle-desc">Eliminate all passenger fares. Massive boost to transit mode share, but zeroes out farebox revenue.</div>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                  <span class="uc-badge b-cost">🔴 Costly</span>
+                  <span class="uc-badge b-good">🟢 Ridership</span>
+                </div>
+              </div>
+              <div class="econ-switch" id="fare-free-switch"><div class="knob"></div></div>
+            </div>
+
+            <div class="econ-toggle-row" onclick="toggleCongestionPricing()" style="cursor:pointer;">
+              <div style="flex:1;">
+                <div style="color:#fff; font-weight:600;">Congestion Pricing (Core)</div>
+                <div class="econ-toggle-desc">Toll drivers entering Downtown zones. Pushes commuters to transit and generates daily revenue.</div>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                  <span class="uc-badge b-good">🟢 Revenue</span>
+                  <span class="uc-badge b-cov">🔵 Mode Shift</span>
+                </div>
+                <div id="toll-tax-preview" style="font-size:10px; color:var(--text-muted); margin-top:5px; font-family:monospace;"></div>
+              </div>
+              <div class="econ-switch" id="congestion-switch"><div class="knob"></div></div>
+            </div>
+
+            <div class="econ-toggle-row" onclick="toggleDeferredMaintenance()" style="cursor:pointer;">
+              <div style="flex:1;">
+                <div style="color:#fff; font-weight:600;">Deferred Maintenance</div>
+                <div class="econ-toggle-desc">Cut track and station upkeep budgets by 50%. Saves money immediately, but trains will frequently break down or delay.</div>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                  <span class="uc-badge b-good">🟢 Savings</span>
+                  <span class="uc-badge b-cost">🔴 Reliability</span>
+                </div>
+              </div>
+              <div class="econ-switch" id="deferred-switch"><div class="knob"></div></div>
             </div>
           </div>
           <div class="nav-subsection">
@@ -738,7 +1130,142 @@
   </div>
 </div>
 
+    </div><!-- /#gameRoot -->
+
     <script>
+      // ============================================================
+      // MAIN MENU / MAP SELECTION SYSTEM
+      // ------------------------------------------------------------
+      // Adding a new city later only requires:
+      //   1. Writing a `loadXyzMap()` function (its map loader).
+      //   2. Adding one entry to the MAPS array below.
+      //   3. Providing a preview icon/image.
+      // No menu/map-selection code needs to change.
+      // ============================================================
+      const MAPS = [
+          {
+              id: "dfw",
+              name: "Dallas–Fort Worth",
+              region: "Texas, USA",
+              population: "8.5M",
+              difficulty: "Normal",
+              status: "Available",
+              available: true,
+              icon: "🤠",
+              loader: loadDallasMap // defined further down with the rest of the simulation engine
+          },
+          { id: "chicago",  name: "Chicago",     region: "Illinois, USA",      population: "9.5M",  difficulty: "Hard",    status: "Coming Soon", available: false, icon: "🌆" },
+          { id: "atlanta",  name: "Atlanta",     region: "Georgia, USA",       population: "6.1M",  difficulty: "Normal",  status: "Coming Soon", available: false, icon: "🍑" },
+          { id: "la",       name: "Los Angeles", region: "California, USA",    population: "13.2M", difficulty: "Hard",    status: "Coming Soon", available: false, icon: "🌴" },
+          { id: "tokyo",    name: "Tokyo",       region: "Japan",              population: "37.4M", difficulty: "Expert",  status: "Coming Soon", available: false, icon: "🗼" },
+          { id: "london",   name: "London",      region: "United Kingdom",     population: "9.5M",  difficulty: "Hard",    status: "Coming Soon", available: false, icon: "🎡" },
+      ];
+
+      // Minimal save-state stub. Future save/load work should extend this
+      // object with year, stations, lines, trains, and finances, then
+      // persist/restore it wholesale.
+      let gameSave = { map: null };
+
+      function showMainMenu() {
+          document.getElementById('mapSelectScreen').classList.add('screen-hidden');
+          document.getElementById('mainMenuScreen').classList.remove('screen-hidden', 'fading-out');
+      }
+
+      function showMapSelector() {
+          renderMapGrid();
+          document.getElementById('mainMenuScreen').classList.add('screen-hidden');
+          document.getElementById('mapSelectScreen').classList.remove('screen-hidden', 'fading-out');
+      }
+
+      function renderMapGrid() {
+          const grid = document.getElementById('mapGrid');
+          grid.innerHTML = MAPS.map(map => {
+              if (map.available) {
+                  return `
+                      <div class="map-card map-available" onclick="startGame('${map.id}')">
+                          <div class="map-card-preview">${map.icon}</div>
+                          <div class="map-card-body">
+                              <div class="map-card-name">${map.name}</div>
+                              <div class="map-card-region">${map.region}</div>
+                              <div class="map-card-stats">
+                                  <span>Population <b>${map.population}</b></span>
+                                  <span>Difficulty <b>${map.difficulty}</b></span>
+                              </div>
+                              <div class="map-card-status status-available">${map.status}</div>
+                              <button class="map-start-btn" onclick="event.stopPropagation(); startGame('${map.id}')">Start</button>
+                          </div>
+                      </div>`;
+              }
+              return `
+                  <div class="map-card map-locked">
+                      <div class="map-card-preview">
+                          ${map.icon}
+                          <div class="map-card-locked-badge">
+                              <span class="lock-icon">🔒</span>
+                              <span>Coming Soon</span>
+                          </div>
+                      </div>
+                      <div class="map-card-body">
+                          <div class="map-card-name">${map.name}</div>
+                          <div class="map-card-region">${map.region}</div>
+                          <div class="map-card-stats">
+                              <span>Population <b>${map.population}</b></span>
+                              <span>Difficulty <b>${map.difficulty}</b></span>
+                          </div>
+                          <div class="map-card-status status-locked">Locked</div>
+                      </div>
+                  </div>`;
+          }).join('');
+      }
+
+      // Looks up a map by id and runs its city-specific loader function.
+      // This is the single seam a new city needs to plug into.
+      function loadMap(mapId) {
+          const map = MAPS.find(m => m.id === mapId);
+          if (!map || !map.available || typeof map.loader !== 'function') {
+              console.error('Cannot load map:', mapId);
+              return false;
+          }
+          gameSave.map = map.id; // future save files persist this alongside year/stations/lines/trains/finances
+          map.loader();
+          return true;
+      }
+
+      // Orchestrates the full startup sequence:
+      //  1. Fade out the menu
+      //  2. Reveal + initialize the simulator shell
+      //  3. Load the selected map (stations/highways/neighborhoods)
+      //  4. Start the simulation loop
+      function startGame(mapId) {
+          const mapSelectScreen = document.getElementById('mapSelectScreen');
+          const mainMenuScreen = document.getElementById('mainMenuScreen');
+          const gameRoot = document.getElementById('gameRoot');
+
+          mapSelectScreen.classList.add('fading-out');
+          mainMenuScreen.classList.add('fading-out');
+
+          setTimeout(() => {
+              mapSelectScreen.classList.add('screen-hidden');
+              mainMenuScreen.classList.add('screen-hidden');
+
+              gameRoot.classList.remove('hidden-root');
+              gameRoot.style.opacity = 0;
+              // reveal the simulator shell first so the canvas has real
+              // dimensions before we size/center it inside loadMap -> initEngine
+              requestAnimationFrame(() => {
+                  gameRoot.style.opacity = 1;
+
+                  const ok = loadMap(mapId);
+                  if (!ok) { showMainMenu(); return; }
+
+                  initEngine();
+
+                  // Auto-open the tutorial once the player is actually in-game.
+                  setTimeout(() => { startTutorialSystem(true); }, 600);
+              });
+          }, 450);
+      }
+
       // --- DAILY OVERVIEW LOGIC ---
       let previousSimSpeed = 1;
 let weeklyRiders = 0;
@@ -775,6 +1302,308 @@ let weeklyOtherIncome = 0;
           // Resume simulation speed
           setSpeed(previousSimSpeed);
       }
+// --- LINES & NETWORK UI MANAGER ---
+const NetworkPanelUI = {
+    expandedLines: new Set(),
+    sortModes: {}, // lineId -> sortMode string
+    searchQuery: '',
+    lastDataHash: '', // Prevent deep rebuilds if network topology hasn't changed
+
+    // Call this function from your main game loop every tick or second
+    // Expected input: Array of Line Objects
+    update(linesData) {
+        const container = document.getElementById('net-lines-container');
+        if (!container) return;
+
+        // Generate a quick topology hash to see if we need structural DOM rebuilding
+        // (e.g. stations added/removed) vs just updating passenger numbers
+        const currentHash = linesData.map(l => l.id + l.stations.length).join('|');
+        const structuralChange = this.lastDataHash !== currentHash;
+        this.lastDataHash = currentHash;
+
+        linesData.forEach(line => {
+            let card = document.getElementById(`net-line-${line.id}`);
+            
+            if (!card) {
+                // First time render
+                card = this.buildLineCardDOM(line);
+                container.appendChild(card);
+                this.rebuildStationList(line);
+            } else {
+                // Update existing card stats
+                this.updateLineStats(card, line);
+                
+                // Update station list
+                if (this.expandedLines.has(line.id)) {
+                    if (structuralChange || card.dataset.needsSort === "true") {
+                        this.rebuildStationList(line);
+                        card.dataset.needsSort = "false";
+                    } else {
+                        this.updateStationStatsFast(line);
+                    }
+                }
+            }
+        });
+
+        // Apply search filter globally if active
+        if (structuralChange && this.searchQuery) {
+            this.applySearchFilter();
+        }
+    },
+
+    buildLineCardDOM(line) {
+        const card = document.createElement('div');
+        card.id = `net-line-${line.id}`;
+        card.className = 'net-line-card';
+        if (this.expandedLines.has(line.id)) card.classList.add('expanded');
+        
+        // CSS custom property for coloring the metro visual
+        card.style.setProperty('--line-color', line.color);
+
+        card.innerHTML = `
+            <div class="net-line-header" onclick="NetworkPanelUI.toggleLine('${line.id}')">
+                <div class="net-line-title-row">
+                    <div class="net-line-name">
+                        <div class="net-line-swatch"></div>
+                        ${line.name}
+                    </div>
+                    <div class="net-line-expand-icon">▼</div>
+                </div>
+                <div class="net-stats-grid">
+                    <div class="net-stat-box"><span>Stations</span><span class="net-stat-val">${line.stations.length}</span></div>
+                    <div class="net-stat-box"><span>Length</span><span class="net-stat-val">${line.length || '0mi'}</span></div>
+                    <div class="net-stat-box"><span>Fleet</span><span class="net-stat-val">${line.activeTrains || 0}</span></div>
+                    <div class="net-stat-box"><span>Freq</span><span class="net-stat-val">${line.frequency || 'N/A'}</span></div>
+                    <div class="net-stat-box"><span>Pax/Day</span><span class="net-stat-val good" id="nl-pax-${line.id}">0</span></div>
+                    <div class="net-stat-box"><span>Revenue</span><span class="net-stat-val good" id="nl-rev-${line.id}">$0</span></div>
+                    <div class="net-stat-box"><span>OpEx</span><span class="net-stat-val cost" id="nl-opex-${line.id}">$0</span></div>
+                </div>
+                <div class="net-pax-bar-container"><div class="net-pax-bar" id="nl-bar-${line.id}" style="width:0%"></div></div>
+            </div>
+            <div class="net-line-body">
+                <div class="net-summary-box" id="nl-summary-${line.id}">
+                    <!-- Summaries injected here during expand -->
+                </div>
+                <div class="net-sort-row">
+                    <span style="font-size:10px; color:var(--text-muted); font-weight:600;">STATIONS</span>
+                    <select class="net-sort-select" onchange="NetworkPanelUI.changeSort('${line.id}', this.value)">
+                        <option value="order">Route Order (Default)</option>
+                        <option value="pax-high">Highest Passengers</option>
+                        <option value="pax-low">Lowest Passengers</option>
+                        <option value="az">Alphabetical (A-Z)</option>
+                        <option value="za">Reverse (Z-A)</option>
+                    </select>
+                </div>
+                <div class="net-station-list" id="nl-stlist-${line.id}"></div>
+            </div>
+        `;
+        return card;
+    },
+
+    updateLineStats(card, line) {
+        // Direct ID targeting prevents forced reflows
+        const paxEl = document.getElementById(`nl-pax-${line.id}`);
+        const revEl = document.getElementById(`nl-rev-${line.id}`);
+        const opexEl = document.getElementById(`nl-opex-${line.id}`);
+        const barEl = document.getElementById(`nl-bar-${line.id}`);
+
+        if (paxEl) paxEl.textContent = (line.dailyRiders || 0).toLocaleString();
+        if (revEl && line.revenue !== undefined) revEl.textContent = '$' + line.revenue.toLocaleString();
+        if (opexEl && line.opex !== undefined) opexEl.textContent = '$' + line.opex.toLocaleString();
+        
+        // Simple arbitrary fill calculation for the visual bar (assumes 20k max for example)
+        if (barEl) {
+            const fill = Math.min(100, ((line.dailyRiders || 0) / 20000) * 100);
+            barEl.style.width = fill + '%';
+        }
+    },
+
+    rebuildStationList(line) {
+        const listContainer = document.getElementById(`nl-stlist-${line.id}`);
+        const summaryContainer = document.getElementById(`nl-summary-${line.id}`);
+        if (!listContainer || !summaryContainer) return;
+
+        const sortMode = this.sortModes[line.id] || 'order';
+        let sortedStations = [...line.stations];
+
+        if (sortMode === 'pax-high') sortedStations.sort((a,b) => (b.passengers||0) - (a.passengers||0));
+        else if (sortMode === 'pax-low') sortedStations.sort((a,b) => (a.passengers||0) - (b.passengers||0));
+        else if (sortMode === 'az') sortedStations.sort((a,b) => a.name.localeCompare(b.name));
+        else if (sortMode === 'za') sortedStations.sort((a,b) => b.name.localeCompare(a.name));
+        // 'order' requires no sort as we assume line.stations is chronological
+
+        let html = '';
+        const isChronological = (sortMode === 'order');
+
+        sortedStations.forEach((st, idx) => {
+            const isFirst = isChronological && idx === 0;
+            const isLast = isChronological && idx === sortedStations.length - 1;
+            
+            // Visual line logic
+            let lineGfx = '';
+            if (isChronological) {
+                if (!isFirst) lineGfx += '<div class="st-gfx-line top-half"></div>';
+                if (!isLast) lineGfx += '<div class="st-gfx-line bot-half"></div>';
+            }
+
+            // Indicators
+            const nodeClass = st.isTransfer ? 'transfer' : (st.isTerminal || isFirst || isLast ? 'terminal' : '');
+            let tagsHTML = '';
+            if (st.isTransfer) tagsHTML += '<span class="icn-tag transfer" title="Transfer">T</span>';
+            if (st.hasParkAndRide) tagsHTML += '<span class="icn-tag pr" title="Park & Ride">P&R</span>';
+            if (st.upgradeIcons && st.upgradeIcons.length > 0) tagsHTML += '<span class="icn-tag upg" title="Upgraded">★</span>';
+
+            html += `
+                <div class="net-station-item" id="nsi-${st.id}" data-name="${st.name.toLowerCase()}" 
+                     onmouseenter="NetworkPanelUI.hoverStation('${st.id}', '${line.id}')"
+                     onmouseleave="NetworkPanelUI.outStation()"
+                     onclick="NetworkPanelUI.clickStation('${st.id}')">
+                    <div class="st-gfx">
+                        ${lineGfx}
+                        <div class="st-gfx-node ${nodeClass}"></div>
+                    </div>
+                    <div class="st-details">
+                        <div class="st-info-left">
+                            <div class="st-name">${st.name}</div>
+                            <div class="st-meta">
+                                <span class="st-meta-pill">#${st.order !== undefined ? st.order : (idx+1)}</span>
+                                ${st.platformCount ? `<span class="st-meta-pill">${st.platformCount} Plats</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="st-info-right">
+                            <div class="st-pax" id="nst-pax-${st.id}">${(st.passengers||0).toLocaleString()}</div>
+                            <div class="st-icons-row">${tagsHTML}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        listContainer.innerHTML = html;
+
+        // Compute Summary
+        const totalPax = line.stations.reduce((sum, st) => sum + (st.passengers||0), 0);
+        const avgPax = line.stations.length ? Math.round(totalPax / line.stations.length) : 0;
+        const transfers = line.stations.filter(s => s.isTransfer).length;
+        let busiest = {name: 'N/A', p: -1};
+        let least = {name: 'N/A', p: Infinity};
+        line.stations.forEach(s => {
+            if ((s.passengers||0) > busiest.p) busiest = {name: s.name, p: s.passengers||0};
+            if ((s.passengers||0) < least.p) least = {name: s.name, p: s.passengers||0};
+        });
+
+        summaryContainer.innerHTML = `
+            <div class="net-summary-row"><span>Total Pax</span><span>${totalPax.toLocaleString()}</span></div>
+            <div class="net-summary-row"><span>Avg Pax</span><span>${avgPax.toLocaleString()}</span></div>
+            <div class="net-summary-row"><span>Transfers</span><span>${transfers}</span></div>
+            <div class="net-summary-row" style="grid-column: span 2; display:flex; gap:12px;">
+                <span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>High:</b> ${busiest.name}</span>
+                <span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Low:</b> ${least.name !== 'N/A' && least.p !== Infinity ? least.name : 'N/A'}</span>
+            </div>
+        `;
+
+        if (this.searchQuery) this.applySearchFilter();
+    },
+
+    updateStationStatsFast(line) {
+        // Direct DOM mutation for rapid passenger updates to avoid rebuilding lists
+        line.stations.forEach(st => {
+            const el = document.getElementById(`nst-pax-${st.id}`);
+            if (el) el.textContent = (st.passengers||0).toLocaleString();
+        });
+    },
+
+    toggleLine(lineId) {
+        const card = document.getElementById(`net-line-${lineId}`);
+        if (!card) return;
+        if (this.expandedLines.has(lineId)) {
+            this.expandedLines.delete(lineId);
+            card.classList.remove('expanded');
+        } else {
+            this.expandedLines.add(lineId);
+            card.classList.add('expanded');
+            card.dataset.needsSort = "true"; // Force a list rebuild on next tick to populate data
+        }
+    },
+
+    expandAll() {
+        document.querySelectorAll('.net-line-card').forEach(card => {
+            const id = card.id.replace('net-line-', '');
+            this.expandedLines.add(id);
+            card.classList.add('expanded');
+            card.dataset.needsSort = "true";
+        });
+    },
+
+    collapseAll() {
+        this.expandedLines.clear();
+        document.querySelectorAll('.net-line-card').forEach(card => card.classList.remove('expanded'));
+    },
+
+    changeSort(lineId, sortMode) {
+        this.sortModes[lineId] = sortMode;
+        const card = document.getElementById(`net-line-${lineId}`);
+        if (card) card.dataset.needsSort = "true";
+    },
+
+    handleSearch(e) {
+        this.searchQuery = e.target.value.toLowerCase().trim();
+        this.applySearchFilter();
+    },
+
+    applySearchFilter() {
+        const allItems = document.querySelectorAll('.net-station-item');
+        if (!this.searchQuery) {
+            allItems.forEach(el => {
+                el.classList.remove('search-match');
+                el.style.display = 'flex';
+            });
+            return;
+        }
+
+        allItems.forEach(el => {
+            const name = el.dataset.name;
+            if (name.includes(this.searchQuery)) {
+                el.classList.add('search-match');
+                el.style.display = 'flex';
+            } else {
+                el.classList.remove('search-match');
+                el.style.display = 'none';
+            }
+        });
+    },
+
+    // --- Map Integration Hooks ---
+    // You will need to wire these up to your engine's internal map rendering logic
+    hoverStation(stationId, lineId) {
+        // 1. Highlight station on the canvas
+        // 2. Highlight connecting track lines for lineId
+        // 3. Fade unrelated map geometry
+        if (typeof window.engineHighlightStation === 'function') {
+            window.engineHighlightStation(stationId, lineId);
+        }
+    },
+
+    outStation() {
+        // Reset map highlighting
+        if (typeof window.engineResetHighlight === 'function') {
+            window.engineResetHighlight();
+        }
+    },
+
+    clickStation(stationId) {
+        // 1. Center map camera on coordinates
+        // 2. Briefly flash the station graphics
+        // 3. Trigger your existing Station Inspector logic
+        if (typeof window.engineCenterCamera === 'function') {
+            window.engineCenterCamera(stationId);
+        }
+        // This relies on the original HTML's station inspector system
+        if (typeof window.openStationInspector === 'function') {
+            window.openStationInspector(stationId);
+        }
+    }
+};
 
       // --- TUTORIAL LOGIC ---
       const systemTutorialSteps = [
@@ -1026,10 +1855,9 @@ let weeklyOtherIncome = 0;
           window.addEventListener('resize', () => { if (activeEl) positionDtTip(activeEl); });
       })();
 
-      window.addEventListener('DOMContentLoaded', () => {
-          // ALWAYS auto-open tutorial
-          setTimeout(() => { startTutorialSystem(true); }, 600); 
-      });
+      // NOTE: tutorial auto-launch now happens from startGame() once a map has
+      // actually been loaded and the player is inside the simulation, not on
+      // raw page load (which now shows the main menu instead of the game).
 
       // --- ENGINE / SIMULATION LOGIC ---
       const canvas  = document.getElementById('gameCanvas');
@@ -1613,7 +2441,7 @@ let weeklyOtherIncome = 0;
               }
           });
           renderObjectives();
-          if (anyNewlyCompleted) updateHUD();
+          if (anyNewlyCompleted) { updateHUD(); SaveManager.notifyObjectiveComplete(); }
       }
 
       function renderObjectives() {
@@ -1839,6 +2667,9 @@ const TRAIN_SPECS = {
       ];
       let todTaxEnabled = false;
       const TOD_TAX_RESIDENT_RATE = 0.015;   // $ per resident/day, within a station's catchment
+      let fareFreeEnabled = false;
+      let congestionPricingEnabled = false;
+      let deferredMaintenanceEnabled = false;
       const TOD_TAX_JOB_RATE = 0.02;         // $ per job/day
       const TOD_TAX_STATION_CAP = 6000;      // cap per station per day so it can't spiral
       const GOV_SUBSIDY_COVERAGE = 0.6;      // subsidy covers up to 60% of the farebox/opex gap
@@ -1849,7 +2680,7 @@ const TRAIN_SPECS = {
       let activeCityEvent = null; // { name, expiresDay }
 
       // Today's breakdown, refreshed once per sim-day for display purposes
-      let todaysIncomeBreakdown = { fare: 0, retail: 0, parking: 0, ads: 0, naming: 0, todTax: 0, subsidy: 0, event: 0 };
+let todaysIncomeBreakdown = { fare: 0, retail: 0, parking: 0, ads: 0, naming: 0, todTax: 0, congestionToll: 0, subsidy: 0, event: 0 };
       let todaysExpenseBreakdown = { electricity: 0, maintenance: 0, cleaning: 0, staffing: 0, security: 0, trackRenewal: 0, amenityUpkeep: 0, interest: 0 };
       let otherIncomeToday = 0;
 
@@ -3009,9 +3840,15 @@ function setSpeed(s){
           if (!home || !dest) return null;
           const distMiles = Math.hypot(home.x - dest.x, home.y - dest.y) / FREQ_MAP_UNITS_PER_MILE;
 
+
+let currentDriveCost = distMiles * CC_DRIVE_COST_PER_MILE;
+          if (congestionPricingEnabled && dest.type === 'DOWNTOWN') {
+              currentDriveCost += 10; // $10 flat congestion toll applied to destination
+          }
+
           const drive = {
               time: (distMiles / CC_DRIVE_SPEED_MPH) * 60 + Math.min(18, distMiles * 0.55),
-              cost: distMiles * CC_DRIVE_COST_PER_MILE,
+              cost: currentDriveCost,
               transfers: 0,
               parking: ccParkingCost(dest),
               frequency: null,
@@ -3034,14 +3871,19 @@ function setSpeed(s){
                   const egressWalk = Math.hypot(dest.x - destStation.x, dest.y - destStation.y) / FREQ_MAP_UNITS_PER_MILE / CC_WALK_SPEED_MPH * 60;
                   transit = {
                       time: accessWalk + egressWalk + leg.inVehicleMin + leg.waitMin,
-                      cost: ticketFare, transfers: leg.transfers, parking: 0,
+                      cost: fareFreeEnabled ? 0 : ticketFare, transfers: leg.transfers, parking: 0,
                       frequency: leg.frequency, available: true
                   };
               }
           }
 
-          const modes = { drive, walk, transit };
-          const pref = c.transitPreference ?? 0.2;
+         const modes = { drive, walk, transit };
+          let pref = c.transitPreference ?? 0.2;
+          
+          // Apply policy modifiers to transit preference
+          if (fareFreeEnabled) pref += 0.25; // Massive psychological preference boost
+          if (todTaxEnabled) pref -= 0.10;   // Gentrification penalty: pushes out transit-dependent riders
+          
           let best = null, bestScore = Infinity;
           ['drive', 'walk', 'transit'].forEach(key => {
               const m = modes[key];
@@ -3359,19 +4201,21 @@ const meta = route.meta || getRouteMeta(route.color, route);
       }
 
 function calculateDailyExpenseBreakdown() {
+          const maintMultiplier = deferredMaintenanceEnabled ? 0.5 : 1.0;
+
           // Track-related costs: power for traction/signals, running maintenance, and a renewal reserve.
           const trackElectricity = tracks.length * 30;
-          const trackMaintenance = tracks.length * 150;
-          const trackRenewal = tracks.length * 70;
+          const trackMaintenance = tracks.length * 150 * maintMultiplier;
+          const trackRenewal = tracks.length * 70 * maintMultiplier;
 
           // Station-related costs: cleaning crews, staffing, and security patrols.
-          const stationCleaning = stations.length * 300;
+          const stationCleaning = stations.length * 300 * maintMultiplier;
           const stationStaffing = stations.length * 600;
           const stationSecurity = stations.length * 300;
 
           // Depot costs: mostly staffing (mechanics/yard crews), some cleaning, and security.
           const depotStaffing = depots.length * 2500;
-          const depotCleaning = depots.length * 300;
+          const depotCleaning = depots.length * 300 * maintMultiplier;
           const depotSecurity = depots.length * 700;
 
           // Train costs: electricity (traction power) and onboard staffing (crews).
@@ -3400,7 +4244,6 @@ function calculateDailyExpenseBreakdown() {
               amenityUpkeep: amenityUpkeep
           };
       }
-
       function calculateDailyOpEx() {
           const b = calculateDailyExpenseBreakdown();
           return b.electricity + b.maintenance + b.cleaning + b.staffing + b.security + b.trackRenewal + b.amenityUpkeep;
@@ -3485,7 +4328,97 @@ function calculateDailyExpenseBreakdown() {
           todTaxEnabled = !todTaxEnabled;
           const sw = document.getElementById('tod-switch');
           if (sw) sw.classList.toggle('on', todTaxEnabled);
-          showNotification(todTaxEnabled ? '🏙️ TOD Value-Capture Tax enabled.' : '🏙️ TOD Value-Capture Tax disabled.');
+          showNotification(todTaxEnabled ? '🏙️ TOD Tax enabled. Revenue up, but ridership may dip.' : '🏙️ TOD Tax disabled. Cost of living normalizes.');
+          refreshNeighborhoodInspector();
+      }
+
+function toggleFareFree() {
+          fareFreeEnabled = !fareFreeEnabled;
+          const sw = document.getElementById('fare-free-switch');
+          if (sw) sw.classList.toggle('on', fareFreeEnabled);
+          showNotification(fareFreeEnabled ? '🎫 Fare-Free Transit enabled. Ridership surging!' : '🎫 Fare-Free Transit disabled. Fares reinstated.');
+          refreshNeighborhoodInspector();
+      }
+
+// ==========================================
+// MID-LINE STATION INSERTION HELPERS
+// ==========================================
+function getDistanceToSegment(px, py, x1, y1, x2, y2) {
+    const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+    if (l2 === 0) return Math.hypot(px - x1, py - y1);
+    let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+}
+
+function findHoveredTrackSegment(worldX, worldY, zoomLevel) {
+    let closestDist = Infinity;
+    let targetTrack = null;
+    const TRACK_CLICK_TOLERANCE = 15 / zoomLevel; // Scales with zoom so you can click while zoomed out
+
+    tracks.forEach(track => {
+        // Calculate distance to the direct line between stations
+        const dist = getDistanceToSegment(worldX, worldY, track.startStation.x, track.startStation.y, track.endStation.x, track.endStation.y);
+        if (dist < TRACK_CLICK_TOLERANCE && dist < closestDist) {
+            closestDist = dist;
+            targetTrack = track;
+        }
+    });
+    return targetTrack;
+}
+
+function insertStationMidLine(targetTrack, newStation) {
+    // 1. Remove the old long track segment
+    tracks = tracks.filter(t => t !== targetTrack);
+
+    // 2. Add two new shorter segments to bridge the gap, inheriting the old track's properties
+    tracks.push({
+        startStation: targetTrack.startStation,
+        endStation: newStation,
+        waypoints: [], // Clears waypoints on split to prevent visual snaking bugs
+        color: targetTrack.color,
+        elevation: targetTrack.elevation,
+        wayConfig: targetTrack.wayConfig,
+        crossover: targetTrack.crossover
+    });
+
+    tracks.push({
+        startStation: newStation,
+        endStation: targetTrack.endStation,
+        waypoints: [],
+        color: targetTrack.color,
+        elevation: targetTrack.elevation,
+        wayConfig: targetTrack.wayConfig,
+        crossover: targetTrack.crossover
+    });
+
+    // 3. Reset active trains on this line to prevent crashes from missing track references
+    trains.forEach(t => {
+        if (t.lineColor === targetTrack.color) {
+            t.state = 'DWELLING';
+            t.dwell = 120; // Force a brief stop to recalibrate routing
+            t.pct = 0;
+        }
+    });
+
+    // 4. Force the engine to rebuild routes and pathfinding
+    manageTrainsRealtime();
+    updateTelemetryData();
+}
+
+      function toggleCongestionPricing() {
+          congestionPricingEnabled = !congestionPricingEnabled;
+          const sw = document.getElementById('congestion-switch');
+          if (sw) sw.classList.toggle('on', congestionPricingEnabled);
+          showNotification(congestionPricingEnabled ? '🚗 Congestion Pricing enabled in Downtown zones.' : '🚗 Congestion Pricing disabled.');
+          refreshNeighborhoodInspector();
+      }
+
+      function toggleDeferredMaintenance() {
+          deferredMaintenanceEnabled = !deferredMaintenanceEnabled;
+          const sw = document.getElementById('deferred-switch');
+          if (sw) sw.classList.toggle('on', deferredMaintenanceEnabled);
+          showNotification(deferredMaintenanceEnabled ? '⚠️ Deferred Maintenance enabled. OpEx reduced, but expect delays.' : '🔧 Maintenance restored to normal levels.');
       }
 
       function calculateTODTaxRevenue() {
@@ -3544,11 +4477,17 @@ function calculateDailyExpenseBreakdown() {
           const todTax = calculateTODTaxRevenue();
           const subsidy = calculateGovSubsidy(lastOpExAmount, fareRevenueToday, dailyRiders);
           const eventIncome = maybeTriggerCityEvent();
+let congestionRevenue = 0;
+          if (congestionPricingEnabled) {
+              const downtownJobs = neighborhoods.filter(n => n.type === 'DOWNTOWN').reduce((sum, n) => sum + n.jobs, 0);
+              // Approximate calculation: 5% of regional downtown jobs are driving in and paying a $10 toll
+              congestionRevenue = (downtownJobs * 0.05) * 10;
+          }
 
-          const total = retailTotal + parkingTotal + adsTotal + namingTotal + todTax + subsidy + eventIncome;
+          const total = retailTotal + parkingTotal + adsTotal + namingTotal + todTax + congestionRevenue + subsidy + eventIncome;
           budget += total;
           otherIncomeToday = total;
-          todaysIncomeBreakdown = { fare: fareRevenueToday, retail: retailTotal, parking: parkingTotal, ads: adsTotal, naming: namingTotal, todTax: todTax, subsidy: subsidy, event: eventIncome };
+          todaysIncomeBreakdown = { fare: fareRevenueToday, retail: retailTotal, parking: parkingTotal, ads: adsTotal, naming: namingTotal, todTax: todTax, congestionToll: congestionRevenue, subsidy: subsidy, event: eventIncome };
 
           checkNamingRightsOpportunities();
           updateHUD();
@@ -3575,15 +4514,24 @@ function calculateDailyExpenseBreakdown() {
                   ? `Currently earning ≈$${Math.round(potential).toLocaleString()}/day`
                   : `Would earn ≈$${Math.round(potential).toLocaleString()}/day if enabled`;
           }
+const tollPreviewEl = document.getElementById('toll-tax-preview');
+          if (tollPreviewEl) {
+              const downtownJobs = neighborhoods.filter(n => n.type === 'DOWNTOWN').reduce((sum, n) => sum + n.jobs, 0);
+              const tollPotential = (downtownJobs * 0.05) * 10;
+              tollPreviewEl.textContent = congestionPricingEnabled
+                  ? `Currently earning ≈$${Math.round(tollPotential).toLocaleString()}/day`
+                  : `Would earn ≈$${Math.round(tollPotential).toLocaleString()}/day if enabled`;
+          }
           const incomeEl = document.getElementById('econ-income-breakdown');
           if (incomeEl) {
               const rows = [
-                  ['🎫 Fare Revenue', todaysIncomeBreakdown.fare],
+['🎫 Fare Revenue', todaysIncomeBreakdown.fare],
                   ['🛍️ Station Retail', todaysIncomeBreakdown.retail],
                   ['🅿️ Parking', todaysIncomeBreakdown.parking],
                   ['📢 Advertising', todaysIncomeBreakdown.ads],
                   ['🏷️ Naming Rights', todaysIncomeBreakdown.naming],
                   ['🏙️ TOD Tax', todaysIncomeBreakdown.todTax],
+                  ['🚗 Congestion Tolls', todaysIncomeBreakdown.congestionToll],
                   ['🏛️ Gov Subsidy', todaysIncomeBreakdown.subsidy],
                   ['🎉 Event Income', todaysIncomeBreakdown.event]
               ];
@@ -3746,9 +4694,10 @@ gameTime.min += TIME_SCALE[simSpeed] ?? simSpeed;          while (gameTime.min >
               origin.waiting++; 
               origin.boardings = (origin.boardings || 0) + 1;
 
-              budget += ticketFare;
-              fareRevenueToday += ticketFare;
-              origin.revenueToday = (origin.revenueToday || 0) + ticketFare;
+             const actualFare = fareFreeEnabled ? 0 : ticketFare;
+              budget += actualFare;
+              fareRevenueToday += actualFare;
+              origin.revenueToday = (origin.revenueToday || 0) + actualFare;
               dailyRiders++; lifetimeRiders++;
               updateHUD();
           });
@@ -3840,9 +4789,10 @@ if (t.pct >= 1) {
                       t.pct = 1; t.state = "DWELLING"; t.dwell = 20; const cs = en.station;
                       const meta = t.route && t.route.meta;
                       if (meta) {
-                          const freq = meta.frequency || 10;
+const freq = meta.frequency || 10;
                           const riskFactor = Math.min(3, 10 / freq);
-                          const delayChance = BASE_DELAY_CHANCE * riskFactor;
+                          let delayChance = BASE_DELAY_CHANCE * riskFactor;
+                          if (deferredMaintenanceEnabled) delayChance *= 3.0; // Breakdowns occur 3x more often
                           if (Math.random() < delayChance) t.dwell += 15 + Math.random() * 45;
                       }
                       if (cs) {
@@ -3896,10 +4846,11 @@ if (t.pct >= 1) {
                           cs.ridersBoarded = (cs.ridersBoarded || 0) + boardedHere;
                           totalBoarded += boardedHere;
 
-                          if (anonymousBoarded > 0) {
-                              budget += anonymousBoarded * ticketFare; 
-                              fareRevenueToday += anonymousBoarded * ticketFare;
-                              cs.revenueToday = (cs.revenueToday || 0) + anonymousBoarded * ticketFare;
+                         if (anonymousBoarded > 0) {
+                              const actualFare = fareFreeEnabled ? 0 : ticketFare;
+                              budget += anonymousBoarded * actualFare; 
+                              fareRevenueToday += anonymousBoarded * actualFare;
+                              cs.revenueToday = (cs.revenueToday || 0) + anonymousBoarded * actualFare;
                               
                               // Add these two lines so anonymous riders count on the popup
                               dailyRiders += anonymousBoarded;
@@ -4168,19 +5119,38 @@ if (t.pct >= 1) {
               if (budget >= DEPOT_COST) {
                   budget -= DEPOT_COST; depots.push({ id: depots.length + 1, x: p.worldX, y: p.worldY });
                   updateHUD(); updateFleetPanel();
+                  SaveManager.notifyConstructionEvent();
               } else { flashInsufficientFunds('Insufficient Funds'); }
           }
           else if (mode === 'station') {
               if (budget >= STATION_BASE_COST) {
+                  // Check if clicking an existing track segment
+                  const segmentTarget = findHoveredTrackSegment(p.worldX, p.worldY, zoom);
+                  
                   budget -= STATION_BASE_COST; 
+                  
+                  // Generate station name based on proximity to neighborhoods
                   let near = null, md = Infinity;
                   neighborhoods.forEach(n => { const d = Math.hypot(n.x - p.worldX, n.y - p.worldY); if (d < md) { md = d; near = n; } });
-                  
                   const label = near && md < 180 ? near.name : `Terminal ${stations.length + 1}`;
-                  stations.push({ id: stations.length + 1, x: p.worldX, y: p.worldY, name: label, waiting: 0, queue: [], ridersBoarded: 0, boardings: 0, amenities: { retail: false, parking: false, ads: false }, namingRights: false, namingRightsOffered: false, sponsorName: null, amenityRevenueToday: 0 });
+                  
+                  // Create the new station object
+                  const newStation = { id: stations.length + 1, x: p.worldX, y: p.worldY, name: label, waiting: 0, queue: [], ridersBoarded: 0, boardings: 0, amenities: { retail: false, parking: false, ads: false }, namingRights: false, namingRightsOffered: false, sponsorName: null, amenityRevenueToday: 0 };
+                  
+                  stations.push(newStation);
+                  
+                  // If we clicked a track, splice it in. Otherwise, just place it.
+                  if (segmentTarget) {
+                      insertStationMidLine(segmentTarget, newStation);
+                      showNotification(`🚉 ${label} inserted into active line!`);
+                  }
+                  
                   updateHUD(); updateTelemetryData();
+                  SaveManager.notifyConstructionEvent();
+              } else {
+                  flashInsufficientFunds('Insufficient Funds');
               }
-          } 
+          }
           else if (mode === 'track') {
               const CLICK_THRESHOLD = 22 / Math.sqrt(zoom);
               const clicked = stations.find(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < CLICK_THRESHOLD);
@@ -4206,6 +5176,7 @@ if (t.pct >= 1) {
 
                           activeTrackBuild = null; 
                           updateHUD(); manageTrainsRealtime(); refreshNeighborhoodInspector();
+                          SaveManager.notifyConstructionEvent();
                       } else { alert('Insufficient structural configuration funds!'); }
                   } else if (!clicked) {
                       const last = activeTrackBuild.waypoints.length ? activeTrackBuild.waypoints[activeTrackBuild.waypoints.length - 1] : activeTrackBuild.startStation;
@@ -4339,19 +5310,913 @@ if (t.pct >= 1) {
 
       function resizeCanvas(){ canvas.width=document.getElementById('canvas-container').clientWidth; canvas.height=document.getElementById('canvas-container').clientHeight; }
       function gameLoop(){ updatePhysics(); draw(); requestAnimationFrame(gameLoop); }
-      function init(){
-          resizeCanvas(); window.addEventListener('resize',resizeCanvas);
-          generateNodes(); setupLineSelectorUI(); buildTelemetryCharts(); updateFleetPanel();
-          updateBonusPanel(); renderObjectives(); renderEconomyPanel();
-          camera.x = -canvas.width / (2 * zoom); camera.y = -canvas.height / (2 * zoom);
 
-          setInterval(tickSimulationTime,1000/60);
-          setInterval(updateTelemetryData,1000);
-          canvas.addEventListener('mousedown',onMouseDown); canvas.addEventListener('mousemove',onMouseMove);
-          window.addEventListener('mouseup',onMouseUp); canvas.addEventListener('wheel',onWheel,{passive:false});
-          updateHUD(); gameLoop();
+      // City-specific map loader for Dallas–Fort Worth. This is the piece a
+      // new city replaces: generate that city's stations/highways/neighborhoods,
+      // then hand off to the shared initEngine() bootstrap below.
+      function loadDallasMap(){
+          generateNodes();
       }
-      init();
+
+      // Generic simulator bootstrap, shared by every map. Runs once the
+      // simulator shell is visible and the selected city's map data has
+      // been generated by its loader (e.g. loadDallasMap).
+      let engineBooted = false; // guards one-time listener/interval/loop setup across save-load re-entry
+      function initEngine(opts){
+          opts = opts || {};
+          resizeCanvas();
+          if (!engineBooted) {
+              window.addEventListener('resize',resizeCanvas);
+              setInterval(tickSimulationTime,1000/60);
+              setInterval(updateTelemetryData,1000);
+              canvas.addEventListener('mousedown',onMouseDown); canvas.addEventListener('mousemove',onMouseMove);
+              window.addEventListener('mouseup',onMouseUp); canvas.addEventListener('wheel',onWheel,{passive:false});
+              gameLoop();
+              engineBooted = true;
+          }
+          setupLineSelectorUI(); buildTelemetryCharts(); updateFleetPanel();
+          updateBonusPanel(); renderObjectives(); renderEconomyPanel();
+          if (!opts.preserveCamera) {
+              camera.x = -canvas.width / (2 * zoom); camera.y = -canvas.height / (2 * zoom);
+          }
+          updateHUD();
+      }
+
+      // ================================================================================================
+      // SAVE / LOAD SYSTEM
+      // ------------------------------------------------------------------------------------------------
+      // Everything below is self-contained and isolated from gameplay logic. No other system talks to
+      // localStorage directly — SaveManager is the single point of contact, matching the architecture
+      // used by Cities: Skylines / Factorio-style save systems:
+      //
+      //   StorageProvider   -> thin persistence backend (swap for IndexedDB / Steam Cloud / a server later)
+      //   SaveSerializer    -> turns live game objects into a plain, storage-safe save payload and back
+      //   SaveValidator     -> checks structure/version/required fields before anything touches game state
+      //   SaveMigrator      -> upgrades old save versions forward; never throws, always degrades safely
+      //   SaveMetadata      -> tiny per-slot summary so the save menu can render instantly without
+      //                        deserializing full game state
+      //   SaveManager       -> public API or orchestration layer; the only thing the rest of the game calls
+      //
+      // Design note on what is NOT saved: routes/pathNodes (rebuilt from tracks via rebuildRoutes()),
+      // and the 12,000-strong commuters/neighborhoods population (regenerated by generateNodes(), which
+      // is itself deterministic aside from cosmetic jitter). Persisting derived, regenerable, or
+      // extremely high-volume ephemeral state would bloat every save and slow every autosave for no
+      // gameplay benefit — the same principle Factorio/Cities: Skylines apply to path caches and citizen
+      // pathfinding data. Anything that represents a player decision (stations, tracks, trains, fares,
+      // policies, objective progress, claimed grants, line frequencies) is saved in full.
+      // ================================================================================================
+
+      const SAVE_SCHEMA_VERSION = "1.0.0";
+
+      // Surfaces anything that goes wrong anywhere in the page as a visible toast instead of failing
+      // silently — this is what actually lets us tell "nothing happened" apart from "something errored".
+      window.addEventListener('error', (e) => {
+          console.error('[Unhandled error]', e.error || e.message);
+          if (typeof showSlToast === 'function') showSlToast('Something went wrong: ' + (e.message || 'unknown error'), true);
+      });
+      window.addEventListener('unhandledrejection', (e) => {
+          console.error('[Unhandled promise rejection]', e.reason);
+          if (typeof showSlToast === 'function') showSlToast('Something went wrong: ' + (e.reason && e.reason.message ? e.reason.message : e.reason), true);
+      });
+
+      const SAVE_SLOT_IDS = ['slot1', 'slot2', 'slot3', 'slot4', 'slot5'];
+      const AUTOSAVE_SLOT_ID = 'autosave';
+      const SAVE_KEY_PREFIX = 'dfwmetro.save.';
+      const META_KEY_PREFIX = 'dfwmetro.meta.';
+
+      // ---------------------------------------------------------------
+      // StorageBackend — picks whichever persistence mechanism actually
+      // works in the current environment, in priority order:
+      //   1. window.storage   (Claude's persistent artifact storage API —
+      //                        used automatically when this file is being
+      //                        previewed inside Claude.ai, where the
+      //                        sandboxed iframe blocks real localStorage)
+      //   2. localStorage     (used when the file is downloaded and opened
+      //                        directly in a normal browser tab)
+      //   3. in-memory Map    (last-resort fallback so saves still work
+      //                        for the current session even in a fully
+      //                        locked-down context; nothing is lost mid-
+      //                        session, it just won't survive a refresh)
+      // Every value is stored/retrieved as a JSON string, so the layer
+      // above (StorageProvider) doesn't need to care which backend is live.
+      // ---------------------------------------------------------------
+      // ---------------------------------------------------------------
+      // StorageBackend — picks whichever persistence mechanism actually
+      // works in the current environment, in priority order, verified with
+      // a real round-trip (not just "does the API exist") since a sandboxed
+      // host can expose window.storage/localStorage while still rejecting
+      // every call:
+      //   1. window.storage   (Claude's persistent artifact storage API —
+      //                        used automatically when this file is being
+      //                        previewed inside Claude.ai, where the
+      //                        sandboxed iframe blocks real localStorage)
+      //   2. localStorage     (used when the file is downloaded and opened
+      //                        directly in a normal browser tab)
+      //   3. in-memory Map    (last-resort fallback so saves still work
+      //                        for the current session even in a fully
+      //                        locked-down context; nothing is lost mid-
+      //                        session, it just won't survive a refresh)
+      // Every value is stored/retrieved as a JSON string, so the layer
+      // above (StorageProvider) doesn't need to care which backend is live.
+      // Selection happens once (lazily, on first use) and is memoized.
+      // ---------------------------------------------------------------
+      let _storageBackendPromise = null;
+      function getStorageBackend() {
+          if (_storageBackendPromise) return _storageBackendPromise;
+          _storageBackendPromise = (async () => {
+              const probeKey = '__dfwmetro_probe__';
+              const probeVal = 'ok';
+
+              // 1. Claude's artifact storage API — verify with a real write+read+delete.
+              if (typeof window !== 'undefined' && window.storage && typeof window.storage.get === 'function') {
+                  try {
+                      await window.storage.set(probeKey, probeVal, false);
+                      const r = await window.storage.get(probeKey, false);
+                      await window.storage.delete(probeKey, false).catch(() => {});
+                      if (r && r.value === probeVal) {
+                          console.info('[SaveManager] Using artifact storage backend.');
+                          return {
+                              type: 'artifact',
+                              async get(key) { try { const res = await window.storage.get(key, false); return res ? res.value : null; } catch (err) { return null; } },
+                              async set(key, value) { try { const res = await window.storage.set(key, value, false); return !!res; } catch (err) { return false; } },
+                              async delete(key) { try { await window.storage.delete(key, false); } catch (err) {} return true; }
+                          };
+                      }
+                  } catch (err) { console.warn('[SaveManager] window.storage present but failed verification, falling back.', err); }
+              }
+
+              // 2. Real localStorage — verify with a real write+read+delete too (some sandboxes expose
+              //    the API but throw a SecurityError on first actual use).
+              try {
+                  window.localStorage.setItem(probeKey, probeVal);
+                  const ok = window.localStorage.getItem(probeKey) === probeVal;
+                  window.localStorage.removeItem(probeKey);
+                  if (ok) {
+                      console.info('[SaveManager] Using localStorage backend.');
+                      return {
+                          type: 'localStorage',
+                          async get(key) { const raw = window.localStorage.getItem(key); return raw === null ? null : raw; },
+                          async set(key, value) { window.localStorage.setItem(key, value); return true; },
+                          async delete(key) { window.localStorage.removeItem(key); return true; }
+                      };
+                  }
+              } catch (err) { console.warn('[SaveManager] localStorage unavailable, falling back to in-memory storage.', err); }
+
+              // 3. In-memory fallback — always works, but only for the current page session.
+              console.warn('[SaveManager] Using in-memory storage — saves will not survive closing or refreshing this page.');
+              const memoryStore = new Map();
+              return {
+                  type: 'memory',
+                  async get(key) { return memoryStore.has(key) ? memoryStore.get(key) : null; },
+                  async set(key, value) { memoryStore.set(key, value); return true; },
+                  async delete(key) { memoryStore.delete(key); return true; }
+              };
+          })();
+          return _storageBackendPromise;
+      }
+
+      // ---------------------------------------------------------------
+      // StorageProvider — the only module allowed to talk to StorageBackend.
+      // Swap getStorageBackend()'s implementation to move to IndexedDB /
+      // Steam Cloud / a remote server without changing anything above it.
+      // ---------------------------------------------------------------
+      const StorageProvider = {
+          async save(key, valueObj) {
+              try {
+                  const backend = await getStorageBackend();
+                  const json = JSON.stringify(valueObj);
+                  const ok = await backend.set(key, json);
+                  if (!ok) return { ok: false, error: 'Could not write save data.' };
+                  return { ok: true };
+              } catch (err) {
+                  if (err && (err.name === 'QuotaExceededError' || err.code === 22)) {
+                      return { ok: false, error: 'Storage is full. Delete an old save and try again.' };
+                  }
+                  return { ok: false, error: 'Could not write save data (' + (err && err.message ? err.message : 'unknown error') + ').' };
+              }
+          },
+          async load(key) {
+              try {
+                  const backend = await getStorageBackend();
+                  const raw = await backend.get(key);
+                  if (raw === null || raw === undefined) return { ok: false, error: 'No data found.' };
+                  return { ok: true, value: JSON.parse(raw) };
+              } catch (err) {
+                  return { ok: false, error: 'Save data is corrupted and could not be read.' };
+              }
+          },
+          async delete(key) {
+              try { const backend = await getStorageBackend(); await backend.delete(key); return { ok: true }; }
+              catch (err) { return { ok: false, error: 'Could not delete save data.' }; }
+          },
+          async exists(key) {
+              try { const backend = await getStorageBackend(); const v = await backend.get(key); return v !== null && v !== undefined; }
+              catch (err) { return false; }
+          },
+          async backendType() { const backend = await getStorageBackend(); return backend.type; }
+      };
+
+      // ---------------------------------------------------------------
+      // SaveValidator — structural/version/field checks. Runs BEFORE any
+      // data is allowed to touch live game state.
+      // ---------------------------------------------------------------
+      const SaveValidator = {
+          validate(saveObj) {
+              if (!saveObj || typeof saveObj !== 'object') return { ok: false, error: 'Save file is empty or malformed.' };
+              if (typeof saveObj.version !== 'string') return { ok: false, error: 'Save file is missing a version number.' };
+              if (!saveObj.metadata || typeof saveObj.metadata !== 'object') return { ok: false, error: 'Save file is missing metadata.' };
+              if (!saveObj.game || typeof saveObj.game !== 'object') return { ok: false, error: 'Save file is missing game data.' };
+              const requiredGameKeys = ['economy', 'stations', 'tracks', 'trains', 'depots'];
+              for (const key of requiredGameKeys) {
+                  if (!(key in saveObj.game)) return { ok: false, error: `Save file is missing required data: ${key}.` };
+              }
+              if (!Array.isArray(saveObj.game.stations) || !Array.isArray(saveObj.game.tracks) ||
+                  !Array.isArray(saveObj.game.trains) || !Array.isArray(saveObj.game.depots)) {
+                  return { ok: false, error: 'Save file has corrupted network data.' };
+              }
+              return { ok: true };
+          }
+      };
+
+      // ---------------------------------------------------------------
+      // SaveMigrator — forward-migrates older save versions. Add a case
+      // whenever SAVE_SCHEMA_VERSION bumps; never throw, never crash.
+      // ---------------------------------------------------------------
+      const SaveMigrator = {
+          migrate(saveObj) {
+              try {
+                  let working = saveObj;
+                  if (working.version === SAVE_SCHEMA_VERSION) return { ok: true, data: working };
+
+                  // Example shape for future migrations:
+                  // if (working.version === "1.0.0") { working = this._migrate_1_0_0_to_1_1_0(working); }
+
+                  if (working.version !== SAVE_SCHEMA_VERSION) {
+                      // Unknown/newer version with no migration path defined.
+                      return { ok: false, error: 'This save was created with an incompatible version.' };
+                  }
+                  return { ok: true, data: working };
+              } catch (err) {
+                  return { ok: false, error: 'This save was created with an incompatible version.' };
+              }
+          }
+      };
+
+      // ---------------------------------------------------------------
+      // SaveMetadata — metadata lives in its own small storage key per
+      // slot so the save menu can list all slots instantly without ever
+      // deserializing full game payloads.
+      // ---------------------------------------------------------------
+      const SaveMetadata = {
+          key(slotId) { return META_KEY_PREFIX + slotId; },
+          async write(slotId, metadataObj) { return StorageProvider.save(this.key(slotId), metadataObj); },
+          async read(slotId) {
+              const res = await StorageProvider.load(this.key(slotId));
+              return res.ok ? res.value : null;
+          },
+          async remove(slotId) { return StorageProvider.delete(this.key(slotId)); }
+      };
+
+      // ---------------------------------------------------------------
+      // GameStateSerializer — the seam between gameplay systems and the
+      // save format. Each gameplay system gets its own serialize()/
+      // deserialize() pair here rather than scattering save logic across
+      // the codebase.
+      // ---------------------------------------------------------------
+      const GameStateSerializer = {
+          serializeStations() {
+              return stations.map(s => ({
+                  id: s.id, x: s.x, y: s.y, name: s.name,
+                  waiting: s.waiting || 0, ridersBoarded: s.ridersBoarded || 0, boardings: s.boardings || 0,
+                  amenities: s.amenities || { retail: false, parking: false, ads: false },
+                  namingRights: !!s.namingRights, namingRightsOffered: !!s.namingRightsOffered,
+                  sponsorName: s.sponsorName || null, amenityRevenueToday: s.amenityRevenueToday || 0,
+                  upgradeLevel: s.upgradeLevel || 0
+              }));
+          },
+          deserializeStations(data) {
+              return (data || []).map(s => ({
+                  id: s.id, x: s.x, y: s.y, name: s.name,
+                  waiting: s.waiting || 0, queue: [], // queue holds live commuter refs; repopulates naturally during play
+                  ridersBoarded: s.ridersBoarded || 0, boardings: s.boardings || 0,
+                  amenities: s.amenities || { retail: false, parking: false, ads: false },
+                  namingRights: !!s.namingRights, namingRightsOffered: !!s.namingRightsOffered,
+                  sponsorName: s.sponsorName || null, amenityRevenueToday: s.amenityRevenueToday || 0,
+                  upgradeLevel: s.upgradeLevel || 0
+              }));
+          },
+
+          // Tracks reference station OBJECTS directly in memory (not ids), so we resolve them to ids on
+          // the way out and back to live object references on the way in.
+          serializeTracks() {
+              return tracks.map(t => ({
+                  startStationId: t.startStation.id, endStationId: t.endStation.id,
+                  waypoints: t.waypoints || [], color: t.color, elevation: t.elevation,
+                  wayConfig: t.wayConfig, crossover: !!t.crossover
+              }));
+          },
+          deserializeTracks(data, liveStations) {
+              const byId = new Map(liveStations.map(s => [s.id, s]));
+              return (data || []).map(t => ({
+                  startStation: byId.get(t.startStationId), endStation: byId.get(t.endStationId),
+                  waypoints: t.waypoints || [], color: t.color, elevation: t.elevation,
+                  wayConfig: t.wayConfig, crossover: !!t.crossover
+              })).filter(t => t.startStation && t.endStation); // drop any track whose stations failed to resolve
+
+          },
+
+          serializeDepots() {
+              return depots.map(d => ({ id: d.id, x: d.x, y: d.y }));
+          },
+          deserializeDepots(data) {
+              return (data || []).map(d => ({ id: d.id, x: d.x, y: d.y }));
+          },
+
+          // Trains reference their route object + a derived pathNodes array directly; both are rebuilt by
+          // rebuildRoutes() -> reconcileFleet() immediately after load, so we drop them here rather than
+          // trying to serialize a circular structure.
+          serializeTrains() {
+              return trains.map(t => ({
+                  id: t.id, lineColor: t.lineColor, currentNodeIdx: t.currentNodeIdx, pct: t.pct, dir: t.dir,
+                  x: t.x, y: t.y, state: t.state, dwell: t.dwell, reverse: t.reverse, dirKey: t.dirKey,
+                  speed: t.speed, targetSpeed: t.targetSpeed, capacityType: t.capacityType,
+                  baseCapacity: t.baseCapacity, extraCars: t.extraCars, capacity: t.capacity, cost: t.cost,
+                  // Riders aboard are kept as a headcount + status only; commuterRef is transient in-memory
+                  // linkage into the regenerated commuter population and is not meaningful across a save.
+                  riders: (t.riders || []).map(r => ({ status: r.status, commuterRef: null }))
+              }));
+          },
+          deserializeTrains(data) {
+              return (data || []).map(t => ({
+                  id: t.id, lineColor: t.lineColor, currentNodeIdx: t.currentNodeIdx || 0, pct: t.pct || 0,
+                  dir: t.dir, x: t.x, y: t.y, state: t.state || 'MOVING', dwell: t.dwell || 0,
+                  reverse: t.reverse, dirKey: t.dirKey, speed: t.speed || 0, targetSpeed: t.targetSpeed || 0,
+                  capacityType: t.capacityType, baseCapacity: t.baseCapacity, extraCars: t.extraCars || 0,
+                  capacity: t.capacity, cost: t.cost || 0,
+                  riders: (t.riders || []).map(r => ({ status: r.status, commuterRef: null })),
+                  route: null, pathNodes: null // filled in by reconcileFleet() right after load
+              }));
+          },
+
+          serializeRouteMeta() {
+              const out = {};
+              for (const color in routeMeta) {
+                  const m = routeMeta[color];
+                  out[color] = { frequency: m.frequency, history: m.history || [], reliability: m.reliability, lastDeparture: m.lastDeparture || {} };
+              }
+              return out;
+          },
+          deserializeRouteMeta(data) {
+              const out = {};
+              for (const color in (data || {})) {
+                  const m = data[color];
+                  out[color] = { frequency: m.frequency, history: m.history || [], reliability: m.reliability, lastDeparture: m.lastDeparture || {}, route: null };
+              }
+              return out;
+          },
+
+          serializeLocationBonuses() {
+              const out = {};
+              for (const name in LOCATION_BONUSES) out[name] = { claimed: !!LOCATION_BONUSES[name].claimed };
+              return out;
+          },
+          applyLocationBonuses(data) {
+              for (const name in (data || {})) {
+                  if (LOCATION_BONUSES[name]) LOCATION_BONUSES[name].claimed = !!data[name].claimed;
+              }
+          },
+
+          // Builds the full "game" payload for a save file.
+          serialize() {
+              return {
+                  meta: { mapId: gameSave.map || 'dfw' },
+                  economy: {
+                      budget, currentDebt, ticketFare,
+                      lastOpExAmount, bankruptcyStrikes, gameOver,
+                      totalBoarded, totalGaveUp, dailyRiders, lifetimeRiders, fareRevenueToday,
+                      peakConcurrentRiders, waitTimeSum, waitSamples, tripTimeSum, tripSamples,
+                      overcrowdingEvents, otherIncomeToday,
+                      todaysIncomeBreakdown, todaysExpenseBreakdown,
+                      weeklyRiders, weeklyRevenue, weeklyOvercrowding, totalWeeklyOpEx, weeklyOtherIncome,
+                      previousSimSpeed
+                  },
+                  policies: { todTaxEnabled, fareFreeEnabled, congestionPricingEnabled, deferredMaintenanceEnabled },
+                  objectives: { completedObjectives, objectivesInitialized, bestDailyRiders, currentTransitShare },
+                  stations: this.serializeStations(),
+                  tracks: this.serializeTracks(),
+                  depots: this.serializeDepots(),
+                  trains: this.serializeTrains(),
+                  routeMeta: this.serializeRouteMeta(),
+                  locationBonuses: this.serializeLocationBonuses(),
+                  camera: { x: camera.x, y: camera.y, zoom },
+                  ui: { hudCollapsed, sidebarCollapsed, grantsCollapsed, collapsedNavGroups, activeColor, selectedTrainClass },
+                  simulation: { gameTime, simSpeed, mode: 'pan', trainIdCounter, activeCityEvent }
+              };
+          },
+
+          // Applies a saved "game" payload onto live state. Expects the map's baseline (neighborhoods,
+          // fresh commuter population) to have already been generated by loadMap()/generateNodes().
+          applyState(g) {
+              // Economy
+              const e = g.economy || {};
+              budget = e.budget ?? budget; currentDebt = e.currentDebt ?? 0; ticketFare = e.ticketFare ?? ticketFare;
+              lastOpExAmount = e.lastOpExAmount ?? 0; bankruptcyStrikes = e.bankruptcyStrikes ?? 0; gameOver = e.gameOver ?? false;
+              totalBoarded = e.totalBoarded ?? 0; totalGaveUp = e.totalGaveUp ?? 0; dailyRiders = e.dailyRiders ?? 0;
+              lifetimeRiders = e.lifetimeRiders ?? 0; fareRevenueToday = e.fareRevenueToday ?? 0;
+              peakConcurrentRiders = e.peakConcurrentRiders ?? 0; waitTimeSum = e.waitTimeSum ?? 0; waitSamples = e.waitSamples ?? 0;
+              tripTimeSum = e.tripTimeSum ?? 0; tripSamples = e.tripSamples ?? 0; overcrowdingEvents = e.overcrowdingEvents ?? 0;
+              otherIncomeToday = e.otherIncomeToday ?? 0;
+              todaysIncomeBreakdown = e.todaysIncomeBreakdown || todaysIncomeBreakdown;
+              todaysExpenseBreakdown = e.todaysExpenseBreakdown || todaysExpenseBreakdown;
+              weeklyRiders = e.weeklyRiders ?? 0; weeklyRevenue = e.weeklyRevenue ?? 0; weeklyOvercrowding = e.weeklyOvercrowding ?? 0;
+              totalWeeklyOpEx = e.totalWeeklyOpEx ?? 0; weeklyOtherIncome = e.weeklyOtherIncome ?? 0;
+              previousSimSpeed = e.previousSimSpeed ?? 1;
+
+              // Policies
+              const p = g.policies || {};
+              todTaxEnabled = !!p.todTaxEnabled; fareFreeEnabled = !!p.fareFreeEnabled;
+              congestionPricingEnabled = !!p.congestionPricingEnabled; deferredMaintenanceEnabled = !!p.deferredMaintenanceEnabled;
+
+              // Objectives
+              const o = g.objectives || {};
+              completedObjectives = o.completedObjectives || {}; objectivesInitialized = !!o.objectivesInitialized;
+              bestDailyRiders = o.bestDailyRiders || 0; currentTransitShare = o.currentTransitShare || 0;
+
+              // Network — stations first (tracks resolve station object refs against these)
+              stations = this.deserializeStations(g.stations);
+              tracks = this.deserializeTracks(g.tracks, stations);
+              depots = this.deserializeDepots(g.depots);
+              trains = this.deserializeTrains(g.trains);
+              routeMeta = this.deserializeRouteMeta(g.routeMeta);
+              this.applyLocationBonuses(g.locationBonuses);
+
+              // Derived state: rebuild routes/geometry from tracks, then reattach trains + pathNodes.
+              rebuildRoutes();
+
+              // Camera / UI / misc simulation flags
+              const cam = g.camera || {};
+              camera.x = cam.x ?? camera.x; camera.y = cam.y ?? camera.y; zoom = cam.zoom ?? zoom;
+              const ui = g.ui || {};
+              hudCollapsed = !!ui.hudCollapsed; sidebarCollapsed = !!ui.sidebarCollapsed; grantsCollapsed = !!ui.grantsCollapsed;
+              collapsedNavGroups = ui.collapsedNavGroups || collapsedNavGroups;
+              activeColor = ui.activeColor || activeColor; selectedTrainClass = ui.selectedTrainClass || selectedTrainClass;
+              const sim = g.simulation || {};
+              gameTime = sim.gameTime || gameTime; simSpeed = (sim.simSpeed ?? simSpeed); mode = 'pan';
+              trainIdCounter = sim.trainIdCounter || trainIdCounter; activeCityEvent = sim.activeCityEvent || null;
+          }
+      };
+
+      // ---------------------------------------------------------------
+      // Track total play time across sessions so metadata can show it
+      // without needing to persist a running interval timer.
+      // ---------------------------------------------------------------
+      let sessionStartTimestamp = Date.now();
+      let totalPlayTimeMsAccumulated = 0;
+      function currentPlayTimeMs() { return totalPlayTimeMsAccumulated + (Date.now() - sessionStartTimestamp); }
+      function formatPlayTime(ms) {
+          const totalMin = Math.floor(ms / 60000);
+          const h = Math.floor(totalMin / 60), m = totalMin % 60;
+          return h > 0 ? `${h}h ${m}m` : `${m}m`;
+      }
+      function currentAbsoluteGameDay() {
+          const gt = gameTime || { day: 1, month: 1, year: 2026 };
+          return Math.max(1, (gt.year - 2026) * 360 + (gt.month - 1) * 30 + gt.day);
+      }
+      function currentMapDisplayName() {
+          const map = MAPS.find(m => m.id === (gameSave.map || 'dfw'));
+          return map ? map.name : 'Unknown Metro';
+      }
+      function currentDifficulty() {
+          const map = MAPS.find(m => m.id === (gameSave.map || 'dfw'));
+          return map ? map.difficulty : 'Normal';
+      }
+
+      // ---------------------------------------------------------------
+      // SaveManager — the single public API every part of the game uses.
+      // ---------------------------------------------------------------
+      const SaveManager = {
+          _autosaveDebounceTimer: null,
+          _autosaveIntervalStarted: false,
+
+          startAutosaveInterval() {
+              if (this._autosaveIntervalStarted) return;
+              this._autosaveIntervalStarted = true;
+              setInterval(() => this.autosave(), 5 * 60 * 1000); // every 5 minutes
+          },
+
+          // Construction/objective events debounce into a single autosave a couple seconds later so a
+          // burst of station/track placement doesn't hammer storage or stall the render loop.
+          notifyConstructionEvent() {
+              clearTimeout(this._autosaveDebounceTimer);
+              this._autosaveDebounceTimer = setTimeout(() => this.autosave(), 2500);
+          },
+          notifyObjectiveComplete() {
+              clearTimeout(this._autosaveDebounceTimer);
+              this._autosaveDebounceTimer = setTimeout(() => this.autosave(), 1500);
+          },
+
+          _slotStorageKey(slotId) { return SAVE_KEY_PREFIX + slotId; },
+
+          _buildSaveObject(saveName, isAutosave) {
+              return {
+                  version: SAVE_SCHEMA_VERSION,
+                  metadata: {
+                      saveName: saveName || currentMapDisplayName(),
+                      mapId: gameSave.map || 'dfw',
+                      mapName: currentMapDisplayName(),
+                      created: Date.now(),
+                      modified: Date.now(),
+                      playTime: currentPlayTimeMs(),
+                      gameDay: currentAbsoluteGameDay(),
+                      difficulty: currentDifficulty(),
+                      autosave: !!isAutosave,
+                      budget: Math.floor(budget),
+                      dailyRidership: Math.round(dailyRiders || 0),
+                      gameVersion: SAVE_SCHEMA_VERSION
+                  },
+                  game: GameStateSerializer.serialize()
+              };
+          },
+
+          // Saves into a manual slot (1-5) or the autosave slot. Preserves `created` from any existing
+          // save in that slot so repeated saves to the same slot keep an honest creation date.
+          async save(slotId, saveName) {
+              if (!engineBooted) return { success: false, error: 'Start or load a game before saving.' };
+              try {
+                  const existingMeta = await SaveMetadata.read(slotId);
+                  const saveObj = this._buildSaveObject(saveName, slotId === AUTOSAVE_SLOT_ID);
+                  if (existingMeta && existingMeta.created) saveObj.metadata.created = existingMeta.created;
+
+                  const writeResult = await StorageProvider.save(this._slotStorageKey(slotId), saveObj);
+                  if (!writeResult.ok) return { success: false, error: writeResult.error };
+                  await SaveMetadata.write(slotId, saveObj.metadata);
+                  await refreshContinueButton();
+                  return { success: true, metadata: saveObj.metadata };
+              } catch (err) {
+                  return { success: false, error: 'Unexpected error while saving: ' + (err && err.message ? err.message : err) };
+              }
+          },
+
+          async load(slotId) {
+              const raw = await StorageProvider.load(this._slotStorageKey(slotId));
+              if (!raw.ok) return { success: false, error: raw.error || 'That save slot is empty.' };
+
+              const structural = SaveValidator.validate(raw.value);
+              if (!structural.ok) return { success: false, error: structural.error };
+
+              const migrated = SaveMigrator.migrate(raw.value);
+              if (!migrated.ok) return { success: false, error: migrated.error };
+
+              return { success: true, data: migrated.data };
+          },
+
+          async delete(slotId) {
+              await StorageProvider.delete(this._slotStorageKey(slotId));
+              await SaveMetadata.remove(slotId);
+              await refreshContinueButton();
+              return { success: true };
+          },
+
+          async autosave() {
+              if (typeof stations === 'undefined' || !engineBooted) return; // nothing live to save yet
+              const result = await this.save(AUTOSAVE_SLOT_ID, currentMapDisplayName() + ' (Autosave)');
+              if (result.success) showSlToast('Autosaved ✓');
+              else showSlToast('Autosave failed: ' + result.error, true);
+              return result;
+          },
+
+          async listSaves() {
+              const allIds = [...SAVE_SLOT_IDS, AUTOSAVE_SLOT_ID];
+              const metas = await Promise.all(allIds.map(id => SaveMetadata.read(id)));
+              return allIds.map((slotId, i) => ({ slotId, metadata: metas[i], isAutosave: slotId === AUTOSAVE_SLOT_ID }));
+          },
+
+          async getMetadata(slotId) { return SaveMetadata.read(slotId); },
+
+          async exportSave(slotId) {
+              const raw = await StorageProvider.load(this._slotStorageKey(slotId));
+              if (!raw.ok) { showSlToast('Nothing to export in that slot.', true); return; }
+              const blob = new Blob([JSON.stringify(raw.value, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              const meta = raw.value.metadata || {};
+              const safeName = (meta.saveName || 'save').replace(/[^a-z0-9\-_]+/gi, '_');
+              a.href = url; a.download = `${safeName}_day${meta.gameDay || ''}.json`;
+              document.body.appendChild(a); a.click(); document.body.removeChild(a);
+              setTimeout(() => URL.revokeObjectURL(url), 2000);
+          },
+
+          async importSave(file) {
+              if (!file) return;
+              const text = await new Promise((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onload = () => resolve(reader.result);
+                  reader.onerror = () => reject(new Error('read failed'));
+                  reader.readAsText(file);
+              }).catch(() => null);
+
+              if (text === null) { showSlStatus('Could not read that file.', true); return; }
+
+              let parsed;
+              try { parsed = JSON.parse(text); }
+              catch (err) { showSlStatus('That file is not valid save data.', true); return; }
+
+              const structural = SaveValidator.validate(parsed);
+              if (!structural.ok) { showSlStatus(structural.error, true); return; }
+              const migrated = SaveMigrator.migrate(parsed);
+              if (!migrated.ok) { showSlStatus(migrated.error, true); return; }
+
+              // Imports land in the first free manual slot, or slot1 if all are full.
+              let target = SAVE_SLOT_IDS[0];
+              for (const id of SAVE_SLOT_IDS) {
+                  const existing = await SaveMetadata.read(id);
+                  if (!existing) { target = id; break; }
+              }
+              const writeResult = await StorageProvider.save(this._slotStorageKey(target), migrated.data);
+              if (!writeResult.ok) { showSlStatus(writeResult.error, true); return; }
+              await SaveMetadata.write(target, migrated.data.metadata);
+              showSlStatus(`Imported into Slot ${SAVE_SLOT_IDS.indexOf(target) + 1}.`, false);
+              await renderSaveLoadSlots();
+              await refreshContinueButton();
+          }
+      };
+
+      // ================================================================================================
+      // SAVE / LOAD UI WIRING
+      // ================================================================================================
+
+      let slMenuContext = 'menu'; // 'menu' (main menu) or 'ingame' (pause menu) — changes which actions make sense
+
+      async function openSaveLoadMenu(context) {
+          slMenuContext = context || 'menu';
+          document.getElementById('save-load-backdrop').style.display = 'flex';
+          document.getElementById('sl-slots-container').innerHTML = '<div class="sl-slot-empty-label" style="padding:8px 2px;">Loading saves…</div>';
+          try {
+              const backendType = await StorageProvider.backendType();
+              const backendNote = backendType === 'memory'
+                  ? ' (⚠ no persistent storage available here — saves will only last for this session)'
+                  : '';
+              document.getElementById('sl-modal-subtitle').textContent = (slMenuContext === 'ingame'
+                  ? '5 manual slots, plus a dedicated autosave slot the game keeps up to date on its own.'
+                  : 'Load a previous game, or manage your saved slots.') + backendNote;
+              await renderSaveLoadSlots();
+          } catch (err) {
+              console.error('Failed to open Save/Load menu:', err);
+              document.getElementById('sl-slots-container').innerHTML =
+                  `<div class="sl-slot-empty-label" style="padding:8px 2px;">Could not load saves: ${escapeSlHtml(err && err.message ? err.message : String(err))}</div>`;
+          }
+      }
+      function closeSaveLoadMenu() {
+          document.getElementById('save-load-backdrop').style.display = 'none';
+          document.getElementById('sl-status-msg').textContent = '';
+      }
+
+      function openPauseMenu() {
+          setSpeed(0); // pause sim while the menu is open
+          document.getElementById('pause-menu-backdrop').style.display = 'flex';
+      }
+      function closePauseMenu() {
+          document.getElementById('pause-menu-backdrop').style.display = 'none';
+      }
+
+      function exitToMainMenu() {
+          closePauseMenu();
+          showSlConfirm('Exit to the main menu? Your progress will be autosaved first.', async () => {
+              await SaveManager.autosave();
+              totalPlayTimeMsAccumulated = currentPlayTimeMs();
+              sessionStartTimestamp = Date.now();
+              document.getElementById('gameRoot').classList.add('hidden-root');
+              showMainMenu();
+              refreshContinueButton();
+          });
+      }
+
+      async function refreshContinueButton() {
+          const btn = document.getElementById('continue-btn');
+          if (!btn) return;
+          const allIds = [...SAVE_SLOT_IDS, AUTOSAVE_SLOT_ID];
+          const metas = await Promise.all(allIds.map(id => SaveMetadata.read(id)));
+          const hasAnySave = metas.some(m => !!m);
+          btn.disabled = !hasAnySave;
+          btn.title = hasAnySave ? 'Load your most recent save' : 'No save data yet';
+      }
+
+      // "Continue" always resumes whichever slot (including autosave) was modified most recently.
+      async function continueGame() {
+          const all = (await SaveManager.listSaves()).filter(s => s.metadata);
+          if (!all.length) return;
+          all.sort((a, b) => (b.metadata.modified || 0) - (a.metadata.modified || 0));
+          await loadSaveFromMainMenu(all[0].slotId);
+      }
+
+      // Only an active, booted game has meaningful state worth writing to a slot. From the main menu
+      // (no game running yet) Save/Overwrite must stay hidden — otherwise "Save Here" would silently
+      // persist an empty, default-budget game over whatever was really in that slot.
+      function canSaveNow() { return slMenuContext === 'ingame' && engineBooted; }
+
+      async function renderSaveLoadSlots() {
+          const container = document.getElementById('sl-slots-container');
+          let slots;
+          try {
+              slots = await SaveManager.listSaves();
+          } catch (err) {
+              container.innerHTML = `<div class="sl-slot-empty-label" style="padding:8px 2px;">Could not read save data: ${escapeSlHtml(err && err.message ? err.message : String(err))}</div>`;
+              return;
+          }
+          const saveable = canSaveNow();
+          container.innerHTML = slots.map(({ slotId, metadata, isAutosave }) => {
+              const label = isAutosave ? 'Autosave' : `Save Slot ${SAVE_SLOT_IDS.indexOf(slotId) + 1}`;
+              if (!metadata) {
+                  const emptyHint = isAutosave
+                      ? 'Fills automatically as you play.'
+                      : (saveable ? 'Start a new save here.' : 'Start or load a game, then save here.');
+                  return `
+                      <div class="sl-slot">
+                          <div class="sl-slot-icon">${isAutosave ? '🔄' : '📁'}</div>
+                          <div class="sl-slot-body">
+                              <div class="sl-slot-name">${label}</div>
+                              <div class="sl-slot-empty-label">Empty save slot. ${emptyHint}</div>
+                          </div>
+                          <div class="sl-slot-actions">
+                              ${(!isAutosave && saveable) ? `<button class="sl-btn sl-btn-save" onclick="handleSlSave('${slotId}')">Save Here</button>` : ''}
+                          </div>
+                      </div>`;
+              }
+              const savedDate = new Date(metadata.modified || metadata.created).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+              return `
+                  <div class="sl-slot ${isAutosave ? 'sl-autosave' : ''}">
+                      <div class="sl-slot-icon">${isAutosave ? '🔄' : '💾'}</div>
+                      <div class="sl-slot-body">
+                          <div class="sl-slot-name">${escapeSlHtml(metadata.saveName || label)} ${isAutosave ? '<span class="sl-badge">Auto</span>' : ''}</div>
+                          <div class="sl-slot-stats">
+                              <span><b>${escapeSlHtml(metadata.mapName || 'Metro')}</b></span>
+                              <span>Day <b>${metadata.gameDay ?? '—'}</b></span>
+                              <span>Budget <b>$${Math.round(metadata.budget || 0).toLocaleString()}</b></span>
+                              <span>Ridership <b>${Math.round(metadata.dailyRidership || 0).toLocaleString()}/day</b></span>
+                              <span>Played <b>${formatPlayTime(metadata.playTime || 0)}</b></span>
+                              <span>Saved <b>${savedDate}</b></span>
+                              <span>v${metadata.gameVersion || metadata.version || '1.0'}</span>
+                          </div>
+                      </div>
+                      <div class="sl-slot-actions">
+                          <button class="sl-btn sl-btn-load" onclick="handleSlLoad('${slotId}')">Load</button>
+                          ${(!isAutosave && saveable) ? `<button class="sl-btn sl-btn-save" onclick="handleSlSave('${slotId}')">Overwrite</button>` : ''}
+                          ${isAutosave ? '' : `<button class="sl-btn sl-btn-rename" onclick="handleSlRename('${slotId}')">Rename</button>`}
+                          <button class="sl-btn sl-btn-export" onclick="SaveManager.exportSave('${slotId}')">Export</button>
+                          ${isAutosave ? '' : `<button class="sl-btn sl-btn-delete" onclick="handleSlDelete('${slotId}')">Delete</button>`}
+                      </div>
+                  </div>`;
+          }).join('');
+      }
+
+      function escapeSlHtml(str) {
+          return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      }
+
+      async function handleSlSave(slotId) {
+          const doSave = async () => {
+              const name = await promptSaveName(slotId);
+              const result = await SaveManager.save(slotId, name);
+              if (result.success) { showSlStatus('Saved successfully.', false); await renderSaveLoadSlots(); }
+              else showSlStatus(result.error || 'Save failed.', true);
+          };
+          const existing = await SaveMetadata.read(slotId);
+          if (existing) {
+              showSlConfirm(`Overwrite "${existing.saveName}"? This cannot be undone.`, doSave);
+          } else {
+              await doSave();
+          }
+      }
+
+      async function promptSaveName(slotId) {
+          const existing = await SaveMetadata.read(slotId);
+          const defaultName = (existing && existing.saveName) || currentMapDisplayName();
+          const name = window.prompt('Name this save:', defaultName);
+          return (name && name.trim()) ? name.trim() : defaultName;
+      }
+
+      function handleSlLoad(slotId) {
+          if (slMenuContext === 'menu') { loadSaveFromMainMenu(slotId); return; }
+          showSlConfirm('Load this save? Any unsaved progress in your current game will be lost.', async () => {
+              const result = await SaveManager.load(slotId);
+              if (!result.success) { showSlStatus(result.error, true); return; }
+              closeSaveLoadMenu();
+              applyLoadedGameData(result.data);
+          });
+      }
+
+      async function handleSlRename(slotId) {
+          const existing = await SaveMetadata.read(slotId);
+          if (!existing) return;
+          const name = window.prompt('Rename save:', existing.saveName);
+          if (!name || !name.trim()) return;
+          existing.saveName = name.trim();
+          existing.modified = Date.now();
+          await SaveMetadata.write(slotId, existing);
+          const raw = await StorageProvider.load(SaveManager._slotStorageKey(slotId));
+          if (raw.ok) { raw.value.metadata.saveName = existing.saveName; await StorageProvider.save(SaveManager._slotStorageKey(slotId), raw.value); }
+          await renderSaveLoadSlots();
+      }
+
+      async function handleSlDelete(slotId) {
+          const existing = await SaveMetadata.read(slotId);
+          if (!existing) return;
+          showSlConfirm(`Delete "${existing.saveName}"? This cannot be undone.`, async () => {
+              await SaveManager.delete(slotId);
+              await renderSaveLoadSlots();
+              showSlStatus('Save deleted.', false);
+          });
+      }
+
+      // Loading from the main menu reuses the same reveal/fade sequence as starting a new game.
+      async function loadSaveFromMainMenu(slotId) {
+          const result = await SaveManager.load(slotId);
+          if (!result.success) { showSlStatus(result.error, true); return; }
+          closeSaveLoadMenu();
+
+          const mapSelectScreen = document.getElementById('mapSelectScreen');
+          const mainMenuScreen = document.getElementById('mainMenuScreen');
+          const gameRoot = document.getElementById('gameRoot');
+
+          mapSelectScreen.classList.add('fading-out', 'screen-hidden');
+          mainMenuScreen.classList.add('fading-out');
+
+          setTimeout(() => {
+              mainMenuScreen.classList.add('screen-hidden');
+              gameRoot.classList.remove('hidden-root');
+              gameRoot.style.opacity = 0;
+              requestAnimationFrame(() => {
+                  gameRoot.style.opacity = 1;
+                  const mapId = (result.data.game.meta && result.data.game.meta.mapId) || 'dfw';
+                  const map = MAPS.find(m => m.id === mapId) || MAPS.find(m => m.available);
+                  gameSave.map = map.id;
+                  map.loader(); // regenerate this map's neighborhoods + a fresh commuter population
+                  applyLoadedGameData(result.data);
+              });
+          }, 450);
+      }
+
+      // Applies validated+migrated save data onto whatever map baseline is currently loaded, whether
+      // we're booting fresh from the main menu or hot-swapping mid-session from the pause menu.
+      function applyLoadedGameData(saveData) {
+          try {
+              GameStateSerializer.applyState(saveData.game);
+              totalPlayTimeMsAccumulated = saveData.metadata.playTime || 0;
+              sessionStartTimestamp = Date.now();
+              initEngine({ preserveCamera: true });
+              SaveManager.startAutosaveInterval();
+              showSlToast(`Loaded "${saveData.metadata.saveName}" ✓`);
+          } catch (err) {
+              console.error('Failed to apply loaded save:', err);
+              showSlToast('That save could not be loaded — it may be corrupted.', true);
+          }
+      }
+
+      // ---- tiny shared confirm dialog (replaces ad-hoc window.confirm for a more polished feel) ----
+      let _slConfirmCallback = null;
+      function showSlConfirm(message, onConfirm) {
+          document.getElementById('sl-confirm-msg').textContent = message;
+          _slConfirmCallback = onConfirm;
+          document.getElementById('sl-confirm-backdrop').style.display = 'flex';
+          document.getElementById('sl-confirm-ok-btn').onclick = async () => {
+              document.getElementById('sl-confirm-backdrop').style.display = 'none';
+              const cb = _slConfirmCallback; _slConfirmCallback = null;
+              if (cb) {
+                  try { await cb(); }
+                  catch (err) { console.error('Confirm action failed:', err); showSlStatus('Something went wrong: ' + (err && err.message ? err.message : err), true); }
+              }
+          };
+      }
+      function _slConfirmCancel() {
+          document.getElementById('sl-confirm-backdrop').style.display = 'none';
+          _slConfirmCallback = null;
+      }
+
+      function showSlStatus(msg, isError) {
+          const el = document.getElementById('sl-status-msg');
+          el.textContent = msg;
+          el.className = 'sl-status-msg ' + (isError ? 'sl-status-error' : 'sl-status-success');
+      }
+
+      let _slToastTimer = null;
+      function showSlToast(msg, isError) {
+          const el = document.getElementById('sl-toast');
+          el.textContent = msg;
+          el.className = 'sl-toast-visible' + (isError ? ' sl-toast-error' : '');
+          clearTimeout(_slToastTimer);
+          _slToastTimer = setTimeout(() => { el.className = ''; }, 2600);
+      }
+
+      // Kick off the 5-minute autosave heartbeat once the engine has actually booted at least once.
+      const _autosaveWatchdog = setInterval(() => {
+          if (engineBooted) { SaveManager.startAutosaveInterval(); clearInterval(_autosaveWatchdog); }
+      }, 2000);
+
+      refreshContinueButton();
+
+      // The simulation no longer boots itself on page load — it now waits
+      // for the player to pick a map from the main menu (see startGame()).
+      showMainMenu();
     </script>
   </body>
 </html>
