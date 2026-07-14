@@ -1,295 +1,266 @@
 # SubBuilder
-MetroSim Tutorial
+. Welcome to the DFW Metroplex
+Build the Future of Transportation
 
-Welcome to MetroSim, a transit planning and management simulation where you design, build, and operate a regional rail network. Your objective is to create an efficient system that attracts riders, generates revenue, and expands across the metro area without going bankrupt.
+Welcome, Director.
 
-Getting Started
+You have been appointed to lead the Dallas–Fort Worth Regional Transit Authority. Your responsibility is to design a rail network that thousands of AI commuters will rely on every day.
 
-When the simulation loads, you'll see four main areas:
+Unlike traditional city builders, every commuter in this simulation makes individual decisions based on their own needs. They compare driving, walking, and transit before every trip.
 
-Map – The large canvas where you build your network.
-Sidebar – Construction options, statistics, and fleet information.
-Bottom Toolbar – Build tools, time controls, and finances.
-HUD – Displays your budget, operating costs, and current fare.
+Your objective is simple:
 
-You begin with:
+• Build an efficient network.
+• Keep your agency financially sustainable.
+• Convince as many commuters as possible to leave their cars at home.
 
-$50,000,000
-No stations
-No tracks
-No trains
-Thousands of potential commuters already living and working throughout the region.
-Camera Controls
-Pan
+Success depends on careful planning—not just building more stations.
 
-Select Pan Map and drag the map.
+2. Understanding the Map
+Reading the City
 
-Zoom
+Before placing anything, take a moment to explore.
 
-Use the mouse wheel to zoom in and out.
+The map represents neighborhoods throughout the metroplex. Every neighborhood has unique characteristics including population, employment, income, and travel demand.
 
-The simulation supports very large zoom ranges, making it possible to inspect individual stations or view the entire region.
+Dense areas generate more riders, while suburban areas often depend on park-and-ride access.
 
-Building Your First Line
-Step 1 — Create Stations
+Use:
 
-Select + Station.
+• Mouse wheel to zoom
+• Click and drag to pan
+• The minimap to quickly jump around the region
 
-Click on the map where you want stations.
+A good understanding of where people live and work will make every future decision easier.
 
-Good beginner locations include:
+3. Time Never Stops
+The Simulation Runs Continuously
 
-Downtown
-Universities
-Airports
-Shopping centers
-Dense residential areas
+Your city is always evolving.
 
-Every station costs money to build.
+People leave home, travel to work, return home, and make recreational trips throughout the day.
 
-Stations automatically attract riders from nearby neighborhoods.
+Use the playback controls to:
 
-Step 2 — Select a Line Color
+• Pause the simulation
+• Run at normal speed
+• Accelerate time
 
-Choose a line color from the colored circles.
+Running at higher speeds allows you to evaluate long-term performance quickly, while pausing lets you carefully plan expansions.
 
-Or create a custom line using the color picker.
+Watch how ridership changes throughout the day.
 
-Each color represents an individual transit line.
+Morning and evening rush hours are often your busiest periods.
 
-Step 3 — Build Track
+4. Building Your First Station
+Creating Access
 
-Choose + Build Line.
+Transit begins with stations.
 
-Click the first station.
+Select the Build Station tool and place your first station inside a populated neighborhood.
 
-Click the second station.
+Stations provide access to the transit network within walking distance.
 
-A rail line will connect them.
+Good station placement is critical.
 
-Continue clicking stations to expand the line.
+Consider placing stations:
 
-Track Types
+• Near dense housing
+• Close to employment centers
+• Near shopping districts
+• Where future expansion is possible
 
-Before building, choose the infrastructure.
+Poor station placement can limit ridership for the rest of the game.
 
-Elevation
-Level
-Cheapest
-Standard surface rail
-Above Ground
-Approximately 2.5× construction cost
-Useful for avoiding conflicts
-Underground
-Approximately 6× construction cost
-Highest construction cost
-Ideal for dense downtown corridors
-Capacity
-Single Line
+5. Stations Need Connections
+A Station Alone Does Nothing
 
-Lowest cost.
+Passengers cannot travel unless stations are connected.
 
-Suitable for branch lines.
+Choose a transit line, then connect stations together into a continuous route.
 
-Parallel Twin
+Think of each line as a complete service that trains will operate automatically.
 
-Higher capacity.
+Good lines are usually:
 
-Supports more trains with fewer delays.
+• Direct
+• Easy to understand
+• Connected to important destinations
 
-Quad Trunk
+Avoid unnecessary detours whenever possible.
 
-Highest capacity.
+Longer routes increase travel time and make transit less attractive.
 
-Best for extremely busy corridors.
+6. How AI Commuters Think
+Every Rider Makes Their Own Decision
 
-Most expensive.
+This simulation contains thousands of individual commuters.
 
-Building Depots
+Each commuter evaluates every available transportation option before beginning a trip.
 
-Trains cannot be purchased without a depot.
+They consider:
 
-Choose:
+• Total travel time
+• Walking distance
+• Waiting time
+• Number of transfers
+• Ticket price
+• Station comfort
+• Reliability
 
-Build Depot
+If transit provides the best experience, they will ride your system.
 
-Place it near your network.
+If driving is faster or more convenient, they'll use their car instead.
 
-A depot services trains within its operating radius.
+Your goal is not to force people onto transit—it is to make transit the obvious choice.
 
-Depots also have daily operating costs.
+7. Following Passengers
+Learn From Their Decisions
 
-Purchasing Trains
+Click on neighborhoods to inspect the people living there.
 
-Select either:
+You'll see:
 
-Light Rail
-Lower purchase cost
-Lower operating cost
-Smaller capacity
-Best for newer systems
-Heavy Rail
-Higher purchase cost
-Larger capacity
-Better for busy corridors
+• Where they travel
+• Their preferred transportation mode
+• Why they chose that option
+• Travel time comparisons
+• Alternative routes they considered
 
-Once purchased, trains automatically begin operating on connected routes.
+If many commuters continue driving, ask yourself why.
 
-How Riders Work
+Maybe stations are too far away.
 
-Every neighborhood contains:
+Maybe the route requires too many transfers.
 
-Residents
-Jobs
-Students
-Shopping destinations
-Entertainment destinations
+Maybe trains simply aren't competitive yet.
 
-Throughout the day, thousands of simulated commuters decide where they want to travel.
+These insights are one of your most valuable planning tools.
 
-They compare:
+8. Inspecting Stations
+Every Station Tells a Story
 
-Walking
-Driving
-Transit
+Select any station to open its information panel.
 
-If transit is competitive, they choose your system.
+Here you'll find:
 
-Rush Hour
+• Daily ridership
+• Capacity usage
+• Revenue
+• Maintenance costs
+• Connected lines
+• Available upgrades
 
-Demand changes throughout the day.
+Watch for overcrowded stations.
 
-Morning:
+High passenger demand is usually a sign that expansion or upgrades are needed.
 
-Residents travel toward:
+Ignoring congestion can reduce rider satisfaction and discourage future transit use.
 
-Offices
-Universities
-Downtown
+9. Building Better Stations
+Invest Where It Matters
 
-Afternoon:
+Stations can be upgraded with new amenities and infrastructure.
 
-Traffic shifts toward:
+Upgrades may:
 
-Home
-Shopping
-Entertainment
+• Increase passenger capacity
+• Improve comfort
+• Reduce overcrowding
+• Attract additional riders
+• Increase maintenance costs
 
-Building a network that serves multiple trip types keeps trains busy all day.
+Not every station needs every upgrade.
 
-Fare Management
+Busy downtown hubs benefit much more than lightly used suburban stops.
 
-Use the Fare controls to increase or decrease ticket prices.
+Spend your money where it creates the greatest return.
 
-Higher fares:
+10. Understanding Your Finances
+Every Decision Has a Cost
 
-More revenue per passenger
-Some riders choose to drive instead
+Your agency operates like a real transit authority.
 
-Lower fares:
+Money comes from:
 
-More riders
-Less income per passenger
+• Passenger fares
+• Objective rewards
+• Future funding opportunities
 
-Finding the right balance is important.
+Expenses include:
 
-Revenue
+• Building stations
+• Constructing lines
+• Maintenance
+• Station improvements
+• Operating costs
 
-You earn money whenever passengers complete trips.
+Running out of money doesn't necessarily end the game—but it severely limits future expansion.
 
-Income depends on:
+A successful agency balances growth with financial stability.
 
-Number of riders
-Ticket price
+11. Growing Your Network
+Expand Strategically
 
-Revenue helps pay for:
+As your system grows, avoid simply adding more stations everywhere.
 
-Construction
-New trains
-Daily operating costs
-Operating Costs
+Instead, ask:
 
-Every day you pay for:
+Can this station connect two busy areas?
 
-Train maintenance
-Depot maintenance
-Infrastructure
+Will this extension create new commuting opportunities?
 
-Expanding too quickly without enough riders can cause your operating expenses to exceed your income.
+Can existing lines handle additional passengers?
 
-Statistics
+Smart expansion often produces far more riders than building entirely new isolated routes.
 
-The sidebar displays important information including:
+Quality usually beats quantity.
 
-Daily riders
-Lifetime riders
-Fare revenue
-Transit mode share
-Highway mode share
-Walking mode share
-Station activity
-Waiting passengers
-Network performance
+12. Objectives
+Your Next Challenge
 
-Use these statistics to identify overcrowded stations or underused parts of your network.
+Objectives introduce new mechanics while rewarding efficient planning.
 
-Choosing Good Station Locations
+Completing objectives earns:
 
-Successful stations are usually located near:
+• Additional funding
+• Progress toward milestones
+• New gameplay opportunities
 
-Downtown districts
-Universities
-Airports
-Hospitals
-Office parks
-Shopping malls
-Entertainment venues
-High-density residential neighborhoods
+If you're unsure what to do next, check the Objectives panel.
 
-Connecting multiple activity centers creates stronger ridership than connecting only residential areas.
+Treat objectives as guidance—not strict requirements.
 
-Expanding Your Network
+You are free to build your network however you like.
 
-As revenue increases, begin building:
+13. Saving Your Progress
+Protect Your City
 
-Branch lines
-Transfer stations
-Airport connections
-Downtown trunk lines
-Cross-town routes
+Transit systems take time to perfect.
 
-Well-designed transfer stations allow passengers to travel across multiple lines efficiently.
+Use the Save menu to create multiple save files.
 
-Managing Congestion
+Saving frequently allows you to:
 
-If stations become crowded:
+• Experiment with different layouts
+• Compare strategies
+• Recover from mistakes
+• Preserve successful cities
 
-Add additional trains
-Upgrade to Parallel Twin or Quad Trunk tracks
-Create alternate routes
-Build additional stations nearby
-Improve transfer opportunities
+Autosaves are created automatically, but manual saves are recommended before making major changes to your network.
 
-Congestion lowers passenger satisfaction and reduces transit's attractiveness.
+14. Tips From Experienced Transit Directors
+Before You Begin
 
-Advanced Strategy
+Successful transit systems usually follow a few simple principles.
 
-Experienced players often:
+• Build between places people actually travel.
+• Keep routes simple and direct.
+• Watch what commuters are doing instead of guessing.
+• Upgrade busy stations before building new ones.
+• Maintain a financial reserve for unexpected expansion.
+• Small improvements across the network often outperform one massive project.
 
-Build one profitable line before expanding.
-Connect dense residential areas to major employment centers.
-Use Light Rail early to minimize costs.
-Upgrade busy corridors instead of rebuilding the entire network.
-Keep fares competitive.
-Avoid constructing expensive underground segments unless necessary.
-Watch operating costs carefully before purchasing additional trains.
-Winning Strategy
+Remember: the goal isn't to build the biggest system.
 
-A successful transit network balances four key goals:
-
-Build where people already travel.
-Keep trains moving with sufficient capacity.
-Generate enough fare revenue to cover operating expenses.
-Expand gradually as demand grows.
-
-A financially stable network with high ridership, efficient transfers, and increasing transit mode share is the hallmark of a successful MetroSim operator.
+The goal is to build the system people actually want to use.
