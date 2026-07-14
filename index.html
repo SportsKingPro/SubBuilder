@@ -89,6 +89,60 @@
       .chart-bar { flex:1; background:var(--transit-blue); opacity:.7; border-radius:1px 1px 0 0; }
       .station-card { background:rgba(12,13,18,0.5); border:1px solid rgba(255,255,255,0.08); padding:8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
 
+      /* ---- Lines & Network panel ---- */
+      .net-controls { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+      .net-search { flex:1 1 100%; background:var(--bg-main); border:1px solid var(--border-color); color:var(--text-main); padding:6px 8px; border-radius:4px; font-size:11.5px; box-sizing:border-box; }
+      .net-search:focus { outline:none; border-color:var(--transit-blue); }
+      .net-search::placeholder { color:var(--text-muted); }
+      .net-btn { flex:1; background:var(--bg-accent); border:1px solid var(--border-color); color:var(--text-muted); padding:5px 6px; border-radius:4px; font-size:10.5px; font-weight:600; cursor:pointer; }
+      .net-btn:hover { color:#fff; border-color:rgba(255,255,255,0.2); }
+      #net-lines-container { display:flex; flex-direction:column; gap:8px; }
+      .net-line-card { background:rgba(12,13,18,0.5); border:1px solid var(--border-color); border-radius:6px; overflow:hidden; }
+      .net-line-header { padding:9px 10px; cursor:pointer; }
+      .net-line-title-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+      .net-line-name { display:flex; align-items:center; gap:7px; font-size:12px; font-weight:700; color:#fff; }
+      .net-line-swatch { width:11px; height:11px; border-radius:50%; background:var(--line-color, var(--transit-blue)); flex-shrink:0; }
+      .net-line-expand-icon { font-size:9px; color:var(--text-muted); transition:transform .2s; }
+      .net-line-card.expanded .net-line-expand-icon { transform:rotate(180deg); }
+      .net-stats-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:5px; }
+      .net-stat-box { background:rgba(12,13,18,0.55); border-radius:4px; padding:4px 5px; display:flex; flex-direction:column; gap:2px; }
+      .net-stat-box span:first-child { font-size:8.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; }
+      .net-stat-val { font-size:11px; font-weight:700; color:#e2e8f0; }
+      .net-stat-val.good { color:#4ade80; }
+      .net-stat-val.cost { color:#f87171; }
+      .net-pax-bar-container { height:4px; background:var(--bg-main); border-radius:2px; overflow:hidden; margin-top:7px; }
+      .net-pax-bar { height:100%; border-radius:2px; background:var(--line-color, var(--transit-blue)); transition:width .3s ease; }
+      .net-line-body { display:none; flex-direction:column; gap:8px; padding:0 10px 10px; border-top:1px solid rgba(255,255,255,0.06); }
+      .net-line-card.expanded .net-line-body { display:flex; padding-top:9px; }
+      .net-summary-box { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; background:rgba(12,13,18,0.4); border:1px solid rgba(255,255,255,0.06); border-radius:5px; padding:7px 9px; }
+      .net-summary-row { display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-muted); gap:6px; }
+      .net-summary-row span:last-child { color:#e2e8f0; font-weight:600; text-align:right; }
+      .net-sort-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      .net-sort-select { flex:1; background:var(--bg-main); border:1px solid var(--border-color); color:var(--text-main); font-size:10.5px; padding:4px 5px; border-radius:4px; }
+      .net-station-list { display:flex; flex-direction:column; max-height:260px; overflow-y:auto; }
+      .net-station-item { display:flex; align-items:stretch; gap:8px; padding:5px 2px; cursor:pointer; border-radius:4px; }
+      .net-station-item:hover { background:rgba(255,255,255,0.05); }
+      .net-station-item.search-match { background:rgba(56,189,248,0.1); }
+      .st-gfx { position:relative; width:14px; flex-shrink:0; display:flex; justify-content:center; }
+      .st-gfx-node { width:8px; height:8px; border-radius:50%; background:var(--text-muted); border:2px solid var(--bg-panel); z-index:1; margin-top:4px; }
+      .st-gfx-node.terminal { background:#fff; }
+      .st-gfx-node.transfer { background:#fbbf24; width:10px; height:10px; }
+      .st-gfx-line { position:absolute; left:50%; width:2px; background:rgba(255,255,255,0.15); transform:translateX(-50%); }
+      .st-gfx-line.top-half { top:0; height:6px; }
+      .st-gfx-line.bot-half { bottom:0; height:6px; }
+      .st-details { flex:1; display:flex; justify-content:space-between; align-items:center; min-width:0; }
+      .st-info-left { min-width:0; }
+      .st-name { font-size:11.5px; font-weight:600; color:#e2e8f0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .st-meta { display:flex; gap:4px; margin-top:2px; }
+      .st-meta-pill { font-size:8.5px; color:var(--text-muted); background:rgba(255,255,255,0.05); border-radius:3px; padding:1px 4px; }
+      .st-info-right { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+      .st-pax { font-size:11px; font-weight:700; color:#4ade80; }
+      .st-icons-row { display:flex; gap:3px; }
+      .icn-tag { font-size:8px; font-weight:700; border-radius:3px; padding:1px 4px; color:#0f172a; }
+      .icn-tag.transfer { background:#fbbf24; }
+      .icn-tag.pr { background:var(--transit-blue); }
+      .icn-tag.upg { background:#a855f7; color:#fff; }
+
       /* Objectives */
       #pinned-objectives { background:rgba(12,13,18,0.55); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px; cursor:pointer; transition:border-color .15s, background .15s; }
       #pinned-objectives:hover { border-color:rgba(56,189,248,0.5); background:rgba(18,20,28,0.7); }
@@ -708,7 +762,7 @@
          GAME ROOT (existing simulator UI — hidden until a map starts)
          ============================================================ -->
     <div id="gameRoot" class="hidden-root">
-    <div id="ingame-menu-btn" onclick="openPauseMenu()" title="Menu / Save / Load">☰</div>
+    <div id="ingame-menu-btn" onclick="openPauseMenu()" title="Menu / Save / Load (Esc)">☰</div>
     <div id="pause-menu-backdrop">
       <div id="pause-menu-box">
         <h3>Game Menu</h3>
@@ -717,7 +771,7 @@
         <button class="pm-btn pm-btn-danger" onclick="exitToMainMenu()">⏻ Exit to Main Menu</button>
       </div>
     </div>
-    <div id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">◂</div>
+    <div id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar (Tab)">◂</div>
     <div id="sidebar">
       <div id="sidebar-brand">
         <div class="brand-icon">🚇</div>
@@ -731,11 +785,11 @@
         <div class="nav-subsection">
           <div class="pinned-tools-title"><span>🛠️</span><span>Tools</span></div>
           <div class="tool-btn-grid">
-            <button id="btn-pan" class="btn-action active mode-btn" onclick="setMode('pan')">Pan Map</button>
-            <button id="btn-station" class="btn-action mode-btn" onclick="setMode('station')">+ Station</button>
-            <button id="btn-track" class="btn-action mode-btn" onclick="setMode('track')">+ Build Line</button>
-            <button id="btn-rename" class="btn-action mode-btn" onclick="setMode('rename')">Rename</button>
-            <button id="btn-delete" class="btn-action danger-btn mode-btn" onclick="setMode('delete')">Demolish</button>
+            <button id="btn-pan" class="btn-action active mode-btn" onclick="setMode('pan')" title="Pan Map (Q)">Pan Map</button>
+            <button id="btn-station" class="btn-action mode-btn" onclick="setMode('station')" title="+ Station (W)">+ Station</button>
+            <button id="btn-track" class="btn-action mode-btn" onclick="setMode('track')" title="+ Build Line (E)">+ Build Line</button>
+            <button id="btn-rename" class="btn-action mode-btn" onclick="setMode('rename')" title="Rename (R)">Rename</button>
+            <button id="btn-delete" class="btn-action danger-btn mode-btn" onclick="setMode('delete')" title="Demolish (T)">Demolish</button>
           </div>
         </div>
         <div class="nav-subsection">
@@ -1070,7 +1124,7 @@
       <div id="playback-strip">
         <div id="minimap-header">
           <span id="minimap-title">Regional Map</span>
-          <span id="minimap-collapse" onclick="toggleHud()" title="Collapse">▾</span>
+          <span id="minimap-collapse" onclick="toggleHud()" title="Collapse (H)">▾</span>
         </div>
         <canvas id="minimap-canvas" width="216" height="140"></canvas>
         <div id="hud-info-row">
@@ -1078,13 +1132,13 @@
           <div id="mouse-coords">X:0 Y:0</div>
         </div>
         <div id="hud-speed-row">
-          <button class="btn-action" id="btn-speed-0" onclick="setSpeed(0)" style="font-family: monospace; font-weight: bold; color: #ef4444">||</button>
-          <button class="btn-action active" id="btn-speed-1" onclick="setSpeed(1)">1x</button>
-          <button class="btn-action" id="btn-speed-2" onclick="setSpeed(2)">2x</button>
-          <button class="btn-action" id="btn-speed-4" onclick="setSpeed(4)">4x</button>
+          <button class="btn-action" id="btn-speed-0" onclick="setSpeed(0)" style="font-family: monospace; font-weight: bold; color: #ef4444" title="Pause (1 or Space)">||</button>
+          <button class="btn-action active" id="btn-speed-1" onclick="setSpeed(1)" title="1x Speed (2)">1x</button>
+          <button class="btn-action" id="btn-speed-2" onclick="setSpeed(2)" title="2x Speed (3)">2x</button>
+          <button class="btn-action" id="btn-speed-4" onclick="setSpeed(4)" title="4x Speed (4)">4x</button>
         </div>
       </div>
-      <div id="playback-strip-toggle" onclick="toggleHud()" title="Show map & controls">🗺️</div>
+      <div id="playback-strip-toggle" onclick="toggleHud()" title="Show map & controls (H)">🗺️</div>
     </div>
 
     <div id="tutBackdrop" class="tutorial-backdrop" onclick="/* Prevent dismissal clicking outside */"></div>
@@ -1345,6 +1399,30 @@ const NetworkPanelUI = {
             }
         });
 
+        // Remove cards for lines that no longer exist (e.g. a line was fully demolished)
+        const currentIds = new Set(linesData.map(l => l.id));
+        container.querySelectorAll('.net-line-card').forEach(card => {
+            const id = card.id.replace('net-line-', '');
+            if (!currentIds.has(id)) {
+                card.remove();
+                this.expandedLines.delete(id);
+            }
+        });
+
+        let emptyMsg = document.getElementById('net-empty-msg');
+        if (!linesData.length) {
+            if (!emptyMsg) {
+                emptyMsg = document.createElement('div');
+                emptyMsg.id = 'net-empty-msg';
+                emptyMsg.className = 'station-card';
+                emptyMsg.style.cssText = 'color:var(--text-muted); text-align:center; display:block;';
+                emptyMsg.textContent = 'No lines built yet.';
+                container.appendChild(emptyMsg);
+            }
+        } else if (emptyMsg) {
+            emptyMsg.remove();
+        }
+
         // Apply search filter globally if active
         if (structuralChange && this.searchQuery) {
             this.applySearchFilter();
@@ -1454,7 +1532,7 @@ const NetworkPanelUI = {
             if (st.upgradeIcons && st.upgradeIcons.length > 0) tagsHTML += '<span class="icn-tag upg" title="Upgraded">★</span>';
 
             html += `
-                <div class="net-station-item" id="nsi-${st.id}" data-name="${st.name.toLowerCase()}" 
+                <div class="net-station-item" id="nsi-${line.id}-${st.id}" data-name="${st.name.toLowerCase()}" 
                      onmouseenter="NetworkPanelUI.hoverStation('${st.id}', '${line.id}')"
                      onmouseleave="NetworkPanelUI.outStation()"
                      onclick="NetworkPanelUI.clickStation('${st.id}')">
@@ -1471,7 +1549,7 @@ const NetworkPanelUI = {
                             </div>
                         </div>
                         <div class="st-info-right">
-                            <div class="st-pax" id="nst-pax-${st.id}">${(st.passengers||0).toLocaleString()}</div>
+                            <div class="st-pax" id="nst-pax-${line.id}-${st.id}">${(st.passengers||0).toLocaleString()}</div>
                             <div class="st-icons-row">${tagsHTML}</div>
                         </div>
                     </div>
@@ -1508,7 +1586,7 @@ const NetworkPanelUI = {
     updateStationStatsFast(line) {
         // Direct DOM mutation for rapid passenger updates to avoid rebuilding lists
         line.stations.forEach(st => {
-            const el = document.getElementById(`nst-pax-${st.id}`);
+            const el = document.getElementById(`nst-pax-${line.id}-${st.id}`);
             if (el) el.textContent = (st.passengers||0).toLocaleString();
         });
     },
@@ -1547,29 +1625,49 @@ const NetworkPanelUI = {
     },
 
     handleSearch(e) {
-        this.searchQuery = e.target.value.toLowerCase().trim();
+        const q = e.target.value.toLowerCase().trim();
+        if (this.searchQuery === '' && q !== '') {
+            // Entering search mode — remember what was expanded so it can be restored after.
+            this._preSearchExpanded = new Set(this.expandedLines);
+        }
+        this.searchQuery = q;
         this.applySearchFilter();
     },
 
     applySearchFilter() {
-        const allItems = document.querySelectorAll('.net-station-item');
+        const cards = document.querySelectorAll('.net-line-card');
+
         if (!this.searchQuery) {
-            allItems.forEach(el => {
-                el.classList.remove('search-match');
-                el.style.display = 'flex';
+            if (this._preSearchExpanded) {
+                this.expandedLines = new Set(this._preSearchExpanded);
+                this._preSearchExpanded = null;
+            }
+            cards.forEach(card => {
+                const lineId = card.id.replace('net-line-', '');
+                card.style.display = '';
+                card.classList.toggle('expanded', this.expandedLines.has(lineId));
+                card.querySelectorAll('.net-station-item').forEach(el => {
+                    el.classList.remove('search-match');
+                    el.style.display = 'flex';
+                });
             });
             return;
         }
 
-        allItems.forEach(el => {
-            const name = el.dataset.name;
-            if (name.includes(this.searchQuery)) {
-                el.classList.add('search-match');
-                el.style.display = 'flex';
-            } else {
-                el.classList.remove('search-match');
-                el.style.display = 'none';
-            }
+        cards.forEach(card => {
+            const items = card.querySelectorAll('.net-station-item');
+            let anyMatch = false;
+
+            items.forEach(el => {
+                const isMatch = (el.dataset.name || '').includes(this.searchQuery);
+                el.classList.toggle('search-match', isMatch);
+                el.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) anyMatch = true;
+            });
+
+            // Auto-expand lines containing a match, hide lines with no matches at all.
+            card.style.display = anyMatch ? '' : 'none';
+            card.classList.toggle('expanded', anyMatch);
         });
     },
 
@@ -3647,7 +3745,7 @@ function recordHeadwaySample(meta, dirKey, nowTicks) {
           const feed=document.getElementById('station-feed-list');
           if(!stations.length){feed.innerHTML='<div class="station-card" style="color:var(--text-muted);text-align:center;display:block;">No terminals linked.</div>';return;}
           updateHUD();
-
+          if (typeof refreshNetworkPanel === 'function') refreshNetworkPanel();
           const transitUsers = trains.reduce((a,t)=>a+t.riders.length,0) + stations.reduce((a,s)=>a+s.waiting,0);
           if (transitUsers > peakConcurrentRiders) peakConcurrentRiders = transitUsers;
           const stationCount = stations.length; const trackCount = tracks.length;
@@ -4061,6 +4159,63 @@ let currentDriveCost = distMiles * CC_DRIVE_COST_PER_MILE;
 
       function manageTrainsRealtime() { rebuildRoutes(); }
 
+      // Builds the data structure NetworkPanelUI.update() expects out of the
+      // simulation's actual routes/stations, and refreshes the Lines & Network panel.
+      function buildNetworkLinesData() {
+          // A station can belong to more than one route (a transfer point);
+          // tally which colors touch each station first so we can flag transfers.
+          const stationLineColors = new Map();
+          routes.forEach(route => {
+              route.geometry.forEach(p => {
+                  if (!p.station) return;
+                  if (!stationLineColors.has(p.station.id)) stationLineColors.set(p.station.id, new Set());
+                  stationLineColors.get(p.station.id).add(route.color);
+              });
+          });
+
+          return routes.map((route, idx) => {
+              const meta = route.meta || getRouteMeta(route.color, route);
+              const lineId = route.color.replace('#', '');
+
+              const seen = new Set();
+              const orderedStations = [];
+              route.geometry.forEach(p => {
+                  if (p.station && !seen.has(p.station.id)) {
+                      seen.add(p.station.id);
+                      orderedStations.push(p.station);
+                  }
+              });
+
+              const lengthMiles = routeLengthMiles(route);
+              const dailyRiders = orderedStations.reduce((sum, s) => sum + (s.boardingsToday || 0), 0);
+              const opex = route.trains.reduce((sum, t) => sum + (TRAIN_SPECS[t.capacityType]?.dailyCost || TRAIN_SPECS.light.dailyCost), 0);
+
+              return {
+                  id: lineId,
+                  name: `Line ${idx + 1}`,
+                  color: route.color,
+                  length: `${lengthMiles.toFixed(1)}mi`,
+                  activeTrains: route.trains.length,
+                  frequency: meta.frequency === 0 ? 'Variable' : `${meta.frequency}m`,
+                  dailyRiders,
+                  revenue: Math.round(dailyRiders * ticketFare),
+                  opex: Math.round(opex),
+                  stations: orderedStations.map((s, i) => ({
+                      id: s.id,
+                      name: s.name,
+                      passengers: s.boardingsToday || 0,
+                      isTransfer: (stationLineColors.get(s.id)?.size || 0) > 1,
+                      hasParkAndRide: !!(s.amenities && s.amenities.parking),
+                      order: i + 1
+                  }))
+              };
+          });
+      }
+
+      function refreshNetworkPanel() {
+          if (typeof NetworkPanelUI !== 'undefined') NetworkPanelUI.update(buildNetworkLinesData());
+      }
+
       function setTrainClass(cls) {
           selectedTrainClass = cls;
           document.getElementById('class-light').classList.toggle('active', cls === 'light');
@@ -4137,6 +4292,7 @@ let currentDriveCost = distMiles * CC_DRIVE_COST_PER_MILE;
       }
 
       function updateFleetPanel() {
+if (typeof refreshNetworkPanel === 'function') refreshNetworkPanel();
 if (document.activeElement && document.activeElement.tagName === 'SELECT') return;
           const container = document.getElementById('fleet-list');
           if (!container) return;
@@ -4632,7 +4788,7 @@ gameTime.min += TIME_SCALE[simSpeed] ?? simSpeed;          while (gameTime.min >
     
     // Existing daily reset
     if (dailyRiders > bestDailyRiders) bestDailyRiders = dailyRiders;
-    dailyRiders = 0; fareRevenueToday = 0; stations.forEach(s => s.revenueToday = 0);
+    dailyRiders = 0; fareRevenueToday = 0; stations.forEach(s => { s.revenueToday = 0; s.boardingsToday = 0; });
     overcrowdingEvents = 0;
     evaluateObjectives();
 }
@@ -4693,6 +4849,7 @@ gameTime.min += TIME_SCALE[simSpeed] ?? simSpeed;          while (gameTime.min >
               origin.queue.push(c);
               origin.waiting++; 
               origin.boardings = (origin.boardings || 0) + 1;
+              origin.boardingsToday = (origin.boardingsToday || 0) + 1;
 
              const actualFare = fareFreeEnabled ? 0 : ticketFare;
               budget += actualFare;
@@ -5588,6 +5745,7 @@ const freq = meta.frequency || 10;
               return stations.map(s => ({
                   id: s.id, x: s.x, y: s.y, name: s.name,
                   waiting: s.waiting || 0, ridersBoarded: s.ridersBoarded || 0, boardings: s.boardings || 0,
+                  boardingsToday: s.boardingsToday || 0,
                   amenities: s.amenities || { retail: false, parking: false, ads: false },
                   namingRights: !!s.namingRights, namingRightsOffered: !!s.namingRightsOffered,
                   sponsorName: s.sponsorName || null, amenityRevenueToday: s.amenityRevenueToday || 0,
@@ -5599,6 +5757,7 @@ const freq = meta.frequency || 10;
                   id: s.id, x: s.x, y: s.y, name: s.name,
                   waiting: s.waiting || 0, queue: [], // queue holds live commuter refs; repopulates naturally during play
                   ridersBoarded: s.ridersBoarded || 0, boardings: s.boardings || 0,
+                  boardingsToday: s.boardingsToday || 0,
                   amenities: s.amenities || { retail: false, parking: false, ads: false },
                   namingRights: !!s.namingRights, namingRightsOffered: !!s.namingRightsOffered,
                   sponsorName: s.sponsorName || null, amenityRevenueToday: s.amenityRevenueToday || 0,
@@ -6206,6 +6365,64 @@ const freq = meta.frequency || 10;
           clearTimeout(_slToastTimer);
           _slToastTimer = setTimeout(() => { el.className = ''; }, 2600);
       }
+
+      // ===================== KEYBOARD SHORTCUTS =====================
+      let _kbPrevSpeed = 1; // remembers the speed to restore when un-pausing with Space
+
+      function _kbIsOverlayOpen() {
+          const ids = ['pause-menu-backdrop', 'save-load-backdrop', 'sl-confirm-backdrop', 'tutBackdrop', 'daily-overview-backdrop'];
+          return ids.some(id => {
+              const el = document.getElementById(id);
+              return el && getComputedStyle(el).display !== 'none';
+          });
+      }
+
+      function _kbIsTyping() {
+          const el = document.activeElement;
+          if (!el) return false;
+          const tag = el.tagName;
+          return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+      }
+
+      document.addEventListener('keydown', (e) => {
+          if (e.metaKey || e.ctrlKey || e.altKey) return; // don't steal browser/OS shortcuts
+          if (_kbIsTyping()) return;
+
+          const gameActive = !document.getElementById('gameRoot').classList.contains('hidden-root');
+
+          // Escape: works even over most overlays, to back out one level at a time.
+          if (e.key === 'Escape') {
+              const slConfirm = document.getElementById('sl-confirm-backdrop');
+              if (slConfirm && getComputedStyle(slConfirm).display !== 'none') return; // let the user choose explicitly
+              const saveLoad = document.getElementById('save-load-backdrop');
+              if (saveLoad && getComputedStyle(saveLoad).display !== 'none') { e.preventDefault(); closeSaveLoadMenu(); return; }
+              const pauseMenu = document.getElementById('pause-menu-backdrop');
+              if (pauseMenu && getComputedStyle(pauseMenu).display !== 'none') { e.preventDefault(); closePauseMenu(); return; }
+              if (gameActive) { e.preventDefault(); openPauseMenu(); }
+              return;
+          }
+
+          if (!gameActive || _kbIsOverlayOpen()) return; // rest of the shortcuts only apply during active, unpaused-menu gameplay
+
+          switch (e.key) {
+              case 'q': case 'Q': e.preventDefault(); setMode('pan'); break;
+              case 'w': case 'W': e.preventDefault(); setMode('station'); break;
+              case 'e': case 'E': e.preventDefault(); setMode('track'); break;
+              case 'r': case 'R': e.preventDefault(); setMode('rename'); break;
+              case 't': case 'T': e.preventDefault(); setMode('delete'); break;
+              case '1': e.preventDefault(); setSpeed(0); break;
+              case '2': e.preventDefault(); _kbPrevSpeed = 1; setSpeed(1); break;
+              case '3': e.preventDefault(); _kbPrevSpeed = 2; setSpeed(2); break;
+              case '4': e.preventDefault(); _kbPrevSpeed = 4; setSpeed(4); break;
+              case ' ': case 'Spacebar':
+                  e.preventDefault();
+                  if (simSpeed === 0) { setSpeed(_kbPrevSpeed || 1); }
+                  else { _kbPrevSpeed = simSpeed; setSpeed(0); }
+                  break;
+              case 'Tab': e.preventDefault(); toggleSidebar(); break;
+              case 'h': case 'H': e.preventDefault(); toggleHud(); break;
+          }
+      });
 
       // Kick off the 5-minute autosave heartbeat once the engine has actually booted at least once.
       const _autosaveWatchdog = setInterval(() => {
