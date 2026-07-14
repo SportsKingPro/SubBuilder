@@ -1272,6 +1272,42 @@
           }).join('');
       }
 
+      // Resets every piece of mutable game state back to its true starting default. Called before
+      // EVERY map load (new game or load-a-save) so that starting a second dfw game — or loading a
+      // dfw save — can never inherit stations/budget/trains/etc. left over from a previous game that
+      // was running earlier in this same browser tab. (Loading a save immediately overwrites these
+      // via GameStateSerializer.applyState() right after, so this is always safe to run first.)
+      function resetGameStateToDefaults() {
+          budget = 50000000; currentDebt = 0; ticketFare = 2.50; simSpeed = 1; mode = 'pan';
+          lastOpExAmount = 0; bankruptcyStrikes = 0; gameOver = false;
+          totalBoarded = 0; totalGaveUp = 0;
+          dailyRiders = 0; lifetimeRiders = 0; fareRevenueToday = 0; peakConcurrentRiders = 0;
+          waitTimeSum = 0; waitSamples = 0; tripTimeSum = 0; tripSamples = 0;
+          overcrowdingEvents = 0; otherIncomeToday = 0;
+          todaysIncomeBreakdown = { fare: 0, retail: 0, parking: 0, ads: 0, naming: 0, todTax: 0, congestionToll: 0, subsidy: 0, event: 0 };
+          todaysExpenseBreakdown = { electricity: 0, maintenance: 0, cleaning: 0, staffing: 0, security: 0, trackRenewal: 0, amenityUpkeep: 0, interest: 0 };
+          weeklyRiders = 0; weeklyRevenue = 0; weeklyOvercrowding = 0; totalWeeklyOpEx = 0; weeklyOtherIncome = 0;
+          previousSimSpeed = 1;
+
+          todTaxEnabled = false; fareFreeEnabled = false; congestionPricingEnabled = false; deferredMaintenanceEnabled = false;
+
+          completedObjectives = {}; objectivesInitialized = false; bestDailyRiders = 0; currentTransitShare = 0;
+
+          stations = []; tracks = []; depots = []; trains = []; routes = [];
+          routeMeta = {};
+          for (const name in LOCATION_BONUSES) LOCATION_BONUSES[name].claimed = false;
+
+          camera = { x: 0, y: 0 }; zoom = 0.42;
+          hudCollapsed = false; sidebarCollapsed = false; grantsCollapsed = false;
+          collapsedNavGroups = { 'grp-build': true, 'grp-operations': true, 'grp-economy': true, 'grp-analytics': true, 'grp-objectives': true };
+          activeColor = '#38bdf8'; selectedTrainClass = 'light';
+
+          gameTime = { min: 0, hour: 6, day: 1, month: 1, year: 2026 };
+          trainIdCounter = 1; activeCityEvent = null;
+
+          selectedStation = null; activeTrackBuild = null;
+      }
+
       // Looks up a map by id and runs its city-specific loader function.
       // This is the single seam a new city needs to plug into.
       function loadMap(mapId) {
@@ -1280,6 +1316,7 @@
               console.error('Cannot load map:', mapId);
               return false;
           }
+          resetGameStateToDefaults(); // always start from a clean slate, whether this is a new game or about to load a save
           gameSave.map = map.id; // future save files persist this alongside year/stations/lines/trains/finances
           map.loader();
           return true;
@@ -5349,18 +5386,63 @@ const freq = meta.frequency || 10;
           } 
           else if (mode === 'delete') {
               const depotIdx = depots.findIndex(d => Math.hypot(d.x - p.worldX, d.y - p.worldY) < 18);
-              const idx = stations.findIndex(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < 22);
-              if (depotIdx !== -1 && idx === -1) {
+              const stationIdx = stations.findIndex(s => Math.hypot(s.x - p.worldX, s.y - p.worldY) < 22);
+              const trackTarget = findHoveredTrackSegment(p.worldX, p.worldY, zoom);
+
+              // Gather every valid candidate under the cursor and let the CLOSEST one win,
+              // instead of always favoring depots/stations over the track itself. This is what
+              // caused clicks on a track segment to be silently ignored (nothing was ever
+              // checked for tracks), and clicks near a station to remove every track touching
+              // it even when the user just wanted one segment gone.
+              const candidates = [];
+              if (depotIdx !== -1) {
+                  const d = depots[depotIdx];
+                  candidates.push({ type: 'depot', dist: Math.hypot(d.x - p.worldX, d.y - p.worldY) });
+              }
+              if (stationIdx !== -1) {
+                  const s = stations[stationIdx];
+                  candidates.push({ type: 'station', dist: Math.hypot(s.x - p.worldX, s.y - p.worldY) });
+              }
+              if (trackTarget) {
+                  const dist = getDistanceToSegment(p.worldX, p.worldY, trackTarget.startStation.x, trackTarget.startStation.y, trackTarget.endStation.x, trackTarget.endStation.y);
+                  candidates.push({ type: 'track', dist });
+              }
+              if (!candidates.length) return;
+              candidates.sort((a, b) => a.dist - b.dist);
+              const winner = candidates[0].type;
+
+              if (winner === 'depot') {
                   budget += Math.floor(DEPOT_COST * 0.5); depots.splice(depotIdx, 1);
                   updateHUD(); updateFleetPanel();
               }
-              else if (idx !== -1) { 
-                  const s = stations[idx]; 
+              else if (winner === 'station') {
+                  const s = stations[stationIdx];
+                  const connectedTracks = tracks.filter(t => t.startStation === s || t.endStation === s);
+                  if (connectedTracks.length > 1) {
+                      const proceed = confirm(`${s.name} has ${connectedTracks.length} track segments connected to it. Demolishing this station will remove all of them. Continue?`);
+                      if (!proceed) return;
+                  }
                   budget += Math.floor(STATION_BASE_COST * 0.5);
-                  tracks = tracks.filter(t => t.startStation !== s && t.endStation !== s); 
-                  stations.splice(idx, 1); 
+                  tracks = tracks.filter(t => t.startStation !== s && t.endStation !== s);
+                  stations.splice(stationIdx, 1);
                   updateHUD(); manageTrainsRealtime(); updateTelemetryData(); setupLineSelectorUI(); refreshNeighborhoodInspector();
               }
+              else if (winner === 'track') {
+                  // Refund 50% of what this specific segment (including any waypoints) cost to build.
+                  const pts = [trackTarget.startStation, ...trackTarget.waypoints, trackTarget.endStation];
+                  let segCost = 0;
+                  for (let i = 0; i < pts.length - 1; i++) {
+                      segCost += calculateTrackCost(pts[i], pts[i + 1], trackTarget.elevation, trackTarget.wayConfig);
+                  }
+                  budget += Math.floor(segCost * 0.5);
+                  tracks = tracks.filter(t => t !== trackTarget);
+                  trains.forEach(t => {
+                      if (t.lineColor === trackTarget.color) { t.state = 'DWELLING'; t.dwell = 120; t.pct = 0; }
+                  });
+                  updateHUD(); manageTrainsRealtime(); updateTelemetryData(); setupLineSelectorUI(); refreshNeighborhoodInspector();
+                  showNotification('🗑️ Track segment demolished.');
+              }
+              SaveManager.notifyConstructionEvent();
           }
       }
 
@@ -5538,8 +5620,11 @@ const freq = meta.frequency || 10;
 
       const SAVE_SLOT_IDS = ['slot1', 'slot2', 'slot3', 'slot4', 'slot5'];
       const AUTOSAVE_SLOT_ID = 'autosave';
-      const SAVE_KEY_PREFIX = 'dfwmetro.save.';
-      const META_KEY_PREFIX = 'dfwmetro.meta.';
+      // All slot data (game payload + metadata, for every manual slot and the autosave) lives under
+      // this ONE storage key as a single JSON blob: { slot1: {metadata, game}, slot2: {...}, autosave: {...} }.
+      // Using one key instead of one-per-slot means there is no possible way for the storage backend
+      // to mix up which slot's data comes back for a given read/write.
+      const SAVES_STORAGE_KEY = 'dfwmetro.allsaves.v1';
 
       // ---------------------------------------------------------------
       // StorageBackend — picks whichever persistence mechanism actually
@@ -5720,18 +5805,62 @@ const freq = meta.frequency || 10;
       };
 
       // ---------------------------------------------------------------
-      // SaveMetadata — metadata lives in its own small storage key per
-      // slot so the save menu can list all slots instantly without ever
-      // deserializing full game payloads.
+      // AllSavesStore — the ONLY module that reads/writes SAVES_STORAGE_KEY.
+      // Holds every slot's {metadata, game} under one JSON blob so a
+      // read/write for one slot can never bleed into another slot.
+      // In-memory cache is kept in sync with storage on every write.
       // ---------------------------------------------------------------
-      const SaveMetadata = {
-          key(slotId) { return META_KEY_PREFIX + slotId; },
-          async write(slotId, metadataObj) { return StorageProvider.save(this.key(slotId), metadataObj); },
-          async read(slotId) {
-              const res = await StorageProvider.load(this.key(slotId));
-              return res.ok ? res.value : null;
+      const AllSavesStore = {
+          _cache: null,
+          _loadingPromise: null,
+          async _ensureLoaded() {
+              if (this._cache) return this._cache;
+              if (this._loadingPromise) return this._loadingPromise;
+              this._loadingPromise = (async () => {
+                  const res = await StorageProvider.load(SAVES_STORAGE_KEY);
+                  this._cache = (res.ok && res.value && typeof res.value === 'object') ? res.value : {};
+                  this._loadingPromise = null;
+                  return this._cache;
+              })();
+              return this._loadingPromise;
           },
-          async remove(slotId) { return StorageProvider.delete(this.key(slotId)); }
+          async _persist() { return StorageProvider.save(SAVES_STORAGE_KEY, this._cache); },
+          async getSlot(slotId) {
+              const all = await this._ensureLoaded();
+              return all[slotId] || null; // { metadata, game } or null
+          },
+          async setSlot(slotId, saveObj) {
+              await this._ensureLoaded();
+              this._cache[slotId] = saveObj;
+              return this._persist();
+          },
+          async deleteSlot(slotId) {
+              await this._ensureLoaded();
+              delete this._cache[slotId];
+              return this._persist();
+          },
+          async getAllMetadata(slotIds) {
+              const all = await this._ensureLoaded();
+              const out = {};
+              for (const id of slotIds) out[id] = (all[id] && all[id].metadata) || null;
+              return out;
+          }
+      };
+
+      // Thin convenience wrapper so call sites that only care about metadata (e.g. rendering the
+      // slot list) don't need to know about the {metadata, game} shape AllSavesStore stores.
+      const SaveMetadata = {
+          async read(slotId) {
+              const slot = await AllSavesStore.getSlot(slotId);
+              return slot ? slot.metadata : null;
+          },
+          async write(slotId, metadataObj) {
+              const existing = await AllSavesStore.getSlot(slotId);
+              const saveObj = existing || { metadata: null, game: null };
+              saveObj.metadata = metadataObj;
+              return AllSavesStore.setSlot(slotId, saveObj);
+          },
+          async remove(slotId) { return AllSavesStore.deleteSlot(slotId); }
       };
 
       // ---------------------------------------------------------------
@@ -5974,8 +6103,6 @@ const freq = meta.frequency || 10;
               this._autosaveDebounceTimer = setTimeout(() => this.autosave(), 1500);
           },
 
-          _slotStorageKey(slotId) { return SAVE_KEY_PREFIX + slotId; },
-
           _buildSaveObject(saveName, isAutosave) {
               return {
                   version: SAVE_SCHEMA_VERSION,
@@ -6002,13 +6129,12 @@ const freq = meta.frequency || 10;
           async save(slotId, saveName) {
               if (!engineBooted) return { success: false, error: 'Start or load a game before saving.' };
               try {
-                  const existingMeta = await SaveMetadata.read(slotId);
+                  const existing = await AllSavesStore.getSlot(slotId);
                   const saveObj = this._buildSaveObject(saveName, slotId === AUTOSAVE_SLOT_ID);
-                  if (existingMeta && existingMeta.created) saveObj.metadata.created = existingMeta.created;
+                  if (existing && existing.metadata && existing.metadata.created) saveObj.metadata.created = existing.metadata.created;
 
-                  const writeResult = await StorageProvider.save(this._slotStorageKey(slotId), saveObj);
+                  const writeResult = await AllSavesStore.setSlot(slotId, saveObj);
                   if (!writeResult.ok) return { success: false, error: writeResult.error };
-                  await SaveMetadata.write(slotId, saveObj.metadata);
                   await refreshContinueButton();
                   return { success: true, metadata: saveObj.metadata };
               } catch (err) {
@@ -6017,21 +6143,20 @@ const freq = meta.frequency || 10;
           },
 
           async load(slotId) {
-              const raw = await StorageProvider.load(this._slotStorageKey(slotId));
-              if (!raw.ok) return { success: false, error: raw.error || 'That save slot is empty.' };
+              const slot = await AllSavesStore.getSlot(slotId);
+              if (!slot) return { success: false, error: 'That save slot is empty.' };
 
-              const structural = SaveValidator.validate(raw.value);
+              const structural = SaveValidator.validate(slot);
               if (!structural.ok) return { success: false, error: structural.error };
 
-              const migrated = SaveMigrator.migrate(raw.value);
+              const migrated = SaveMigrator.migrate(slot);
               if (!migrated.ok) return { success: false, error: migrated.error };
 
               return { success: true, data: migrated.data };
           },
 
           async delete(slotId) {
-              await StorageProvider.delete(this._slotStorageKey(slotId));
-              await SaveMetadata.remove(slotId);
+              await AllSavesStore.deleteSlot(slotId);
               await refreshContinueButton();
               return { success: true };
           },
@@ -6046,19 +6171,19 @@ const freq = meta.frequency || 10;
 
           async listSaves() {
               const allIds = [...SAVE_SLOT_IDS, AUTOSAVE_SLOT_ID];
-              const metas = await Promise.all(allIds.map(id => SaveMetadata.read(id)));
-              return allIds.map((slotId, i) => ({ slotId, metadata: metas[i], isAutosave: slotId === AUTOSAVE_SLOT_ID }));
+              const metaMap = await AllSavesStore.getAllMetadata(allIds);
+              return allIds.map(slotId => ({ slotId, metadata: metaMap[slotId], isAutosave: slotId === AUTOSAVE_SLOT_ID }));
           },
 
           async getMetadata(slotId) { return SaveMetadata.read(slotId); },
 
           async exportSave(slotId) {
-              const raw = await StorageProvider.load(this._slotStorageKey(slotId));
-              if (!raw.ok) { showSlToast('Nothing to export in that slot.', true); return; }
-              const blob = new Blob([JSON.stringify(raw.value, null, 2)], { type: 'application/json' });
+              const slot = await AllSavesStore.getSlot(slotId);
+              if (!slot) { showSlToast('Nothing to export in that slot.', true); return; }
+              const blob = new Blob([JSON.stringify(slot, null, 2)], { type: 'application/json' });
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
-              const meta = raw.value.metadata || {};
+              const meta = slot.metadata || {};
               const safeName = (meta.saveName || 'save').replace(/[^a-z0-9\-_]+/gi, '_');
               a.href = url; a.download = `${safeName}_day${meta.gameDay || ''}.json`;
               document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -6091,9 +6216,8 @@ const freq = meta.frequency || 10;
                   const existing = await SaveMetadata.read(id);
                   if (!existing) { target = id; break; }
               }
-              const writeResult = await StorageProvider.save(this._slotStorageKey(target), migrated.data);
+              const writeResult = await AllSavesStore.setSlot(target, migrated.data);
               if (!writeResult.ok) { showSlStatus(writeResult.error, true); return; }
-              await SaveMetadata.write(target, migrated.data.metadata);
               showSlStatus(`Imported into Slot ${SAVE_SLOT_IDS.indexOf(target) + 1}.`, false);
               await renderSaveLoadSlots();
               await refreshContinueButton();
@@ -6271,9 +6395,8 @@ const freq = meta.frequency || 10;
           if (!name || !name.trim()) return;
           existing.saveName = name.trim();
           existing.modified = Date.now();
-          await SaveMetadata.write(slotId, existing);
-          const raw = await StorageProvider.load(SaveManager._slotStorageKey(slotId));
-          if (raw.ok) { raw.value.metadata.saveName = existing.saveName; await StorageProvider.save(SaveManager._slotStorageKey(slotId), raw.value); }
+          const slot = await AllSavesStore.getSlot(slotId);
+          if (slot) { slot.metadata = existing; await AllSavesStore.setSlot(slotId, slot); }
           await renderSaveLoadSlots();
       }
 
@@ -6308,6 +6431,7 @@ const freq = meta.frequency || 10;
                   gameRoot.style.opacity = 1;
                   const mapId = (result.data.game.meta && result.data.game.meta.mapId) || 'dfw';
                   const map = MAPS.find(m => m.id === mapId) || MAPS.find(m => m.available);
+                  resetGameStateToDefaults(); // clean slate before applying the loaded save on top
                   gameSave.map = map.id;
                   map.loader(); // regenerate this map's neighborhoods + a fresh commuter population
                   applyLoadedGameData(result.data);
